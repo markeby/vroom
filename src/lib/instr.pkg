@@ -1,11 +1,14 @@
 package core_instr;
-    localparam RV_REG_WIDTH = 5;
+    localparam RV_REG_WIDTH    = 5;
+    localparam RV_OPCODE_WIDTH = 7;
 
-    typedef enum logic[4:0] {
+    typedef enum logic[RV_OPCODE_WIDTH-1:0] {
         ADD
     } t_rv_opcode;
 
     typedef logic[4:0] t_rv_reg;
+
+    // RISC-V Instruction descriptor formats
 
     typedef struct packed {
         logic[6:0]  funct7;
@@ -13,16 +16,74 @@ package core_instr;
         t_rv_reg    rs1;
         logic[2:0]  funct3;
         t_rv_reg    rd;
-        t_rv_opcode opcode;
-    } t_instr_R;
+    } t_instr_R_descr;
 
     typedef struct packed {
         logic[11:0] imm_11_0;
         t_rv_reg    rs1;
         logic[2:0]  funct3;
         t_rv_reg    rd;
-        t_rv_opcode opcode;
-    } t_instr_I;
+    } t_instr_I_descr;
 
+    typedef struct packed {
+        logic[11:5] imm_11_5;
+        t_rv_reg    rs2;
+        t_rv_reg    rs1;
+        logic[2:0]  funct3;
+        logic[4:0]  imm_4_0;
+    } t_instr_S_descr;
+
+    typedef struct packed {
+        logic[12:12] imm_12;
+        logic[10:5]  imm_10_5;
+        t_rv_reg     rs2;
+        t_rv_reg     rs1;
+        logic[2:0]   funct3;
+        logic[4:1]   imm_4_1;
+        logic[11:11] imm_11;
+    } t_instr_SB_descr;
+
+    typedef struct packed {
+        logic[31:12] imm_31_12;
+        t_rv_reg    rd;
+    } t_instr_U_descr;
+
+    typedef struct packed {
+        logic[20:20] imm_20;
+        logic[10:1]  imm_10_1;
+        logic[11:11] imm_11;
+        logic[19:12] imm_19_12;
+        t_rv_reg    rd;
+    } t_instr_UJ_descr;
+
+    typedef union {
+        t_instr_R_descr  R;
+        t_instr_I_descr  I;
+        t_instr_S_descr  S;
+        t_instr_B_descr  B;
+        t_instr_U_descr  U;
+        t_instr_J_descr  J;
+    } t_instr_descr;
+
+    // RISC-V Instruction formats
+
+    typedef struct packed {
+        t_instr_descr d;
+        t_rv_opcode   opcode;
+    } t_rv_instr;
+
+    // Expandend uop format
+
+    localparam FUNCT_WIDTH=10;
+    typedef logic[FUNCT_WIDTH-1:0] t_funct;
+
+    typedef struct packed {
+        logic[31:0]   imm32;
+        t_funct       funct;
+        t_rv_reg      rs2;
+        t_rv_reg      rs1;
+        t_rv_reg      rd;
+        t_rv_opcode   opcode;
+    } t_uinstr;
 
 endpackage

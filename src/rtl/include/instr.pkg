@@ -1,10 +1,13 @@
+`ifndef __INSTR_PKG
+`define __INSTR_PKG 
+
 package core_instr;
     localparam RV_REG_WIDTH    = 5;
     localparam RV_OPCODE_WIDTH = 7;
 
     typedef enum logic[RV_OPCODE_WIDTH-1:0] {
         OP_LUI    = 7'b0110111,
-        OP_AUIPC  = 7'b0110111,
+        OP_AUIPC  = 7'b0010111,
         OP_JAL    = 7'b1101111,
         OP_JALR   = 7'b1100111,
         OP_BR     = 7'b1100011,
@@ -51,7 +54,7 @@ package core_instr;
         logic[2:0]   funct3;
         logic[4:1]   imm_4_1;
         logic[11:11] imm_11;
-    } t_instr_SB_descr;
+    } t_instr_B_descr;
 
     typedef struct packed {
         logic[31:12] imm_31_12;
@@ -64,9 +67,9 @@ package core_instr;
         logic[11:11] imm_11;
         logic[19:12] imm_19_12;
         t_rv_reg    rd;
-    } t_instr_UJ_descr;
+    } t_instr_J_descr;
 
-    typedef union {
+    typedef union packed {
         t_instr_R_descr  R;
         t_instr_I_descr  I;
         t_instr_S_descr  S;
@@ -98,7 +101,7 @@ package core_instr;
         OP_ZERO,
         OP_IMM,
         OP_REG,
-        OP_MEM,
+        OP_MEM
     } t_optype;
 
     typedef struct packed {
@@ -116,3 +119,5 @@ package core_instr;
     } t_uinstr;
 
 endpackage
+
+`endif // __INSTR_PKG 

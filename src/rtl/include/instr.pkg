@@ -3,7 +3,17 @@ package core_instr;
     localparam RV_OPCODE_WIDTH = 7;
 
     typedef enum logic[RV_OPCODE_WIDTH-1:0] {
-        ADD
+        OP_LUI    = 7'b0110111,
+        OP_AUIPC  = 7'b0110111,
+        OP_JAL    = 7'b1101111,
+        OP_JALR   = 7'b1100111,
+        OP_BR     = 7'b1100011,
+        OP_LD     = 7'b0000011,
+        OP_ST     = 7'b0100011,
+        OP_ALU_I  = 7'b0010011,
+        OP_ALU_R  = 7'b0110011,
+        OP_FENCE  = 7'b0001111,
+        OP_MISC   = 7'b1110011
     } t_rv_opcode;
 
     typedef logic[4:0] t_rv_reg;
@@ -72,17 +82,36 @@ package core_instr;
         t_rv_opcode   opcode;
     } t_rv_instr;
 
-    // Expandend uop format
+    // Expanded uop format
 
     localparam FUNCT_WIDTH=10;
     typedef logic[FUNCT_WIDTH-1:0] t_funct;
 
+    typedef enum logic[1:0] {
+        SZ_1B = 2'b00,
+        SZ_2B = 2'b01,
+        SZ_4B = 2'b10
+    } t_size;
+
+    typedef enum logic[2:0] {
+        OP_INVD,
+        OP_ZERO,
+        OP_IMM,
+        OP_REG,
+        OP_MEM,
+    } t_optype;
+
+    typedef struct packed {
+        t_size   opsize;
+        t_optype optype;
+    } t_uopnd;
+
     typedef struct packed {
         logic[31:0]   imm32;
         t_funct       funct;
-        t_rv_reg      rs2;
-        t_rv_reg      rs1;
-        t_rv_reg      rd;
+        t_uopnd       src2;
+        t_uopnd       src1;
+        t_uopnd       dst;
         t_rv_opcode   opcode;
     } t_uinstr;
 

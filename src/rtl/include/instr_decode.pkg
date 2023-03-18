@@ -1,0 +1,25 @@
+`ifndef __INSTR_DECODE_PKG
+`define __INSTR_DECODE_PKG 
+
+package instr_decode;
+
+    import core_instr::*;
+    function t_rv_instr_format get_instr_format (t_rv_opcode opcode);
+        unique casez (opcode)
+            OP_LUI   : get_instr_format = RV_FMT_U;
+            OP_AUIPC : get_instr_format = RV_FMT_U; 
+            OP_JAL   : get_instr_format = RV_FMT_J; 
+            OP_JALR  : get_instr_format = RV_FMT_I; 
+            OP_BR    : get_instr_format = RV_FMT_B; 
+            OP_LD    : get_instr_format = RV_FMT_I; 
+            OP_ST    : get_instr_format = RV_FMT_S; 
+            OP_ALU_I : get_instr_format = RV_FMT_I; 
+            OP_ALU_R : get_instr_format = RV_FMT_R; 
+            OP_FENCE : get_instr_format = RV_FMT_I; 
+            OP_MISC  : get_instr_format = RV_FMT_I; 
+        endcase
+    endfunction
+
+endpackage
+
+`endif // __INSTR_DECODE_PKG 

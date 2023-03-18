@@ -23,6 +23,15 @@ package core_instr;
 
     // RISC-V Instruction descriptor formats
 
+    typedef enum logic[2:0] {
+        RV_FMT_R,
+        RV_FMT_I,
+        RV_FMT_S,
+        RV_FMT_B,
+        RV_FMT_U,
+        RV_FMT_J
+    } t_rv_instr_format;
+
     typedef struct packed {
         logic[6:0]  funct7;
         t_rv_reg    rs2;
@@ -105,8 +114,9 @@ package core_instr;
     } t_optype;
 
     typedef struct packed {
-        t_size   opsize;
-        t_optype optype;
+        t_size   osize;
+        t_optype otype;
+        t_rv_reg oreg;
     } t_uopnd;
 
     typedef struct packed {

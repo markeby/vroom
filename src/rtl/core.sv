@@ -1,4 +1,5 @@
 `include "instr.pkg"
+`include "vroom_macros.sv"
 
 module core
     import core_instr::*;
@@ -7,18 +8,25 @@ module core
     input  logic reset
 );
 
-t_uinstr try_me;
+t_rv_instr instr_de0;
 int count;
 
 initial begin
-    try_me = '0;
-    try_me.opcode = OP_ALU_R;
+    instr_de0 = '0;
+    instr_de0.opcode = OP_ALU_R;
     count = '0;
 end
 
+`DFF(count, count+1, clk)
 always @(posedge clk) begin
-    count += 1;
     $display("Hello %d", count);
 end
+
+decode decode (
+    .clk,
+    .reset,
+    .instr_de0,
+    .uinstr_de1 ( )
+);
 
 endmodule

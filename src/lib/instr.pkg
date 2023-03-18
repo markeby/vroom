@@ -1,0 +1,28 @@
+package core_instr;
+    localparam RV_REG_WIDTH = 5;
+
+    typedef enum logic[4:0] {
+        ADD
+    } t_rv_opcode;
+
+    typedef logic[4:0] t_rv_reg;
+
+    typedef struct packed {
+        logic[6:0]  funct7;
+        t_rv_reg    rs2;
+        t_rv_reg    rs1;
+        logic[2:0]  funct3;
+        t_rv_reg    rd;
+        t_rv_opcode opcode;
+    } t_instr_R;
+
+    typedef struct packed {
+        logic[11:0] imm_11_0;
+        t_rv_reg    rs1;
+        logic[2:0]  funct3;
+        t_rv_reg    rd;
+        t_rv_opcode opcode;
+    } t_instr_I;
+
+
+endpackage

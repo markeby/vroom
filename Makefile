@@ -19,12 +19,12 @@ Vtop: verilated
 
 .PHONY: verilated
 verilated: $(SRC_FILES) $(LIB_FILES) 
-	verilator  --trace --trace-structs --trace-params --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) src/rtl/top.sv $(SRC_FILES)
+	verilator  --trace-fst --trace-structs --trace-params --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) src/rtl/top.sv $(SRC_FILES)
 
 .PHONY: clean
 clean:
 	rm -rf obj_dir/
-	rm -f waves.vcd
+	rm -f waves.fst
 
 #sim: $(SRC_FILES) $(LIB_FILES)
 #	$(IVERILOG) -I $(INC_DIR) -y $(LIB_DIR) -f src/rtl.f -o $@

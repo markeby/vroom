@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <verilated.h>
-#include <verilated_vcd_c.h>
+#include <verilated_fst_c.h>
 #include "Vtop.h"
 #include "Vtop___024root.h"
 
@@ -12,9 +12,9 @@ int main(int argc, char** argv, char** env) {
     Vtop *dut = new Vtop;
 
     Verilated::traceEverOn(true);
-    VerilatedVcdC* m_trace = new VerilatedVcdC;
+    VerilatedFstC* m_trace = new VerilatedFstC;
     dut->trace(m_trace, 5);
-    m_trace->open("waves.vcd");
+    m_trace->open("waves.fst");
 
     dut->reset = 1;
 

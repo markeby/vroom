@@ -4,11 +4,13 @@ LIB_DIR   := src/rtl/lib/
 
 INC_FILES := $(shell find $(INC_DIR) -name '*.sv')
 LIB_FILES := $(shell find $(LIB_DIR) -name '*.sv')
-SRC_FILES := src/rtl/top.sv \
+SRC_FILES := src/top.sv \
              src/rtl/core.sv \
 	     src/rtl/decode.sv 
 
 IVERILOG  := iverilog -g2012
+VERILATOR := verilator -Wall -Wno-PINCONNECTEMPTY 
+VL_TRACE_FLAGS := --trace-fst --trace-structs --trace-params 
 
 .PHONY: run
 run: Vtop
@@ -19,7 +21,7 @@ Vtop: verilated
 
 .PHONY: verilated
 verilated: $(SRC_FILES) $(LIB_FILES) 
-	verilator  --trace-fst --trace-structs --trace-params --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) src/rtl/top.sv $(SRC_FILES)
+	$(VERILATOR) $(VL_TRACE_FLAGS) --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) $(SRC_FILES) -o Vtop
 
 .PHONY: clean
 clean:

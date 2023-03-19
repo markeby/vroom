@@ -13,7 +13,7 @@ initial begin
 end
 
 always @(posedge clk) begin
-    cycle_count += 1;
+    cycle_count <= cycle_count + 1;
     if (cycle_count > 20) begin
         $finish();
     end

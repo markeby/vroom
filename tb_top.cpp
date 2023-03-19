@@ -13,6 +13,10 @@
 #define MAX_SIM_TIME 200
 vluint64_t sim_time=0;
 
+double sc_time_stamp() {
+    return (double)sim_time;
+}
+
 int main(int argc, char** argv, char** env) {
     Vtop *dut = new Vtop;
 

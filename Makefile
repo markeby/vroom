@@ -8,10 +8,10 @@ SRC_FILES := $(wildcard src/*.sv) \
              $(wildcard src/rtl/*.sv) 
 
 IVERILOG  := iverilog -g2012
-VERILATOR := verilator -Wall -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-UNUSEDPARAM
+VERILATOR := verilator -Wall -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-UNUSEDPARAM --assert
 VL_TRACE_FLAGS := --trace-fst --trace-structs --trace-params 
 
-VL_DEFINES := +define+SIMULATION=1
+VL_DEFINES := +define+SIMULATION=1 +define+ASSERT=1 #+define+DEBUGON=1
 
 .PHONY: run
 run: Vtop

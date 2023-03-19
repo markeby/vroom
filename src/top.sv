@@ -1,20 +1,22 @@
 `ifndef __TOP_SV
 `define __TOP_SV 
 
+`include "vroom_macros.sv"
+
 module top (
     input logic clk,
     input logic reset
 );
 
-int   cycle_count;
-
-initial begin
-    cycle_count = 0;
+int cclk_count;
+initial cclk_count = '0;
+`DFF(cclk_count, cclk_count+1, clk)
+always @(posedge clk) begin
+    `DEBUG(("Tick tock!"))
 end
 
 always @(posedge clk) begin
-    cycle_count <= cycle_count + 1;
-    if (cycle_count > 20) begin
+    if (cclk_count > 20) begin
         $finish();
     end
 end

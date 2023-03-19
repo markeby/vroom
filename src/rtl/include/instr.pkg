@@ -102,9 +102,6 @@ package instr;
 
     // Expanded uop format
 
-    localparam FUNCT_WIDTH=10;
-    typedef logic[FUNCT_WIDTH-1:0] t_funct;
-
     typedef enum logic[1:0] {
         SZ_INV = 2'b00,
         SZ_1B  = 2'b01,
@@ -128,14 +125,27 @@ package instr;
 
     typedef struct packed {
         `SIMID_STRUCT
-        logic[31:0]   imm32;
-        t_funct       funct;
-        t_uopnd       src2;
-        t_uopnd       src1;
-        t_uopnd       dst;
-        t_rv_opcode   opcode;
-        logic         valid;
+        logic[31:0]       imm32;
+        logic[6:0]        funct7;
+        logic[2:0]        funct3;
+        t_uopnd           src2;
+        t_uopnd           src1;
+        t_uopnd           dst;
+        t_rv_opcode       opcode;
+        t_rv_instr_format ifmt;
+        logic             valid;
     } t_uinstr;
+
+    `ifdef SIMULATION
+    function string describe_uinstr(t_uinstr uinstr);
+        describe_uinstr = $sformatf("opcode:%s ifmt:%s", uinstr.opcode.name(), uinstr.ifmt.name());
+        case (uinstr.ifmt)
+            RV_FMT_I: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d imm32:0x%h funct3:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.imm32, uinstr.funct3);
+            RV_FMT_R: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d rs2:x%-d funct3:%-d funct7:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.src2.opreg, uinstr.funct3, uinstr.funct7);
+            default:  describe_uinstr = describe_uinstr;
+        endcase
+    endfunction
+    `endif
 
 endpackage
 

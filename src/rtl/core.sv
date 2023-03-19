@@ -11,21 +11,17 @@ module core
     input  logic reset
 );
 
+//
+// Nets
+//
+
+logic      valid_de0;
 t_rv_instr instr_de0;
-int count;
 
-initial begin
-    instr_de0 = '0;
-    instr_de0.opcode = OP_ALU_R;
-    count = '0;
-end
 
-`DFF(count, count+1, clk)
-always @(posedge clk) begin
-    $display("Hello %d", count);
-end
-
-logic valid_de0;
+//
+// Nets
+//
 
 fetch fetch (
     .clk,

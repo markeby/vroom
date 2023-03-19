@@ -54,7 +54,7 @@ always_comb begin
         valid_fe0 = 1'b1;
         instr_fe0 = rvADDI(3, 4, 12'h123);
     end
-    if (count == 7) begin
+    if (count == 6) begin
         valid_fe0 = 1'b1;
         instr_fe0 = rvADDI(1, 2, 12'h999);
     end
@@ -72,6 +72,18 @@ end
 `DFF(instr_fe1, instr_fe0, clk)
 always_comb valid_de0 = valid_fe1;
 always_comb instr_de0 = instr_fe1;
+
+//
+// Displays
+//
+
+`ifdef SIMULATION
+always @(posedge clk) begin
+    if (valid_fe0) begin
+        `INFO(("unit:FE %s", describe_instr(instr_fe0)))
+    end
+end
+`endif
 
 endmodule
 

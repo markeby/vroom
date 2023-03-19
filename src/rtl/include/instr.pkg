@@ -137,8 +137,12 @@ package instr;
     } t_uinstr;
 
     `ifdef SIMULATION
+    function string describe_instr(t_rv_instr inst);
+        describe_instr = $sformatf("SIMID:%s opcode:%s", format_simid(inst.SIMID), inst.opcode.name());
+    endfunction
+
     function string describe_uinstr(t_uinstr uinstr);
-        describe_uinstr = $sformatf("opcode:%s ifmt:%s", uinstr.opcode.name(), uinstr.ifmt.name());
+        describe_uinstr = $sformatf("SIMID:%s opcode:%s ifmt:%s", format_simid(uinstr.SIMID), uinstr.opcode.name(), uinstr.ifmt.name());
         case (uinstr.ifmt)
             RV_FMT_I: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d imm32:0x%h funct3:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.imm32, uinstr.funct3);
             RV_FMT_R: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d rs2:x%-d funct3:%-d funct7:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.src2.opreg, uinstr.funct3, uinstr.funct7);

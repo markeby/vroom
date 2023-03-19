@@ -13,6 +13,10 @@ package verif;
         } t_simid;
         `define SIMID_STRUCT t_simid SIMID;
 
+        function string format_simid(t_simid simid);
+            return $sformatf("%-0d", simid.fid);
+        endfunction
+
     `else // SIMULATION
 
         `define SIMID_STRUCT

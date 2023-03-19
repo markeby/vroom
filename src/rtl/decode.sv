@@ -22,6 +22,11 @@ module decode
 t_rv_instr_format ifmt_de0;
 t_uinstr          uinstr_de0;
 
+`ifdef SIMULATION
+int instr_cnt_inst;
+`DFF(instr_cnt_inst, reset ? '0 : instr_cnt_inst + 32'(valid_de0), clk)
+`endif
+
 //
 // Logic
 //
@@ -52,6 +57,10 @@ always_comb begin
         default: begin
         end
     endcase
+
+    `ifdef SIMULATION
+    instr_fe0.SIMID.did = instr_cnt_inst;
+    `endif
 
     if (reset) uinstr_de0 = '0;
 end

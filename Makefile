@@ -11,6 +11,8 @@ IVERILOG  := iverilog -g2012
 VERILATOR := verilator -Wall -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-UNUSEDPARAM
 VL_TRACE_FLAGS := --trace-fst --trace-structs --trace-params 
 
+VL_DEFINES := +define+SIMULATION=1
+
 .PHONY: run
 run: Vtop
 	obj_dir/Vtop
@@ -20,7 +22,7 @@ Vtop: verilated
 
 .PHONY: verilated
 verilated: $(SRC_FILES) $(LIB_FILES) 
-	$(VERILATOR) $(VL_TRACE_FLAGS) --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) $(SRC_FILES) -o Vtop 
+	$(VERILATOR) $(VL_TRACE_FLAGS) --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) $(SRC_FILES) $(VL_DEFINES) -o Vtop 
 
 .PHONY: clean
 clean:

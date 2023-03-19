@@ -8,6 +8,8 @@ package instr;
     localparam RV_OPCODE_WIDTH = 7;
     localparam RV_INSTR_WIDTH  = 32;
 
+    import verif::*;
+
     typedef enum logic[RV_OPCODE_WIDTH-1:0] {
         OP_LUI    = 7'b0110111,
         OP_AUIPC  = 7'b0010111,

@@ -38,6 +38,11 @@ t_rv_instr instr_fe0;
 logic      valid_fe1;
 t_rv_instr instr_fe1;
 
+`ifdef SIMULATION
+int instr_cnt_inst;
+`DFF(instr_cnt_inst, reset ? '0 : instr_cnt_inst + 32'(valid_fe0), clk)
+`endif
+
 //
 // Logic
 //
@@ -53,6 +58,10 @@ always_comb begin
         valid_fe0 = 1'b1;
         instr_fe0 = rvADDI(1, 2, 12'h999);
     end
+
+    `ifdef SIMULATION
+    instr_fe0.SIMID.fid = instr_cnt_inst;
+    `endif
 end
 
 `DFF(valid_fe1, valid_fe0, clk)

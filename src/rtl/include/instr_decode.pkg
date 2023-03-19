@@ -3,7 +3,7 @@
 
 package instr_decode;
 
-    import core_instr::*;
+    import instr::*;
     function t_rv_instr_format get_instr_format (t_rv_opcode opcode);
         unique casez (opcode)
             OP_LUI   : get_instr_format = RV_FMT_U;

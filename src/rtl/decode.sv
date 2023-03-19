@@ -3,7 +3,7 @@
 `include "vroom_macros.sv"
 
 module decode
-    import core_instr::*, instr_decode::*;
+    import instr::*, instr_decode::*;
 (
     input  logic      clk,
     input  logic      reset,
@@ -44,6 +44,10 @@ always_comb begin
         default: begin
         end
     endcase
+
+    if (reset) uinstr_de0 = '0;
 end
+
+`DFF(uinstr_de1, uinstr_de0, clk)
 
 endmodule

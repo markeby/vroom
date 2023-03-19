@@ -1,7 +1,7 @@
 `ifndef __INSTR_PKG
 `define __INSTR_PKG 
 
-package core_instr;
+package instr;
     localparam RV_REG_WIDTH    = 5;
     localparam RV_OPCODE_WIDTH = 7;
 
@@ -19,7 +19,7 @@ package core_instr;
         OP_MISC   = 7'b1110011
     } t_rv_opcode;
 
-    typedef logic[4:0] t_rv_reg;
+    typedef logic[RV_REG_WIDTH-1:0] t_rv_reg;
 
     // RISC-V Instruction descriptor formats
 

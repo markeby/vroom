@@ -8,6 +8,13 @@ LIB_FILES := $(shell find $(LIB_DIR) -name '*.sv')
 
 IVERILOG  := iverilog -g2012
 
+Vcore: verilated
+	make -C obj_dir -f Vcore.mk Vcore
+
+.PHONY: verilated
+verilated: $(SRC_FILES) $(LIB_FILES) 
+	verilator  --trace --exe tb_core.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) src/rtl/core.sv $(SRC_FILES)
+
 sim: $(SRC_FILES) $(LIB_FILES)
 	$(IVERILOG) -I $(INC_DIR) -y $(LIB_DIR) -f src/rtl.f -o $@
 

@@ -1,8 +1,11 @@
+`ifndef __CORE_SV
+`define __CORE_SV
+
 `include "instr.pkg"
 `include "vroom_macros.sv"
 
 module core
-    import core_instr::*;
+    import instr::*;
 (
     input  logic clk,
     input  logic reset
@@ -30,3 +33,5 @@ decode decode (
 );
 
 endmodule
+
+`endif // __CORE_SV

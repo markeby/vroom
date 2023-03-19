@@ -1,3 +1,6 @@
+`ifndef __DECODE_SV
+`define __DECODE_SV
+
 `include "instr.pkg"
 `include "instr_decode.pkg"
 `include "vroom_macros.sv"
@@ -32,11 +35,11 @@ always_comb begin
 
     unique case (ifmt_de0)
         RV_FMT_R: begin
-            uinstr_de0.dst  = '{oreg: instr_de0.d.R.rd,  otype: OP_REG, osize: SZ_INV};
-            uinstr_de0.src1 = '{oreg: instr_de0.d.R.rs1, otype: OP_REG, osize: SZ_INV};
-            uinstr_de0.src2 = '{oreg: instr_de0.d.R.rs2, otype: OP_REG, osize: SZ_INV};
         end
         RV_FMT_I: begin
+            uinstr_de0.dst  = '{opreg: instr_de0.d.R.rd,  optype: OP_REG, opsize: SZ_INV};
+            uinstr_de0.src1 = '{opreg: instr_de0.d.R.rs1, optype: OP_REG, opsize: SZ_INV};
+            uinstr_de0.src2 = '{opreg: instr_de0.d.R.rs2, optype: OP_REG, opsize: SZ_INV};
         end
         RV_FMT_S: begin
         end
@@ -56,3 +59,6 @@ end
 `DFF(uinstr_de1, uinstr_de0, clk)
 
 endmodule
+
+`endif // __DECODE_SV
+

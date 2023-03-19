@@ -1,0 +1,22 @@
+`ifndef __VERIF_PKG
+`define __VERIF_PKG 
+
+package verif;
+
+    `ifdef SIMULATION
+
+        typedef struct packed {
+            int fid;
+            int did;
+        } t_simid;
+        `define SIMID_STRUCT t_simid SIMID;
+
+    `else // SIMULATION
+
+        `define SIMID_STRUCT
+
+    `endif
+
+endpackage
+
+`endif // __VERIF_PKG 

@@ -1,0 +1,37 @@
+`ifndef __ASM_PKG
+`define __ASM_PKG 
+
+package asm;
+    import instr::*;
+
+    // function t_rv_instr_format get_instr_format (t_rv_opcode opcode);
+    //     unique casez (opcode)
+    //         OP_LUI   : get_instr_format = RV_FMT_U;
+    //         OP_AUIPC : get_instr_format = RV_FMT_U; 
+    //         OP_JAL   : get_instr_format = RV_FMT_J; 
+    //         OP_JALR  : get_instr_format = RV_FMT_I; 
+    //         OP_BR    : get_instr_format = RV_FMT_B; 
+    //         OP_LD    : get_instr_format = RV_FMT_I; 
+    //         OP_ST    : get_instr_format = RV_FMT_S; 
+    //         OP_ALU_I : get_instr_format = RV_FMT_I; 
+    //         OP_ALU_R : get_instr_format = RV_FMT_R; 
+    //         OP_FENCE : get_instr_format = RV_FMT_I; 
+    //         OP_MISC  : get_instr_format = RV_FMT_I; 
+    //     endcase
+    // endfunction
+
+    function t_rv_instr __rvI(t_rv_opcode op, t_rv_reg rd, t_rv_reg rs1, logic[11:0] imm_11_0, logic[2:0] funct3);
+        __rvI = (t_rv_instr'(op      ) <<  0)
+              | (t_rv_instr'(rd      ) <<  7)
+              | (t_rv_instr'(funct3  ) << 12)
+              | (t_rv_instr'(rs1     ) << 15)
+              | (t_rv_instr'(imm_11_0) << 20);
+    endfunction
+
+    function t_rv_instr rvADDI(t_rv_reg rd, t_rv_reg rs1, logic[11:0] imm_11_0);
+        return __rvI(OP_ALU_I, rd, rs1, imm_11_0, 3'b000);
+    endfunction
+
+endpackage
+
+`endif // __ASM_PKG 

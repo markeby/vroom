@@ -2,14 +2,13 @@ INC_DIR   := src/rtl/include/
 SRC_DIR   := src/rtl/
 LIB_DIR   := src/rtl/lib/
 
-INC_FILES := $(shell find $(INC_DIR) -name '*.sv')
-LIB_FILES := $(shell find $(LIB_DIR) -name '*.sv')
-SRC_FILES := src/top.sv \
-             src/rtl/core.sv \
-	     src/rtl/decode.sv 
+INC_FILES := $(wildcard $(INC_DIR)/*.sv)
+LIB_FILES := $(wildcard $(LIB_DIR)/*.sv)
+SRC_FILES := $(wildcard src/*.sv) \
+             $(wildcard src/rtl/*.sv) 
 
 IVERILOG  := iverilog -g2012
-VERILATOR := verilator -Wall -Wno-PINCONNECTEMPTY 
+VERILATOR := verilator -Wall -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-UNUSEDPARAM
 VL_TRACE_FLAGS := --trace-fst --trace-structs --trace-params 
 
 .PHONY: run
@@ -17,11 +16,11 @@ run: Vtop
 	obj_dir/Vtop
 
 Vtop: verilated
-	make -C obj_dir -f Vtop.mk Vtop
+	make -C obj_dir -f Vtop.mk Vtop 
 
 .PHONY: verilated
 verilated: $(SRC_FILES) $(LIB_FILES) 
-	$(VERILATOR) $(VL_TRACE_FLAGS) --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) $(SRC_FILES) -o Vtop
+	$(VERILATOR) $(VL_TRACE_FLAGS) --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) $(SRC_FILES) -o Vtop 
 
 .PHONY: clean
 clean:

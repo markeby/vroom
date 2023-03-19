@@ -1,7 +1,12 @@
 #include <stdlib.h>
 #include <iostream>
 #include <verilated.h>
+#define FST 1
+#ifdef FST
 #include <verilated_fst_c.h>
+#else
+#include <verilated_vcd_c.h>
+#endif
 #include "Vtop.h"
 #include "Vtop___024root.h"
 
@@ -12,9 +17,15 @@ int main(int argc, char** argv, char** env) {
     Vtop *dut = new Vtop;
 
     Verilated::traceEverOn(true);
+#ifdef FST
     VerilatedFstC* m_trace = new VerilatedFstC;
     dut->trace(m_trace, 5);
     m_trace->open("waves.fst");
+#else
+    VerilatedVcdC* m_trace = new VerilatedVcdC;
+    dut->trace(m_trace, 5);
+    m_trace->open("waves.vcd");
+#endif
 
     dut->reset = 1;
 

@@ -1,9 +1,12 @@
 `ifndef __INSTR_PKG
 `define __INSTR_PKG 
 
+`include "verif.pkg"
+
 package instr;
     localparam RV_REG_WIDTH    = 5;
     localparam RV_OPCODE_WIDTH = 7;
+    localparam RV_INSTR_WIDTH  = 32;
 
     typedef enum logic[RV_OPCODE_WIDTH-1:0] {
         OP_LUI    = 7'b0110111,
@@ -90,6 +93,7 @@ package instr;
     // RISC-V Instruction formats
 
     typedef struct packed {
+        `SIMID_STRUCT
         t_instr_descr d;
         t_rv_opcode   opcode;
     } t_rv_instr;
@@ -115,12 +119,13 @@ package instr;
     } t_optype;
 
     typedef struct packed {
-        t_size   osize;
-        t_optype otype;
-        t_rv_reg oreg;
+        t_size   opsize;
+        t_optype optype;
+        t_rv_reg opreg;
     } t_uopnd;
 
     typedef struct packed {
+        `SIMID_STRUCT
         logic[31:0]   imm32;
         t_funct       funct;
         t_uopnd       src2;

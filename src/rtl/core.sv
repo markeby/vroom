@@ -26,7 +26,14 @@ always @(posedge clk) begin
 end
 
 logic valid_de0;
-assign valid_de0 = count == 4;
+
+fetch fetch (
+    .clk,
+    .reset,
+    .valid_de0,
+    .instr_de0,
+    .stall_de1 ( 1'b0 )
+);
 
 decode decode (
     .clk,

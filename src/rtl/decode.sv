@@ -7,6 +7,7 @@ module decode
 (
     input  logic      clk,
     input  logic      reset,
+    input  logic      valid_de0,
     input  t_rv_instr instr_de0,
     output t_uinstr   uinstr_de1
 );
@@ -27,19 +28,23 @@ assign ifmt_de0 = get_instr_format(instr_de0.opcode);
 always_comb begin
     uinstr_de0 = '0;
     uinstr_de0.opcode = instr_de0.opcode;
+    uinstr_de0.valid  = valid_de0;
 
     unique case (ifmt_de0)
         RV_FMT_R: begin
-            uinstr_de0.dst.oreg  = instr_de0.d.R.rd;
-            uinstr_de0.dst.otype = OP_REG;
-            //dst   = {oreg: instr_de0.d.R.rd,  otype: OP_REG, default: 0};
-            //src1  = {oreg: instr_de0.d.R.rs1, otype: OP_REG, default: 0};
-            //src2  = {oreg: instr_de0.d.R.rs2, otype: OP_REG, default: 0};
+            uinstr_de0.dst  = '{oreg: instr_de0.d.R.rd,  otype: OP_REG, osize: SZ_INV};
+            uinstr_de0.src1 = '{oreg: instr_de0.d.R.rs1, otype: OP_REG, osize: SZ_INV};
+            uinstr_de0.src2 = '{oreg: instr_de0.d.R.rs2, otype: OP_REG, osize: SZ_INV};
         end
         RV_FMT_I: begin
-            //dst.oreg   = {oreg: instr_de0.d.R.rd,  otype: OP_REG, default: 0};
-            //src1.oreg  = {oreg: instr_de0.d.R.rs1, otype: OP_REG, default: 0};
-            //src2.oreg  = {oreg: 'x,                otype: OP_IMM, default: 0};
+        end
+        RV_FMT_S: begin
+        end
+        RV_FMT_J: begin
+        end
+        RV_FMT_B: begin
+        end
+        RV_FMT_U: begin
         end
         default: begin
         end

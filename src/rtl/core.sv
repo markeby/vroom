@@ -25,9 +25,13 @@ always @(posedge clk) begin
     $display("Hello %d", count);
 end
 
+logic valid_de0;
+assign valid_de0 = count == 4;
+
 decode decode (
     .clk,
     .reset,
+    .valid_de0,
     .instr_de0,
     .uinstr_de1 ( )
 );

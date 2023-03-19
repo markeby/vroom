@@ -100,9 +100,10 @@ package instr;
     typedef logic[FUNCT_WIDTH-1:0] t_funct;
 
     typedef enum logic[1:0] {
-        SZ_1B = 2'b00,
-        SZ_2B = 2'b01,
-        SZ_4B = 2'b10
+        SZ_INV = 2'b00,
+        SZ_1B  = 2'b01,
+        SZ_2B  = 2'b10,
+        SZ_4B  = 2'b11
     } t_size;
 
     typedef enum logic[2:0] {
@@ -126,6 +127,7 @@ package instr;
         t_uopnd       src1;
         t_uopnd       dst;
         t_rv_opcode   opcode;
+        logic         valid;
     } t_uinstr;
 
 endpackage

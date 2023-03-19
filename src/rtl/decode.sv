@@ -80,7 +80,7 @@ always_comb begin
 
     `ifdef SIMULATION
     uinstr_de0.SIMID     = instr_de0.SIMID;
-    uinstr_de0.SIMID.did = instr_cnt_inst;
+    //uinstr_de0.SIMID.did = instr_cnt_inst;
     `endif
 
     if (reset) uinstr_de0 = '0;

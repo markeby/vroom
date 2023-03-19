@@ -9,7 +9,7 @@ package verif;
 
         typedef struct packed {
             int fid;
-            int did;
+            //int did;
         } t_simid;
         `define SIMID_STRUCT t_simid SIMID;
 

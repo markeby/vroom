@@ -21,6 +21,13 @@ module regrd
     output t_rv_reg_data     rddatas_ex0 [1:0]
 );
 
+localparam RD0 = 0;
+localparam RD1 = 1;
+localparam NUM_RD_STAGES = 1;
+
+`MKPIPE_INIT(logic,          valid_rdx,  valid_rd0,  RD0, NUM_RD_STAGES)
+`MKPIPE_INIT(t_uinstr,       uinstr_rdx, uinstr_rd0, RD0, NUM_RD_STAGES)
+
 //
 // Nets
 //
@@ -34,26 +41,20 @@ module regrd
 //
 
 always_comb begin
-    rdens_rd0[0]   = valid_rd0 & uinstr_rd0.src1.optype == OP_REG;
-    rdaddrs_rd0[0] = uinstr_rd0.src1.opreg;
-    rdens_rd0[1]   = valid_rd0 & uinstr_rd0.src2.optype == OP_REG;
-    rdaddrs_rd0[1] = uinstr_rd0.src2.opreg;
+    rdens_rd0[0]   = valid_rdx[RD0] & uinstr_rdx[RD0].src1.optype == OP_REG;
+    rdaddrs_rd0[0] = uinstr_rdx[RD0].src1.opreg;
+    rdens_rd0[1]   = valid_rdx[RD0] & uinstr_rdx[RD0].src2.optype == OP_REG;
+    rdaddrs_rd0[1] = uinstr_rdx[RD0].src2.opreg;
 end
 
 //
 // RD1
 //
 
-logic    valid_rd1;
-t_uinstr uinstr_rd1;
-
-`DFF(valid_rd1, valid_rd0, clk)
-`DFF(uinstr_rd1, uinstr_rd0, clk)
-
 // EX0 assigns
 
-always_comb valid_ex0   = valid_rd1;
-always_comb uinstr_ex0  = uinstr_rd1;
+always_comb valid_ex0   = valid_rdx[RD1];
+always_comb uinstr_ex0  = uinstr_rdx[RD1];
 always_comb rddatas_ex0 = rddatas_rd1;
 
 //

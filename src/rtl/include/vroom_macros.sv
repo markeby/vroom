@@ -10,6 +10,14 @@
 `define MKFLAT(sig) \
     logic[$bits(sig)-1:0] f__``sig``; assign f__``sig`` = sig;
 
+`define MKPIPE(tp, sigx, fr, to) \
+    tp sigx [``to``:``fr``]; \
+    for (genvar stg=``fr``+1; stg<=``to``; stg++) `DFF(``sigx``[stg], ``sigx``[stg-1], clk)
+
+`define MKPIPE_INIT(tp, sigx, sig0, fr, to) \
+    `MKPIPE(tp,sigx,fr,to) \
+    always_comb sigx[fr]=sig0; 
+
 `define PMSG(tag, msg) \
     $display("@[%-d] %-d tag: %s", $time(), top.cclk_count, $sformatf msg);
 

@@ -56,12 +56,12 @@ end
 `endif
 
 `ifdef ASSERT
-logic   last_ret_simid_valid;
-t_simid last_ret_simid;
-
-`DFF(last_ret_simid_valid, ~reset & (uinstr_rb0.valid | last_ret_simid_valid), clk)
-`DFF_EN(last_ret_simid, uinstr_rb0.SIMID.fid, clk, uinstr_rb0.valid)
-`VASSERT(a_mono_incr_fid, uinstr_rb0.valid & last_ret_simid_valid, uinstr_rb0.SIMID.fid > last_ret_simid, "RB: Fetch ID not mononotically increasing!")
+chk_always_increment #(.T(int), .CONSECUTIVE(1)) fid_counting_up (
+    .clk,
+    .reset,
+    .valid ( uinstr_rb0.valid     ),
+    .count ( uinstr_rb0.SIMID.fid )
+);
 `endif
 
 endmodule

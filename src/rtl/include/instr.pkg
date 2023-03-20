@@ -26,6 +26,17 @@ package instr;
         OP_MISC   = 7'b1110011
     } t_rv_opcode;
 
+    typedef enum logic[2:0] {
+        ALU_ADD  = 3'b000,
+        ALU_SHL  = 3'b001,
+        ALU_SLT  = 3'b010,
+        ALU_SLTU = 3'b011,
+        ALU_XOR  = 3'b100,
+        ALU_SHR  = 3'b101,
+        ALU_OR   = 3'b110,
+        ALU_AND  = 3'b111
+    } t_rv_alu_op_funct3;
+
     typedef logic[RV_REG_ADDR_BITS-1:0] t_rv_reg_addr;
     typedef logic[RV_REG_BITS-1:0]      t_rv_reg_data;
 
@@ -120,37 +131,9 @@ package instr;
         OP_MEM
     } t_optype;
 
-    typedef struct packed {
-        t_size   opsize;
-        t_optype optype;
-        t_rv_reg_addr opreg;
-    } t_uopnd_descr;
-
-    typedef struct packed {
-        `SIMID_STRUCT
-        logic[31:0]       imm32;
-        logic[6:0]        funct7;
-        logic[2:0]        funct3;
-        t_uopnd_descr     src2;
-        t_uopnd_descr     src1;
-        t_uopnd_descr     dst;
-        t_rv_opcode       opcode;
-        t_rv_instr_format ifmt;
-        logic             valid;
-    } t_uinstr;
-
     `ifdef SIMULATION
     function string describe_instr(t_rv_instr inst);
         describe_instr = $sformatf("SIMID:%s opcode:%s", format_simid(inst.SIMID), inst.opcode.name());
-    endfunction
-
-    function string describe_uinstr(t_uinstr uinstr);
-        describe_uinstr = $sformatf("SIMID:%s opcode:%s ifmt:%s", format_simid(uinstr.SIMID), uinstr.opcode.name(), uinstr.ifmt.name());
-        case (uinstr.ifmt)
-            RV_FMT_I: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d imm32:0x%h funct3:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.imm32, uinstr.funct3);
-            RV_FMT_R: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d rs2:x%-d funct3:%-d funct7:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.src2.opreg, uinstr.funct3, uinstr.funct7);
-            default:  describe_uinstr = describe_uinstr;
-        endcase
     endfunction
     `endif
 

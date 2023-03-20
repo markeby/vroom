@@ -35,7 +35,7 @@ int main(int argc, char** argv, char** env) {
 
     while (sim_time < MAX_SIM_TIME) {
         dut->clk ^= 1;
-        if (sim_time == 3) {
+        if (sim_time == 20) {
             dut->reset = 0;
         }
 

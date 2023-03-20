@@ -59,7 +59,7 @@ always @(posedge clk) begin
     end
     for (int p=0; p<NUMRD; p++) begin
         if (wren[p]) begin
-            `INFO(("unit:RF op:write addr:%d data:%08h->%08h", rdaddr[p], REGS[rdaddr[p]], wrdata[p]))
+            `INFO(("unit:RF op:write addr:%d data:%08h->%08h", wraddr[p], REGS[wraddr[p]], wrdata[p]))
         end
     end
 end

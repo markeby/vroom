@@ -4,6 +4,42 @@
 package instr_decode;
 
     import instr::*;
+    import verif::*;
+
+    typedef enum logic[4:0] {
+        U_INVALID,
+        U_ADD,
+        U_SUB,
+        U_SLL,
+        U_SLT,
+        U_SLTU,
+        U_XOR,
+        U_SRL,
+        U_SRA,
+        U_OR,
+        U_AND 
+    } t_uop;
+
+    typedef struct packed {
+        t_size   opsize;
+        t_optype optype;
+        t_rv_reg_addr opreg;
+    } t_uopnd_descr;
+
+    typedef struct packed {
+        `SIMID_STRUCT
+        logic[31:0]       imm32;
+        logic[6:0]        funct7;
+        logic[2:0]        funct3;
+        t_uopnd_descr     src2;
+        t_uopnd_descr     src1;
+        t_uopnd_descr     dst;
+        t_rv_opcode       opcode;
+        t_rv_instr_format ifmt;
+        t_uop             uop;
+        logic             valid;
+    } t_uinstr;
+
     function t_rv_instr_format get_instr_format (t_rv_opcode opcode);
         unique casez (opcode)
             OP_LUI   : get_instr_format = RV_FMT_U;
@@ -19,6 +55,87 @@ package instr_decode;
             OP_MISC  : get_instr_format = RV_FMT_I; 
         endcase
     endfunction
+
+    function automatic t_uop rv_instr_to_uop (t_rv_instr instr);
+        t_rv_instr_format ifmt = get_instr_format(instr.opcode);
+        rv_instr_to_uop = U_INVALID;
+        unique casez (ifmt)
+            RV_FMT_R: begin
+                // opcode = OP_ALU_R
+                t_rv_alu_op_funct3 alu_op = t_rv_alu_op_funct3'(instr.d.R.funct3);
+                unique casez(alu_op)
+                    ALU_ADD:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SUB : U_ADD;
+                    ALU_SHL:  rv_instr_to_uop = U_SLL;
+                    ALU_SLT:  rv_instr_to_uop = U_SLT;
+                    ALU_SLTU: rv_instr_to_uop = U_SLTU;
+                    ALU_XOR:  rv_instr_to_uop = U_XOR;
+                    ALU_SHR:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SRA : U_SRL;
+                    ALU_OR:   rv_instr_to_uop = U_OR;
+                    ALU_AND:  rv_instr_to_uop = U_AND;
+                endcase
+            end
+            RV_FMT_I: begin
+                unique casez(instr.opcode) 
+                    OP_JALR  : rv_instr_to_uop = U_INVALID;
+                    OP_LD    : rv_instr_to_uop = U_INVALID;
+                    OP_ALU_I : begin
+                        t_rv_alu_op_funct3 alu_op = t_rv_alu_op_funct3'(instr.d.R.funct3);
+                        unique casez(alu_op)
+                            ALU_ADD:  rv_instr_to_uop = U_ADD;
+                            ALU_SHL:  rv_instr_to_uop = U_SLL;
+                            ALU_SLT:  rv_instr_to_uop = U_SLT;
+                            ALU_SLTU: rv_instr_to_uop = U_SLTU;
+                            ALU_XOR:  rv_instr_to_uop = U_XOR;
+                            ALU_SHR:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SRA : U_SRL; // same as R-type decode
+                            ALU_OR:   rv_instr_to_uop = U_OR;
+                            ALU_AND:  rv_instr_to_uop = U_AND;
+                        endcase
+                    end
+                    OP_FENCE : rv_instr_to_uop = U_INVALID;
+                    OP_MISC  : rv_instr_to_uop = U_INVALID;
+                    default  : rv_instr_to_uop = U_INVALID;
+                endcase
+            end
+            RV_FMT_J: begin
+            end
+            RV_FMT_U: begin
+            end
+            RV_FMT_S: begin
+            end
+            RV_FMT_B: begin
+            end
+        endcase
+    endfunction
+
+    function logic[RV_NUM_REGS-1:0] uinstr_to_rdmask(t_uinstr u);
+        if (!u.valid) begin
+            uinstr_to_rdmask = '0;
+        end else begin
+            uinstr_to_rdmask = '0;
+            if (u.src1.optype == OP_REG) uinstr_to_rdmask[u.src1.opreg] = 1'b1;
+            if (u.src2.optype == OP_REG) uinstr_to_rdmask[u.src2.opreg] = 1'b1;
+        end
+    endfunction
+
+    function logic[RV_NUM_REGS-1:0] uinstr_to_wrmask(t_uinstr u);
+        if (!u.valid) begin
+            uinstr_to_wrmask = '0;
+        end else begin
+            uinstr_to_wrmask = '0;
+            if (u.dst.optype == OP_REG) uinstr_to_wrmask[u.dst.opreg] = 1'b1;
+        end
+    endfunction
+
+    `ifdef SIMULATION
+    function string describe_uinstr(t_uinstr uinstr);
+        describe_uinstr = $sformatf("SIMID:%s opcode:%s uop:%s ifmt:%s", format_simid(uinstr.SIMID), uinstr.opcode.name(), uinstr.uop.name(), uinstr.ifmt.name());
+        case (uinstr.ifmt)
+            RV_FMT_I: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d imm32:0x%h funct3:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.imm32, uinstr.funct3);
+            RV_FMT_R: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d rs2:x%-d funct3:%-d funct7:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.src2.opreg, uinstr.funct3, uinstr.funct7);
+            default:  describe_uinstr = describe_uinstr;
+        endcase
+    endfunction
+    `endif
 
 endpackage
 

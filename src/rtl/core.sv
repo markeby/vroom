@@ -2,10 +2,11 @@
 `define __CORE_SV
 
 `include "instr.pkg"
+`include "instr_decode.pkg"
 `include "vroom_macros.sv"
 
 module core
-    import instr::*;
+    import instr::*, instr_decode::*;
 (
     input  logic clk,
     input  logic reset
@@ -15,30 +16,30 @@ module core
 // Nets
 //
 
-logic         valid_de0;
-t_rv_instr    instr_de0;
+logic         stall;
 
-logic         valid_rd0;
+logic         fe_valid_de0;
+t_rv_instr    instr_de0;
+t_uinstr      uinstr_de0;
+
 t_uinstr      uinstr_rd0;
 logic         rdens_rd0   [1:0];
 t_rv_reg_addr rdaddrs_rd0 [1:0];
 
 t_rv_reg_data rddatas_rd1 [1:0];
 
-logic         valid_ex0;
 t_uinstr      uinstr_ex0;
 t_rv_reg_data rddatas_ex0 [1:0];
 
 t_uinstr      uinstr_mm0;
 t_rv_reg_data result_mm0;
 
-/*
-logic         valid_mm0;
-t_uinstr      uinstr_mm0;
-
-logic         valid_rb0;
 t_uinstr      uinstr_rb0;
-*/
+t_rv_reg_data result_rb0;
+
+logic             wren_rb0;
+t_rv_reg_addr     wraddr_rb0;
+t_rv_reg_data     wrdata_rb0;
 
 //
 // Nets
@@ -47,29 +48,30 @@ t_uinstr      uinstr_rb0;
 fetch fetch (
     .clk,
     .reset,
-    .valid_de0,
+    .fe_valid_de0,
     .instr_de0,
-    .stall_de1 ( 1'b0 )
+    .stall
 );
 
 decode decode (
     .clk,
     .reset,
-    .valid_de0,
+
+    .fe_valid_de0,
+    .stall,
     .instr_de0,
-    .valid_rd0,
+    .uinstr_de0,
     .uinstr_rd0
 );
 
 regrd regrd (
     .clk,
     .reset,
-    .valid_rd0,
     .uinstr_rd0,
     .rdens_rd0,
     .rdaddrs_rd0,
+    .stall,
     .rddatas_rd1,
-    .valid_ex0,
     .uinstr_ex0,
     .rddatas_ex0
 );
@@ -77,8 +79,8 @@ regrd regrd (
 exe exe (
     .clk,
     .reset,
-    .valid_ex0,
-    .uinstr_ex0,
+    .stall,
+    .uinstr_nq_ex0 ( uinstr_ex0 ),
     .rddatas_ex0,
     .uinstr_mm0,
     .result_mm0
@@ -86,12 +88,21 @@ exe exe (
 
 mem mem (
     .clk,
-    .reset
+    .reset,
+    .uinstr_mm0,
+    .result_mm0,
+    .uinstr_rb0,
+    .result_rb0
 );
 
 retire retire (
     .clk,
-    .reset
+    .reset,
+    .uinstr_rb0,
+    .result_rb0,
+    .wren_rb0,
+    .wraddr_rb0,
+    .wrdata_rb0
 );
 
 gprs gprs (
@@ -102,10 +113,34 @@ gprs gprs (
     .rdaddr ( rdaddrs_rd0 ),
     .rddata ( rddatas_rd1 ),
 
-    .wren   ( '{0} ),
-    .wraddr ( '{0} ),
-    .wrdata ( '{0} )
+    .wren   ( '{wren_rb0  } ),
+    .wraddr ( '{wraddr_rb0} ),
+    .wrdata ( '{wrdata_rb0} )
 );
+
+scoreboard scoreboard (
+    .clk,
+    .reset,
+    .fe_valid_de0,
+    .uinstr_de0,
+    .uinstr_rd0,
+    .uinstr_ex0,
+    .uinstr_mm0,
+    .uinstr_rb0,
+
+    .stall
+);
+
+`ifdef ASSERT
+    /*
+    `define MK_REG_COLLISION_ASRT(STAGELC,SRCN) \
+        `VASSERT(a_collision_ex_``STAGELC``_``SRCN``, uinstr_ex0.valid & uinstr_ex0.dst.optype == OP_REG & uinstr_``STAGELC``0.valid & uinstr_``STAGELC``0.src``SRCN``.optype == OP_REG, uinstr_ex0.dst.opreg != uinstr_``STAGELC``0.src``SRCN``.opreg , $sformatf("Register collision! rd.dst <-> STAGELC.src%-d", SRCN))
+    `MK_REG_COLLISION_ASRT(mm,1)
+    `MK_REG_COLLISION_ASRT(mm,2)
+    `MK_REG_COLLISION_ASRT(rb,1)
+    `MK_REG_COLLISION_ASRT(rb,2)
+    */
+`endif
 
 endmodule
 

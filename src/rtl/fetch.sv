@@ -10,22 +10,21 @@ module fetch
 (
     input  logic      clk,
     input  logic      reset,
-    output logic      valid_de0,
+    output logic      fe_valid_de0,
     output t_rv_instr instr_de0,
-    input  logic      stall_de1
+    input  logic      stall
 );
 
 //
 // Fake stuff
 //
 
-int count;
+`ifdef SIMULATION
 
-initial begin
-    count = '0;
-end
+int instr_cnt_inst;
+`DFF(instr_cnt_inst, reset ? '0 : instr_cnt_inst + 32'(valid_no_stall), clk)
+`endif
 
-`DFF(count, count+1, clk)
 
 //
 // Nets
@@ -38,40 +37,68 @@ t_rv_instr instr_fe0;
 logic      valid_fe1;
 t_rv_instr instr_fe1;
 
-`ifdef SIMULATION
-int instr_cnt_inst;
-`DFF(instr_cnt_inst, reset ? '0 : instr_cnt_inst + 32'(valid_fe0), clk)
-`endif
+logic valid_no_stall;
+always_comb valid_no_stall = valid_fe0 & ~stall;
 
 //
 // Logic
 //
 
+localparam IROM_SZ = 128;
+t_rv_instr IROM [IROM_SZ-1:0];
+
+initial begin
+    automatic int a=0;
+    for (int i=0; i<IROM_SZ; i++) begin
+        IROM[i] = t_rv_instr'('0); //rvADDI(0,0,12'h000);
+    end
+
+    a=5;
+    IROM[a++] = rvADDI(1,1,1);
+    IROM[a++] = rvADDI(1,1,1);
+    IROM[a++] = rvADDI(1,1,1);
+    IROM[a++] = rvADDI(1,1,1);
+
+    IROM[a++] = rvXORI(2,1,1);
+    IROM[a++] = rvXORI(3,1,1);
+    IROM[a++] = rvXORI(4,1,1);
+    IROM[a++] = rvXORI(5,1,1);
+    IROM[a++] = rvXORI(6,1,1);
+    IROM[a++] = rvXORI(7,1,1);
+    IROM[a++] = rvADDI(1,1,12'h123);
+    IROM[a++] = rvADDI(2,1,12'h123);
+    IROM[a++] = rvADD(3,1,2);
+    IROM[a++] = rvXOR(2,2,2);
+    IROM[a++] = rvADDI(1,0,12'h111);
+    IROM[a++] = rvADDI(17,0,12'h654);
+    IROM[a++] = rvSUB(16,17,1);
+    IROM[a++] = rvXORI(18,16,12'hfff);
+    IROM[a++] = rvSRAI(20,18,5'h1);
+    IROM[a++] = rvSRLI(21,18,5'h1);
+    IROM[a++] = rvXOR(22,20,21);
+end
+
+logic[$clog2(IROM_SZ)-1:0] PC;
+logic[$clog2(IROM_SZ)-1:0] PCNxt;
+
+always_comb PCNxt = reset  ? '0     :
+                    ~stall ? PC + 1 :
+                             PC;
+`DFF(PC, PCNxt, clk)
+
 always_comb begin
-    instr_fe0 = '0;
-    valid_fe0 = 1'b0;
-    if (count == 5) begin
-        valid_fe0 = 1'b1;
-        instr_fe0 = rvADDI(3, 4, 12'h123);
-    end
-    if (count == 6) begin
-        valid_fe0 = 1'b1;
-        instr_fe0 = rvADDI(1, 2, 12'h999);
-    end
-    if (count == 9) begin
-        valid_fe0 = 1'b1;
-        instr_fe0 = rvADD(1, 2, 17);
-    end
+    instr_fe0 = IROM[PC];
+    valid_fe0 = |instr_fe0;
 
     `ifdef SIMULATION
     instr_fe0.SIMID.fid = instr_cnt_inst;
     `endif
 end
 
-`DFF(valid_fe1, valid_fe0, clk)
-`DFF(instr_fe1, instr_fe0, clk)
-always_comb valid_de0 = valid_fe1;
-always_comb instr_de0 = instr_fe1;
+`DFF_EN(valid_fe1, valid_fe0, clk, ~stall)
+`DFF_EN(instr_fe1, instr_fe0, clk, ~stall)
+always_comb fe_valid_de0 = valid_fe1;
+always_comb instr_de0    = instr_fe1;
 
 //
 // Displays
@@ -79,11 +106,16 @@ always_comb instr_de0 = instr_fe1;
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (valid_fe0) begin
-        `INFO(("unit:FE %s", describe_instr(instr_fe0)))
+    if (valid_no_stall & ~reset) begin
+        `INFO(("unit:FE pc:%h %s", PC, describe_instr(instr_fe0)))
     end
 end
 `endif
+
+`ifdef ASSERT
+chk_no_change #(.T(t_rv_instr)) cnc ( .clk, .reset, .hold(stall & fe_valid_de0), .thing(instr_de0) );
+`endif
+
 
 endmodule
 

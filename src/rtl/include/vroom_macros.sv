@@ -32,6 +32,6 @@
 `endif
 
 `define VASSERT(name, antecedent, consequent, msg) \
-    name: assert property (@(posedge clk) (antecedent) |-> (consequent)) else $error(msg);
+    name: assert property (@(posedge clk) disable iff(reset) (antecedent) |-> (consequent)) else $error(msg);
 
 `endif // __VROOM_MACROS_SV 

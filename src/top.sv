@@ -16,7 +16,7 @@ always @(posedge clk) begin
 end
 
 always @(posedge clk) begin
-    if (cclk_count > 20) begin
+    if (cclk_count > 100) begin
         $finish();
     end
 end

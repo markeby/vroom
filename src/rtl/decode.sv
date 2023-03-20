@@ -8,11 +8,13 @@
 module decode
     import instr::*, instr_decode::*;
 (
-    input  logic      clk,
-    input  logic      reset,
-    input  logic      valid_de0,
-    input  t_rv_instr instr_de0,
-    output t_uinstr   uinstr_de1
+    input  logic             clk,
+    input  logic             reset,
+    input  logic             valid_de0,
+    input  t_rv_instr        instr_de0,
+
+    output logic             valid_rd0,
+    output t_uinstr          uinstr_rd0
 );
 
 //
@@ -21,6 +23,9 @@ module decode
 
 t_rv_instr_format ifmt_de0;
 t_uinstr          uinstr_de0;
+
+t_uinstr          uinstr_de1;
+logic             valid_de1;
 
 `ifdef SIMULATION
 int instr_cnt_inst;
@@ -37,9 +42,9 @@ assign ifmt_de0 = get_instr_format(instr_de0.opcode);
 // logic[31:0]       imm32;
 // logic[6:0]        funct7;
 // logic[2:0]        funct3;
-// t_uopnd           src2;
-// t_uopnd           src1;
-// t_uopnd           dst;
+// t_uopnd_descr     src2;
+// t_uopnd_descr     src1;
+// t_uopnd_descr     dst;
 // t_rv_opcode       opcode;
 // t_rv_instr_format ifmt;
 // logic             valid;
@@ -86,7 +91,14 @@ always_comb begin
     if (reset) uinstr_de0 = '0;
 end
 
+//
+// DE1/RD0
+//
+
 `DFF(uinstr_de1, uinstr_de0, clk)
+`DFF(valid_de1,  valid_de0,  clk)
+always_comb uinstr_rd0 = uinstr_de1;
+always_comb valid_rd0  = valid_de1;
 
 //
 // Debug

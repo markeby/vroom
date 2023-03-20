@@ -15,9 +15,26 @@ module core
 // Nets
 //
 
-logic      valid_de0;
-t_rv_instr instr_de0;
+logic         valid_de0;
+t_rv_instr    instr_de0;
 
+logic         valid_rd0;
+t_uinstr      uinstr_rd0;
+logic         rdens_rd0   [1:0];
+t_rv_reg_addr rdaddrs_rd0 [1:0];
+
+t_rv_reg_data rddatas_rd1 [1:0];
+
+logic         valid_ex0;
+t_uinstr      uinstr_ex0;
+
+/*
+logic         valid_mm0;
+t_uinstr      uinstr_mm0;
+
+logic         valid_rb0;
+t_uinstr      uinstr_rb0;
+*/
 
 //
 // Nets
@@ -36,17 +53,27 @@ decode decode (
     .reset,
     .valid_de0,
     .instr_de0,
-    .uinstr_de1 ( )
+    .valid_rd0,
+    .uinstr_rd0
 );
 
 regrd regrd (
     .clk,
-    .reset
+    .reset,
+    .valid_rd0,
+    .uinstr_rd0,
+    .rdens_rd0,
+    .rdaddrs_rd0,
+    .valid_ex0,
+    .uinstr_ex0
 );
 
 exe exe (
     .clk,
-    .reset
+    .reset,
+    .valid_ex0,
+    .uinstr_ex0,
+    .rddatas_ex0 ( rddatas_rd1 )
 );
 
 mem mem (
@@ -57,6 +84,19 @@ mem mem (
 retire retire (
     .clk,
     .reset
+);
+
+gprs gprs (
+    .clk,
+    .reset,
+
+    .rden   ( rdens_rd0   ),
+    .rdaddr ( rdaddrs_rd0 ),
+    .rddata ( rddatas_rd1 ),
+
+    .wren   ( '{0} ),
+    .wraddr ( '{0} ),
+    .wrdata ( '{0} )
 );
 
 endmodule

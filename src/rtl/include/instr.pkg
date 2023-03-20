@@ -4,9 +4,11 @@
 `include "verif.pkg"
 
 package instr;
-    localparam RV_REG_WIDTH    = 5;
-    localparam RV_OPCODE_WIDTH = 7;
-    localparam RV_INSTR_WIDTH  = 32;
+    localparam RV_REG_BITS      = 32;
+    localparam RV_NUM_REGS      = 32;
+    localparam RV_REG_ADDR_BITS = $clog2(RV_NUM_REGS);
+    localparam RV_OPCODE_WIDTH  = 7;
+    localparam RV_INSTR_WIDTH   = 32;
 
     import verif::*;
 
@@ -24,7 +26,8 @@ package instr;
         OP_MISC   = 7'b1110011
     } t_rv_opcode;
 
-    typedef logic[RV_REG_WIDTH-1:0] t_rv_reg;
+    typedef logic[RV_REG_ADDR_BITS-1:0] t_rv_reg_addr;
+    typedef logic[RV_REG_BITS-1:0]      t_rv_reg_data;
 
     // RISC-V Instruction descriptor formats
 
@@ -38,24 +41,24 @@ package instr;
     } t_rv_instr_format;
 
     typedef struct packed {
-        logic[6:0]  funct7;
-        t_rv_reg    rs2;
-        t_rv_reg    rs1;
-        logic[2:0]  funct3;
-        t_rv_reg    rd;
+        logic[6:0]     funct7;
+        t_rv_reg_addr  rs2;
+        t_rv_reg_addr  rs1;
+        logic[2:0]     funct3;
+        t_rv_reg_addr  rd;
     } t_instr_R_descr;
 
     typedef struct packed {
         logic[11:0] imm_11_0;
-        t_rv_reg    rs1;
+        t_rv_reg_addr    rs1;
         logic[2:0]  funct3;
-        t_rv_reg    rd;
+        t_rv_reg_addr    rd;
     } t_instr_I_descr;
 
     typedef struct packed {
         logic[11:5] imm_11_5;
-        t_rv_reg    rs2;
-        t_rv_reg    rs1;
+        t_rv_reg_addr    rs2;
+        t_rv_reg_addr    rs1;
         logic[2:0]  funct3;
         logic[4:0]  imm_4_0;
     } t_instr_S_descr;
@@ -63,8 +66,8 @@ package instr;
     typedef struct packed {
         logic[12:12] imm_12;
         logic[10:5]  imm_10_5;
-        t_rv_reg     rs2;
-        t_rv_reg     rs1;
+        t_rv_reg_addr     rs2;
+        t_rv_reg_addr     rs1;
         logic[2:0]   funct3;
         logic[4:1]   imm_4_1;
         logic[11:11] imm_11;
@@ -72,7 +75,7 @@ package instr;
 
     typedef struct packed {
         logic[31:12] imm_31_12;
-        t_rv_reg    rd;
+        t_rv_reg_addr    rd;
     } t_instr_U_descr;
 
     typedef struct packed {
@@ -80,7 +83,7 @@ package instr;
         logic[10:1]  imm_10_1;
         logic[11:11] imm_11;
         logic[19:12] imm_19_12;
-        t_rv_reg    rd;
+        t_rv_reg_addr    rd;
     } t_instr_J_descr;
 
     typedef union packed {
@@ -120,17 +123,17 @@ package instr;
     typedef struct packed {
         t_size   opsize;
         t_optype optype;
-        t_rv_reg opreg;
-    } t_uopnd;
+        t_rv_reg_addr opreg;
+    } t_uopnd_descr;
 
     typedef struct packed {
         `SIMID_STRUCT
         logic[31:0]       imm32;
         logic[6:0]        funct7;
         logic[2:0]        funct3;
-        t_uopnd           src2;
-        t_uopnd           src1;
-        t_uopnd           dst;
+        t_uopnd_descr     src2;
+        t_uopnd_descr     src1;
+        t_uopnd_descr     dst;
         t_rv_opcode       opcode;
         t_rv_instr_format ifmt;
         logic             valid;

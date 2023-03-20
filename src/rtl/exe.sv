@@ -7,8 +7,11 @@
 module exe
     import instr::*;
 (
-    input  logic      clk,
-    input  logic      reset
+    input  logic         clk,
+    input  logic         reset,
+    input  logic         valid_ex0,
+    input  t_uinstr      uinstr_ex0,
+    input  t_rv_reg_data rddatas_ex0 [1:0]
 );
 
 //

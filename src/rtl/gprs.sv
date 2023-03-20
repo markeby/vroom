@@ -33,7 +33,7 @@ t_rv_reg_data REGS [RV_NUM_REGS-1:0];
 always_ff @(posedge clk) begin
     for (int rp=0; rp<NUMRD; rp++) begin
         if (rden[rp]) begin
-            rddata[rp] <= REGS[rdaddr[rp]];
+            rddata[rp] <= (rdaddr[rp] == 0) ? '0 : REGS[rdaddr[rp]];
         end
     end
 end

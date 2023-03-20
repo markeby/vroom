@@ -27,6 +27,8 @@ set EXE    "${CORE}.exe"
 set REGRD  "${CORE}.regrd"
 set MEM    "${CORE}.mem"
 set RETIRE "${CORE}.retire"
+set SCORE  "${CORE}.scoreboard"
+set GPRS   "${CORE}.gprs"
 
 set T_OPND        [list opreg opsize optype]
 
@@ -86,4 +88,17 @@ set regwr         [list wren_rb0 wraddr_rb0 wrdata_rb0]
 set sigs      [list {*}$uinstr_fields {*}$dst {*}$src1 {*}$src2 {*}$regwr]
 set rb_sigs   [prefixAll "${RETIRE}." $sigs]
 addSignalGroup "RB" $rb_sigs
+
+# Scoreboard
+set sigs      [list stall]
+set sb_sigs   [prefixAll "${SCORE}." $sigs]
+addSignalGroup "Scoreboard" $sb_sigs
+
+# Regfile
+set sigs      [list]
+for {set i 0} {$i < 32} {incr i} {
+    lappend sigs "REGS\[$i\]"
+}
+set gpr_sigs  [prefixAll "${GPRS}." $sigs]
+addSignalGroup "GPRs" $gpr_sigs
 

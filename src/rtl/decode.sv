@@ -88,6 +88,10 @@ end
 
 `DFF(uinstr_de1, uinstr_de0, clk)
 
+//
+// Debug
+//
+
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (uinstr_de0.valid) begin

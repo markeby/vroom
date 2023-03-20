@@ -39,6 +39,26 @@ decode decode (
     .uinstr_de1 ( )
 );
 
+regrd regrd (
+    .clk,
+    .reset
+);
+
+exe exe (
+    .clk,
+    .reset
+);
+
+mem mem (
+    .clk,
+    .reset
+);
+
+retire retire (
+    .clk,
+    .reset
+);
+
 endmodule
 
 `endif // __CORE_SV

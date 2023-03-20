@@ -27,6 +27,10 @@ t_rv_reg_data rddatas_rd1 [1:0];
 
 logic         valid_ex0;
 t_uinstr      uinstr_ex0;
+t_rv_reg_data rddatas_ex0 [1:0];
+
+t_uinstr      uinstr_mm0;
+t_rv_reg_data result_mm0;
 
 /*
 logic         valid_mm0;
@@ -64,8 +68,10 @@ regrd regrd (
     .uinstr_rd0,
     .rdens_rd0,
     .rdaddrs_rd0,
+    .rddatas_rd1,
     .valid_ex0,
-    .uinstr_ex0
+    .uinstr_ex0,
+    .rddatas_ex0
 );
 
 exe exe (
@@ -73,7 +79,9 @@ exe exe (
     .reset,
     .valid_ex0,
     .uinstr_ex0,
-    .rddatas_ex0 ( rddatas_rd1 )
+    .rddatas_ex0,
+    .uinstr_mm0,
+    .result_mm0
 );
 
 mem mem (

@@ -97,6 +97,9 @@ end
 
 `DFF(uinstr_de1, uinstr_de0, clk)
 `DFF(valid_de1,  valid_de0,  clk)
+
+// RD0 assigns
+
 always_comb uinstr_rd0 = uinstr_de1;
 always_comb valid_rd0  = valid_de1;
 

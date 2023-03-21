@@ -138,15 +138,15 @@ package instr_decode;
 
     function string describe_opnd(t_uopnd_descr opnd, logic[31:0] val32);
         unique case (opnd.optype)
-            OP_REG:  describe_opnd = $sformatf("<reg:x%-2d> 0x%08h", opnd.opreg, val32);
-            OP_IMM:  describe_opnd = $sformatf("<imm>     0x%08h", val32);
+            OP_REG:  describe_opnd = $sformatf("reg,x%-2d 0x%08h", opnd.opreg, val32);
+            OP_IMM:  describe_opnd = $sformatf("imm     0x%08h", val32);
             default: describe_opnd = "UNDEF";
         endcase
     endfunction
 
     function void print_retire_info(t_uinstr uinstr_rb0);
         `RETLOG(("-------------------------------------"))
-        `RETLOG(("PC:%08h Instr:%s", uinstr_rb0.SIMID.pc, uinstr_rb0.uop.name()))
+        `RETLOG(("PC:%08h %s -> %s", uinstr_rb0.SIMID.pc, uinstr_rb0.opcode.name(), uinstr_rb0.uop.name()))
         `RETLOG(("src1: %s", describe_opnd(uinstr_rb0.src1, uinstr_rb0.SIMID.src1_val)))
         `RETLOG(("src2: %s", describe_opnd(uinstr_rb0.src2, uinstr_rb0.SIMID.src2_val)))
         `RETLOG(("rslt: %s", describe_opnd(uinstr_rb0.dst,  uinstr_rb0.SIMID.result_val)))

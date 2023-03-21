@@ -34,7 +34,7 @@ sub bin_lines {
         }
     }
     close($fh);
-    $line_bins{"misc"} = \@misc_lines;
+    $line_bins{"UNSORTED"} = \@misc_lines;
     return \%line_bins;
 }
 

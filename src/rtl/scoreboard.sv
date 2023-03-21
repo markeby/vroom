@@ -73,9 +73,9 @@ logic stall_dly;
 `DFF(stall_dly, stall, clk)
 always @(posedge clk) begin
     if (stall & ~stall_dly) begin
-        `INFO(("Stalling..."))
+        `DEBUG(("Stalling..."))
     end else if (~stall & stall_dly) begin
-        `INFO(("...Resuming"))
+        `DEBUG(("...Resuming"))
     end
 end
 `endif

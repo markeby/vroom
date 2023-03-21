@@ -51,6 +51,7 @@ always_comb wrdata_rb0 = result_rb0;
 always @(posedge clk) begin
     if (uinstr_rb0.valid) begin
         `INFO(("unit:RB %s result:%08h", describe_uinstr(uinstr_rb0), result_rb0))
+        print_retire_info(uinstr_rb0);
     end
 end
 `endif

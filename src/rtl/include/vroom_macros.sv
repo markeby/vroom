@@ -21,8 +21,14 @@
 `define PMSG(tag, msg) \
     $display("@[%-d] %-d tag: %s", $time(), top.cclk_count, $sformatf msg);
 
+`define RETLOG(msg) \
+    `PMSG(RET, msg)
+
+`define PIPELOG(msg) \
+    `PMSG(PIPE, msg)
+
 `define INFO(msg) \
-    `PMSG(I, msg)
+    `PMSG(INFO, msg)
 
 `ifdef DEBUGON
     `define DEBUG(msg) \

@@ -80,7 +80,7 @@ exe exe (
     .clk,
     .reset,
     .stall,
-    .uinstr_nq_ex0 ( uinstr_ex0 ),
+    .uinstr_ex0,
     .rddatas_ex0,
     .uinstr_mm0,
     .result_mm0
@@ -127,7 +127,6 @@ scoreboard scoreboard (
     .uinstr_ex0,
     .uinstr_mm0,
     .uinstr_rb0,
-
     .stall
 );
 

@@ -15,7 +15,11 @@ VL_DEFINES := +define+SIMULATION=1 +define+ASSERT=1 #+define+DEBUGON=1
 
 .PHONY: run
 run: Vtop
-	obj_dir/Vtop
+	obj_dir/Vtop | tee run.log
+	@echo
+	@echo "Splitting run.log"
+	@echo
+	scripts/split_log -f run.log
 
 Vtop: verilated
 	make -C obj_dir -f Vtop.mk Vtop 
@@ -28,6 +32,7 @@ verilated: $(SRC_FILES) $(LIB_FILES)
 clean:
 	rm -rf obj_dir/
 	rm -f waves.fst
+	rm -f *.log
 
 #sim: $(SRC_FILES) $(LIB_FILES)
 #	$(IVERILOG) -I $(INC_DIR) -y $(LIB_DIR) -f src/rtl.f -o $@

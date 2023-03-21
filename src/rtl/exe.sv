@@ -11,7 +11,7 @@ module exe
     input  logic         reset,
     input  logic         stall,
 
-    input  t_uinstr      uinstr_nq_ex0,
+    input  t_uinstr      uinstr_ex0,
     input  t_rv_reg_data rddatas_ex0 [1:0],
 
     output t_uinstr      uinstr_mm0,
@@ -22,15 +22,6 @@ localparam EX0 = 0;
 localparam EX1 = 1;
 localparam NUM_EX_STAGES = 1;
 
-t_uinstr uinstr_ex0;
-always_comb begin
-    uinstr_ex0        = uinstr_nq_ex0;
-    //uinstr_ex0.valid &= stall;
-end
-
-`MKPIPE_INIT(t_uinstr,       uinstr_exx, uinstr_ex0, EX0, NUM_EX_STAGES)
-`MKPIPE     (t_rv_reg_data,  result_exx,             EX0, NUM_EX_STAGES)
-
 //
 // Nets
 //
@@ -40,9 +31,23 @@ t_uinstr      uinstr_ex1;
 t_rv_reg_data src1val_ex0;
 t_rv_reg_data src2val_ex0;
 
+t_uinstr uinstr_ql_ex0;
+
+`MKPIPE_INIT(t_uinstr,       uinstr_exx, uinstr_ql_ex0, EX0, NUM_EX_STAGES)
+`MKPIPE     (t_rv_reg_data,  result_exx,                EX0, NUM_EX_STAGES)
+
 //
 // Logic
 //
+
+always_comb begin
+    uinstr_ql_ex0 = uinstr_ex0;
+    `ifdef SIMULATION
+    uinstr_ql_ex0.SIMID.src1_val   = src1val_ex0;
+    uinstr_ql_ex0.SIMID.src2_val   = src2val_ex0;
+    uinstr_ql_ex0.SIMID.result_val = result_exx[EX0];
+    `endif
+end
 
 //
 // EX0

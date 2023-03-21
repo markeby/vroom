@@ -54,11 +54,17 @@ initial begin
     end
 
     a=5;
+    IROM[a++] = rvXOR(1,1,1);
+    IROM[a++] = rvADDI(1,1,12'h123);
+    IROM[a++] = rvSLLI(1,1,5'd12);
+    IROM[a++] = rvADDI(1,1,12'h456);
+    IROM[a++] = rvSLLI(1,1,5'd8);
+    IROM[a++] = rvADDI(9,1,12'h78);
     IROM[a++] = rvADDI(1,1,1);
     IROM[a++] = rvADDI(1,1,1);
     IROM[a++] = rvADDI(1,1,1);
     IROM[a++] = rvADDI(1,1,1);
-
+    IROM[a++] = rvADDI(1,1,1);
     IROM[a++] = rvXORI(2,1,1);
     IROM[a++] = rvXORI(3,1,1);
     IROM[a++] = rvXORI(4,1,1);
@@ -91,7 +97,8 @@ always_comb begin
     valid_fe0 = |instr_fe0;
 
     `ifdef SIMULATION
-    instr_fe0.SIMID.fid = instr_cnt_inst;
+    instr_fe0.SIMID.fid       = instr_cnt_inst;
+    instr_fe0.SIMID.pc        = 32'(PC);
     `endif
 end
 

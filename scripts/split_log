@@ -1,0 +1,52 @@
+#!/usr/bin/env perl5.30
+use warnings;
+use strict;
+use Getopt::Long;
+use Data::Dumper;
+
+my $FN_LOG  = undef;
+my $VERBOSE = 0;
+GetOptions( 
+    "file=s"   => \$FN_LOG,
+    "verbose"  => \$VERBOSE
+) or die("Error parsing args");
+
+#--
+
+sub bin_lines {
+    my ($fn) = @_;
+    my $fh = undef;
+    my %line_bins = ();
+    my @misc_lines = ();
+    open($fh, "<$fn");
+    foreach my $line (<$fh>) {
+        chomp $line;
+        if ($line =~ /^@\[/) {
+            my @spl = split(/\s/, $line);
+            my $key = $spl[2];
+            $key =~ s/://;
+            if (!defined($line_bins{$key})) {
+                $line_bins{$key} = [];
+            }
+            push(@{$line_bins{$key}}, $line);
+        } else {
+            push(@misc_lines, $line);
+        }
+    }
+    close($fh);
+    $line_bins{"misc"} = \@misc_lines;
+    return \%line_bins;
+}
+
+my %line_bins = %{ bin_lines($FN_LOG) };
+foreach my $b (keys %line_bins) {
+    my $fn_out = "run.$b.log";
+    my $fh = undef;
+    open($fh, ">$fn_out");
+    my $txt = join("\n", @{ $line_bins{$b} });
+    print $fh "$txt\n";
+    print "Wrote $fn_out\n";
+    close($fh);
+}
+
+#print(Dumper(\%line_bins));

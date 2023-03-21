@@ -14,13 +14,13 @@ package asm;
               | (t_rv_instr'(imm_11_0) << 20);
     endfunction
 
-    function t_rv_instr rvADDI(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(OP_ALU_I, rd, rs1, imm_11_0,                 ALU_ADD); endfunction
-    function t_rv_instr rvANDI(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(OP_ALU_I, rd, rs1, imm_11_0,                 ALU_AND); endfunction
-    function t_rv_instr rvORI (t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(OP_ALU_I, rd, rs1, imm_11_0,                 ALU_OR ); endfunction
-    function t_rv_instr rvXORI(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(OP_ALU_I, rd, rs1, imm_11_0,                 ALU_XOR); endfunction
-    function t_rv_instr rvSLLI(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[4:0]  shamt   ); return __rvI(OP_ALU_I, rd, rs1, {7'b0000000, shamt[4:0]}, ALU_SHL); endfunction
-    function t_rv_instr rvSRLI(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[4:0]  shamt   ); return __rvI(OP_ALU_I, rd, rs1, {7'b0000000, shamt[4:0]}, ALU_SHR); endfunction
-    function t_rv_instr rvSRAI(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[4:0]  shamt   ); return __rvI(OP_ALU_I, rd, rs1, {7'b0100000, shamt[4:0]}, ALU_SHR); endfunction
+    function t_rv_instr rvADDI(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(RV_OP_ALU_I, rd, rs1, imm_11_0,                 ALU_ADD); endfunction
+    function t_rv_instr rvANDI(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(RV_OP_ALU_I, rd, rs1, imm_11_0,                 ALU_AND); endfunction
+    function t_rv_instr rvORI (t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(RV_OP_ALU_I, rd, rs1, imm_11_0,                 ALU_OR ); endfunction
+    function t_rv_instr rvXORI(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(RV_OP_ALU_I, rd, rs1, imm_11_0,                 ALU_XOR); endfunction
+    function t_rv_instr rvSLLI(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[4:0]  shamt   ); return __rvI(RV_OP_ALU_I, rd, rs1, {7'b0000000, shamt[4:0]}, ALU_SHL); endfunction
+    function t_rv_instr rvSRLI(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[4:0]  shamt   ); return __rvI(RV_OP_ALU_I, rd, rs1, {7'b0000000, shamt[4:0]}, ALU_SHR); endfunction
+    function t_rv_instr rvSRAI(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[4:0]  shamt   ); return __rvI(RV_OP_ALU_I, rd, rs1, {7'b0100000, shamt[4:0]}, ALU_SHR); endfunction
 
     // R-format instructions
 
@@ -33,14 +33,14 @@ package asm;
               | (t_rv_instr'(funct7  ) << 25);
     endfunction
 
-    function t_rv_instr rvADD(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(OP_ALU_R, rd, rs1, rs2, ALU_ADD, 7'b0000000); endfunction
-    function t_rv_instr rvSUB(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(OP_ALU_R, rd, rs1, rs2, ALU_ADD, 7'b0100000); endfunction
-    function t_rv_instr rvAND(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(OP_ALU_R, rd, rs1, rs2, ALU_AND, 7'b0000000); endfunction
-    function t_rv_instr rvOR (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(OP_ALU_R, rd, rs1, rs2, ALU_OR , 7'b0000000); endfunction
-    function t_rv_instr rvXOR(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(OP_ALU_R, rd, rs1, rs2, ALU_XOR, 7'b0000000); endfunction
-    function t_rv_instr rvSLL(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(OP_ALU_R, rd, rs1, rs2, ALU_SHL, 7'b0000000); endfunction
-    function t_rv_instr rvSRL(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(OP_ALU_R, rd, rs1, rs2, ALU_SHR, 7'b0000000); endfunction
-    function t_rv_instr rvSRA(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(OP_ALU_R, rd, rs1, rs2, ALU_SHR, 7'b0100000); endfunction
+    function t_rv_instr rvADD(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU_R, rd, rs1, rs2, ALU_ADD, 7'b0000000); endfunction
+    function t_rv_instr rvSUB(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU_R, rd, rs1, rs2, ALU_ADD, 7'b0100000); endfunction
+    function t_rv_instr rvAND(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU_R, rd, rs1, rs2, ALU_AND, 7'b0000000); endfunction
+    function t_rv_instr rvOR (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU_R, rd, rs1, rs2, ALU_OR , 7'b0000000); endfunction
+    function t_rv_instr rvXOR(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU_R, rd, rs1, rs2, ALU_XOR, 7'b0000000); endfunction
+    function t_rv_instr rvSLL(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU_R, rd, rs1, rs2, ALU_SHL, 7'b0000000); endfunction
+    function t_rv_instr rvSRL(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU_R, rd, rs1, rs2, ALU_SHR, 7'b0000000); endfunction
+    function t_rv_instr rvSRA(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU_R, rd, rs1, rs2, ALU_SHR, 7'b0100000); endfunction
 
 endpackage
 

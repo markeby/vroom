@@ -42,17 +42,17 @@ package instr_decode;
 
     function t_rv_instr_format get_instr_format (t_rv_opcode opcode);
         unique casez (opcode)
-            OP_LUI   : get_instr_format = RV_FMT_U;
-            OP_AUIPC : get_instr_format = RV_FMT_U; 
-            OP_JAL   : get_instr_format = RV_FMT_J; 
-            OP_JALR  : get_instr_format = RV_FMT_I; 
-            OP_BR    : get_instr_format = RV_FMT_B; 
-            OP_LD    : get_instr_format = RV_FMT_I; 
-            OP_ST    : get_instr_format = RV_FMT_S; 
-            OP_ALU_I : get_instr_format = RV_FMT_I; 
-            OP_ALU_R : get_instr_format = RV_FMT_R; 
-            OP_FENCE : get_instr_format = RV_FMT_I; 
-            OP_MISC  : get_instr_format = RV_FMT_I; 
+            RV_OP_LUI   : get_instr_format = RV_FMT_U;
+            RV_OP_AUIPC : get_instr_format = RV_FMT_U; 
+            RV_OP_JAL   : get_instr_format = RV_FMT_J; 
+            RV_OP_JALR  : get_instr_format = RV_FMT_I; 
+            RV_OP_BR    : get_instr_format = RV_FMT_B; 
+            RV_OP_LD    : get_instr_format = RV_FMT_I; 
+            RV_OP_ST    : get_instr_format = RV_FMT_S; 
+            RV_OP_ALU_I : get_instr_format = RV_FMT_I; 
+            RV_OP_ALU_R : get_instr_format = RV_FMT_R; 
+            RV_OP_FENCE : get_instr_format = RV_FMT_I; 
+            RV_OP_MISC  : get_instr_format = RV_FMT_I; 
         endcase
     endfunction
 
@@ -61,7 +61,7 @@ package instr_decode;
         rv_instr_to_uop = U_INVALID;
         unique casez (ifmt)
             RV_FMT_R: begin
-                // opcode = OP_ALU_R
+                // opcode = RV_OP_ALU_R
                 t_rv_alu_op_funct3 alu_op = t_rv_alu_op_funct3'(instr.d.R.funct3);
                 unique casez(alu_op)
                     ALU_ADD:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SUB : U_ADD;
@@ -76,9 +76,9 @@ package instr_decode;
             end
             RV_FMT_I: begin
                 unique casez(instr.opcode) 
-                    OP_JALR  : rv_instr_to_uop = U_INVALID;
-                    OP_LD    : rv_instr_to_uop = U_INVALID;
-                    OP_ALU_I : begin
+                    RV_OP_JALR  : rv_instr_to_uop = U_INVALID;
+                    RV_OP_LD    : rv_instr_to_uop = U_INVALID;
+                    RV_OP_ALU_I : begin
                         t_rv_alu_op_funct3 alu_op = t_rv_alu_op_funct3'(instr.d.R.funct3);
                         unique casez(alu_op)
                             ALU_ADD:  rv_instr_to_uop = U_ADD;
@@ -91,8 +91,8 @@ package instr_decode;
                             ALU_AND:  rv_instr_to_uop = U_AND;
                         endcase
                     end
-                    OP_FENCE : rv_instr_to_uop = U_INVALID;
-                    OP_MISC  : rv_instr_to_uop = U_INVALID;
+                    RV_OP_FENCE : rv_instr_to_uop = U_INVALID;
+                    RV_OP_MISC  : rv_instr_to_uop = U_INVALID;
                     default  : rv_instr_to_uop = U_INVALID;
                 endcase
             end

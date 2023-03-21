@@ -10,12 +10,12 @@ module scoreboard
     input  logic             clk,
     input  logic             reset,
 
-    input  logic             fe_valid_de0,
+    input  logic             valid_fe1,
     input  t_uinstr          uinstr_de0,
-    input  t_uinstr          uinstr_rd0,
-    input  t_uinstr          uinstr_ex0,
-    input  t_uinstr          uinstr_mm0,
-    input  t_uinstr          uinstr_rb0,
+    input  t_uinstr          uinstr_de1,
+    input  t_uinstr          uinstr_rd1,
+    input  t_uinstr          uinstr_ex1,
+    input  t_uinstr          uinstr_mm1,
 
     output logic             stall
 );
@@ -34,11 +34,11 @@ t_rv_instr_format ifmt_de0;
 
 logic[RV_NUM_REGS-1:0] regrd_mask_de0;
 logic[RV_NUM_REGS-1:0] regwr_mask_de0;
-logic[RV_NUM_REGS-1:0] regrd_mask_rd0;
-logic[RV_NUM_REGS-1:0] regwr_mask_rd0;
-logic[RV_NUM_REGS-1:0] regwr_mask_ex0;
-logic[RV_NUM_REGS-1:0] regwr_mask_mm0;
-logic[RV_NUM_REGS-1:0] regwr_mask_rb0;
+logic[RV_NUM_REGS-1:0] regrd_mask_de1;
+logic[RV_NUM_REGS-1:0] regwr_mask_de1;
+logic[RV_NUM_REGS-1:0] regwr_mask_rd1;
+logic[RV_NUM_REGS-1:0] regwr_mask_ex1;
+logic[RV_NUM_REGS-1:0] regwr_mask_mm1;
 
 //
 // Logic
@@ -47,20 +47,20 @@ logic[RV_NUM_REGS-1:0] regwr_mask_rb0;
 always_comb regrd_mask_de0 = uinstr_to_rdmask(uinstr_de0);
 always_comb regwr_mask_de0 = uinstr_to_wrmask(uinstr_de0);
 
-always_comb regrd_mask_rd0 = uinstr_to_rdmask(uinstr_rd0);
-always_comb regwr_mask_rd0 = uinstr_to_wrmask(uinstr_rd0);
+always_comb regrd_mask_de1 = uinstr_to_rdmask(uinstr_de1);
+always_comb regwr_mask_de1 = uinstr_to_wrmask(uinstr_de1);
 
-always_comb regwr_mask_ex0 = uinstr_to_wrmask(uinstr_ex0);
-always_comb regwr_mask_mm0 = uinstr_to_wrmask(uinstr_mm0);
-always_comb regwr_mask_rb0 = uinstr_to_wrmask(uinstr_rb0);
+always_comb regwr_mask_rd1 = uinstr_to_wrmask(uinstr_rd1);
+always_comb regwr_mask_ex1 = uinstr_to_wrmask(uinstr_ex1);
+always_comb regwr_mask_mm1 = uinstr_to_wrmask(uinstr_mm1);
 
 // stall asserts if there's anything valid in RD0 that collides with EX0, MM0, or RB0.
 //
 // When stall is asserted, a valid uop in FE, DE, or RD must stay in place!
-always_comb stall = |( regrd_mask_rd0
-                     & ( regwr_mask_ex0 
-                       | regwr_mask_mm0 
-                       | regwr_mask_rb0 
+always_comb stall = |( regrd_mask_de1
+                     & ( regwr_mask_rd1 
+                       | regwr_mask_ex1 
+                       | regwr_mask_mm1 
                        ) 
                      );
 

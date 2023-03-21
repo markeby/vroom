@@ -109,10 +109,14 @@ package instr;
     // RISC-V Instruction formats
 
     typedef struct packed {
-        `SIMID_STRUCT
         t_instr_descr d;
         t_rv_opcode   opcode;
     } t_rv_instr;
+
+    typedef struct packed {
+        `SIMID_STRUCT
+        t_rv_instr instr;
+    } t_instr_pkt;
 
     // Expanded uop format
 
@@ -132,8 +136,8 @@ package instr;
     } t_optype;
 
     `ifdef SIMULATION
-    function string describe_instr(t_rv_instr inst);
-        describe_instr = $sformatf("SIMID:%s opcode:%s", format_simid(inst.SIMID), inst.opcode.name());
+    function string describe_instr(t_instr_pkt inst);
+        describe_instr = $sformatf("SIMID:%s opcode:%s", format_simid(inst.SIMID), inst.instr.opcode.name());
     endfunction
     `endif
 

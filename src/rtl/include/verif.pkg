@@ -18,7 +18,7 @@ package verif;
         `define SIMID_STRUCT t_simid SIMID;
 
         function string format_simid(t_simid simid);
-            return $sformatf("%-0d", simid.fid);
+            return $sformatf("%-0d,%h", simid.fid, simid.pc);
         endfunction
 
     `else // SIMULATION

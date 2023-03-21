@@ -10,19 +10,19 @@ module mem
     input  logic         clk,
     input  logic         reset,
 
-    input  t_uinstr      uinstr_mm0,
-    input  t_rv_reg_data result_mm0,
+    input  t_uinstr      uinstr_ex1,
+    input  t_rv_reg_data result_ex1,
 
-    output t_uinstr      uinstr_rb0,
-    output t_rv_reg_data result_rb0
+    output t_uinstr      uinstr_mm1,
+    output t_rv_reg_data result_mm1
 );
 
 localparam MM0 = 0;
 localparam MM1 = 1;
 localparam NUM_MM_STAGES = 1;
 
-`MKPIPE_INIT(t_uinstr,       uinstr_mmx, uinstr_mm0, MM0, NUM_MM_STAGES)
-`MKPIPE_INIT(t_rv_reg_data,  result_mmx, result_mm0, MM0, NUM_MM_STAGES)
+`MKPIPE_INIT(t_uinstr,       uinstr_mmx, uinstr_ex1, MM0, NUM_MM_STAGES)
+`MKPIPE_INIT(t_rv_reg_data,  result_mmx, result_ex1, MM0, NUM_MM_STAGES)
 
 //
 // Nets
@@ -42,8 +42,8 @@ localparam NUM_MM_STAGES = 1;
 
 // RB0 assign
 
-always_comb uinstr_rb0 = uinstr_mmx[MM1];
-always_comb result_rb0 = result_mmx[MM1];
+always_comb uinstr_mm1 = uinstr_mmx[MM1];
+always_comb result_mm1 = result_mmx[MM1];
 
 //
 // Debug
@@ -51,8 +51,8 @@ always_comb result_rb0 = result_mmx[MM1];
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (uinstr_mm0.valid) begin
-        `INFO(("unit:RD %s", describe_uinstr(uinstr_mm0)))
+    if (uinstr_ex1.valid) begin
+        `INFO(("unit:MM %s", describe_uinstr(uinstr_ex1)))
     end
 end
 `endif

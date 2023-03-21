@@ -10,7 +10,7 @@
 #include "Vtop.h"
 #include "Vtop___024root.h"
 
-#define MAX_SIM_TIME 200
+#define MAX_SIM_TIME 2000
 vluint64_t sim_time=0;
 
 double sc_time_stamp() {
@@ -40,7 +40,9 @@ int main(int argc, char** argv, char** env) {
         }
 
         dut->eval();
-        m_trace->dump(sim_time);
+        if (sim_time >= 10) {
+            m_trace->dump(sim_time);
+        }
         sim_time++;
     }
 

@@ -1,0 +1,19 @@
+`ifndef __COMMON_PKG
+`define __COMMON_PKG 
+
+`include "verif.pkg"
+
+package common;
+    localparam PA_SZ        = 32;
+    localparam CL_SZ        = 32;
+    localparam CL_SZ_BYTES  = CL_SZ/8;
+    localparam CL_SZ_HWORDS = CL_SZ_BYTES/2;
+    localparam CL_SZ_WORDS  = CL_SZ_HWORDS/2;
+
+    typedef logic[ 7:0] t_byte;
+    typedef logic[15:0] t_hword;
+    typedef logic[31:0] t_word;
+
+endpackage
+
+`endif // __COMMON_PKG 

@@ -15,15 +15,12 @@ always @(posedge clk) begin
     `DEBUG(("Tick tock!"))
 end
 
-always @(posedge clk) begin
-    if (cclk_count > 300) begin
-        $finish();
-    end
-end
+logic rst_dly;
+`DFF(rst_dly, reset, clk);
 
 core core (
     .clk,
-    .reset
+    .reset ( rst_dly )
 );
 endmodule
 

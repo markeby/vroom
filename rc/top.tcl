@@ -39,48 +39,48 @@ addSignalGroup "Core" $sigs
 puts $sigs
 
 # Fetch signals
-set sigs      [list stall PC instr_fe0.opcode f__instr_fe0]
+set sigs      [list state stall PC instr_fe0.opcode f__instr_fe0]
 set fe_sigs   [prefixAll "${FETCH}." $sigs]
 addSignalGroup "FE" $fe_sigs
 
 # Decode signals
-set uinstr_fields [prefixAll "uinstr_dex\[0\]." [list valid uop funct imm32 opcode]]
-set src1          [prefixAll "uinstr_dex\[0\].src1." $T_OPND]
-set src2          [prefixAll "uinstr_dex\[0\].src2." $T_OPND]
-set dst           [prefixAll "uinstr_dex\[0\].dst."  $T_OPND]
+set uinstr_fields [prefixAll "uinstr_de1." [list valid SIMID.fid uop funct imm32 opcode]]
+set src1          [prefixAll "uinstr_de1.src1." $T_OPND]
+set src2          [prefixAll "uinstr_de1.src2." $T_OPND]
+set dst           [prefixAll "uinstr_de1.dst."  $T_OPND]
 set sigs      [list fe_valid_de0 {*}$uinstr_fields {*}$dst {*}$src1 {*}$src2]
 set de_sigs   [prefixAll "${DECODE}." $sigs]
 addSignalGroup "DE" $de_sigs
 
 # RegRd  signals
-set uinstr_fields [prefixAll "uinstr_rd0." [list valid uop funct imm32 opcode]]
-set src1          [prefixAll "uinstr_rd0.src1." $T_OPND]
-set src2          [prefixAll "uinstr_rd0.src2." $T_OPND]
-set dst           [prefixAll "uinstr_rd0.dst."  $T_OPND]
+set uinstr_fields [prefixAll "uinstr_rd1." [list valid SIMID.fid uop funct imm32 opcode]]
+set src1          [prefixAll "uinstr_rd1.src1." $T_OPND]
+set src2          [prefixAll "uinstr_rd1.src2." $T_OPND]
+set dst           [prefixAll "uinstr_rd1.dst."  $T_OPND]
 set sigs      [list {*}$uinstr_fields {*}$dst {*}$src1 {*}$src2]
 set rd_sigs   [prefixAll "${REGRD}." $sigs]
 addSignalGroup "RD" $rd_sigs
 
 # EXE  signals
-set uinstr_fields [prefixAll "uinstr_ex0." [list valid uop funct imm32 opcode]]
-set src1          [prefixAll "uinstr_ex0.src1." $T_OPND]
-set src2          [prefixAll "uinstr_ex0.src2." $T_OPND]
-set dst           [prefixAll "uinstr_ex0.dst."  $T_OPND]
+set uinstr_fields [prefixAll "uinstr_ex1." [list valid SIMID.fid uop funct imm32 opcode]]
+set src1          [prefixAll "uinstr_ex1.src1." $T_OPND]
+set src2          [prefixAll "uinstr_ex1.src2." $T_OPND]
+set dst           [prefixAll "uinstr_ex1.dst."  $T_OPND]
 set sigs      [list {*}$uinstr_fields {*}$dst {*}$src1 {*}$src2]
 set ex_sigs   [prefixAll "${EXE}." $sigs]
 addSignalGroup "EX" $ex_sigs
 
 # Mem  signals
-set uinstr_fields [prefixAll "uinstr_mm0." [list valid uop funct imm32 opcode]]
-set src1          [prefixAll "uinstr_mm0.src1." $T_OPND]
-set src2          [prefixAll "uinstr_mm0.src2." $T_OPND]
-set dst           [prefixAll "uinstr_mm0.dst."  $T_OPND]
+set uinstr_fields [prefixAll "uinstr_mm1." [list valid SIMID.fid uop funct imm32 opcode]]
+set src1          [prefixAll "uinstr_mm1.src1." $T_OPND]
+set src2          [prefixAll "uinstr_mm1.src2." $T_OPND]
+set dst           [prefixAll "uinstr_mm1.dst."  $T_OPND]
 set sigs      [list {*}$uinstr_fields {*}$dst {*}$src1 {*}$src2]
 set mm_sigs   [prefixAll "${MEM}." $sigs]
 addSignalGroup "MM" $mm_sigs
 
 # Retire signals
-set uinstr_fields [prefixAll "uinstr_rb0." [list valid uop funct imm32 opcode]]
+set uinstr_fields [prefixAll "uinstr_rb0." [list valid SIMID.fid uop funct imm32 opcode]]
 set src1          [prefixAll "uinstr_rb0.src1." $T_OPND]
 set src2          [prefixAll "uinstr_rb0.src2." $T_OPND]
 set dst           [prefixAll "uinstr_rb0.dst."  $T_OPND]

@@ -9,8 +9,8 @@ module retire
 (
     input  logic             clk,
     input  logic             reset,
-    input  t_uinstr          uinstr_rb0,
-    input  t_rv_reg_data     result_rb0,
+    input  t_uinstr          uinstr_mm1,
+    input  t_rv_reg_data     result_mm1,
 
     output logic             wren_rb0,
     output t_rv_reg_addr     wraddr_rb0,
@@ -21,7 +21,7 @@ localparam RB0 = 0;
 localparam RB1 = 1;
 localparam NUM_RB_STAGES = 1;
 
-`MKPIPE_INIT(t_uinstr,       uinstr_rbx, uinstr_rb0, RB0, NUM_RB_STAGES)
+`MKPIPE_INIT(t_uinstr,       uinstr_rbx, uinstr_mm1, RB0, NUM_RB_STAGES)
 
 //
 // Nets
@@ -35,9 +35,9 @@ localparam NUM_RB_STAGES = 1;
 // RB0
 //
 
-always_comb wren_rb0   = uinstr_rb0.dst.optype == OP_REG & uinstr_rb0.valid;
-always_comb wraddr_rb0 = uinstr_rb0.dst.opreg;
-always_comb wrdata_rb0 = result_rb0;
+always_comb wren_rb0   = uinstr_mm1.dst.optype == OP_REG & uinstr_mm1.valid;
+always_comb wraddr_rb0 = uinstr_mm1.dst.opreg;
+always_comb wrdata_rb0 = result_mm1;
 
 //
 // RB1
@@ -48,10 +48,27 @@ always_comb wrdata_rb0 = result_rb0;
 //
 
 `ifdef SIMULATION
+
+localparam FAIL_DLY = 10;
+logic[FAIL_DLY:0] boom_pipe;
+`DFF(boom_pipe[FAIL_DLY:1], boom_pipe[FAIL_DLY-1:0], clk);
+
 always @(posedge clk) begin
-    if (uinstr_rb0.valid) begin
-        `INFO(("unit:RB %s result:%08h", describe_uinstr(uinstr_rb0), result_rb0))
-        print_retire_info(uinstr_rb0);
+    boom_pipe[0] <= 1'b0;
+    if (uinstr_mm1.valid) begin
+        `INFO(("unit:RB %s result:%08h", describe_uinstr(uinstr_mm1), result_mm1))
+        print_retire_info(uinstr_mm1);
+    end
+
+    if (wren_rb0 & wraddr_rb0 == 0 & wrdata_rb0 == 32'h666) begin
+        `INFO(("Saw write of 666 to x0... goodbye, folks!"))
+        boom_pipe[0] <= 1'b1;
+    end
+
+    if (boom_pipe[FAIL_DLY]) begin
+        $finish();
+        $finish();
+        $finish();
     end
 end
 `endif
@@ -60,8 +77,8 @@ end
 chk_always_increment #(.T(int), .CONSECUTIVE(1)) fid_counting_up (
     .clk,
     .reset,
-    .valid ( uinstr_rb0.valid     ),
-    .count ( uinstr_rb0.SIMID.fid )
+    .valid ( uinstr_mm1.valid     ),
+    .count ( uinstr_mm1.SIMID.fid )
 );
 `endif
 

@@ -3,10 +3,11 @@
 
 `include "instr.pkg"
 `include "instr_decode.pkg"
+`include "mem_common.pkg"
 `include "vroom_macros.sv"
 
 module core
-    import instr::*, instr_decode::*;
+    import instr::*, instr_decode::*, mem_common::*;
 (
     input  logic clk,
     input  logic reset
@@ -18,28 +19,31 @@ module core
 
 logic         stall;
 
-logic         fe_valid_de0;
-t_rv_instr    instr_de0;
+logic         valid_fe1;
+t_instr_pkt   instr_fe1;
 t_uinstr      uinstr_de0;
 
-t_uinstr      uinstr_rd0;
+t_uinstr      uinstr_de1;
 logic         rdens_rd0   [1:0];
 t_rv_reg_addr rdaddrs_rd0 [1:0];
 
+t_uinstr      uinstr_rd1;
 t_rv_reg_data rddatas_rd1 [1:0];
 
-t_uinstr      uinstr_ex0;
-t_rv_reg_data rddatas_ex0 [1:0];
+t_uinstr      uinstr_ex1;
+t_rv_reg_data result_ex1;
 
-t_uinstr      uinstr_mm0;
-t_rv_reg_data result_mm0;
-
-t_uinstr      uinstr_rb0;
-t_rv_reg_data result_rb0;
+t_uinstr      uinstr_mm1;
+t_rv_reg_data result_mm1;
 
 logic             wren_rb0;
 t_rv_reg_addr     wraddr_rb0;
 t_rv_reg_data     wrdata_rb0;
+
+// icache
+
+t_mem_req fe_ic_req_nnn;
+t_mem_rsp ic_fe_rsp_nnn;
 
 //
 // Nets
@@ -48,8 +52,10 @@ t_rv_reg_data     wrdata_rb0;
 fetch fetch (
     .clk,
     .reset,
-    .fe_valid_de0,
-    .instr_de0,
+    .fe_ic_req_nnn,
+    .ic_fe_rsp_nnn,
+    .valid_fe1,
+    .instr_fe1,
     .stall
 );
 
@@ -57,49 +63,48 @@ decode decode (
     .clk,
     .reset,
 
-    .fe_valid_de0,
+    .valid_fe1,
     .stall,
-    .instr_de0,
+    .instr_fe1,
     .uinstr_de0,
-    .uinstr_rd0
+    .uinstr_de1
 );
 
 regrd regrd (
     .clk,
     .reset,
-    .uinstr_rd0,
+    .uinstr_de1,
     .rdens_rd0,
     .rdaddrs_rd0,
     .stall,
     .rddatas_rd1,
-    .uinstr_ex0,
-    .rddatas_ex0
+    .uinstr_rd1
 );
 
 exe exe (
     .clk,
     .reset,
     .stall,
-    .uinstr_ex0,
-    .rddatas_ex0,
-    .uinstr_mm0,
-    .result_mm0
+    .uinstr_rd1,
+    .rddatas_rd1,
+    .uinstr_ex1,
+    .result_ex1
 );
 
 mem mem (
     .clk,
     .reset,
-    .uinstr_mm0,
-    .result_mm0,
-    .uinstr_rb0,
-    .result_rb0
+    .uinstr_ex1,
+    .result_ex1,
+    .uinstr_mm1,
+    .result_mm1
 );
 
 retire retire (
     .clk,
     .reset,
-    .uinstr_rb0,
-    .result_rb0,
+    .uinstr_mm1,
+    .result_mm1,
     .wren_rb0,
     .wraddr_rb0,
     .wrdata_rb0
@@ -121,19 +126,26 @@ gprs gprs (
 scoreboard scoreboard (
     .clk,
     .reset,
-    .fe_valid_de0,
+    .valid_fe1,
     .uinstr_de0,
-    .uinstr_rd0,
-    .uinstr_ex0,
-    .uinstr_mm0,
-    .uinstr_rb0,
+    .uinstr_de1,
+    .uinstr_rd1,
+    .uinstr_ex1,
+    .uinstr_mm1,
     .stall
+);
+
+icache icache (
+    .clk,
+    .reset,
+    .fe_ic_req_nnn,
+    .ic_fe_rsp_nnn
 );
 
 `ifdef ASSERT
     /*
     `define MK_REG_COLLISION_ASRT(STAGELC,SRCN) \
-        `VASSERT(a_collision_ex_``STAGELC``_``SRCN``, uinstr_ex0.valid & uinstr_ex0.dst.optype == OP_REG & uinstr_``STAGELC``0.valid & uinstr_``STAGELC``0.src``SRCN``.optype == OP_REG, uinstr_ex0.dst.opreg != uinstr_``STAGELC``0.src``SRCN``.opreg , $sformatf("Register collision! rd.dst <-> STAGELC.src%-d", SRCN))
+        `VASSERT(a_collision_ex_``STAGELC``_``SRCN``, uinstr_rd1.valid & uinstr_rd1.dst.optype == OP_REG & uinstr_``STAGELC``0.valid & uinstr_``STAGELC``0.src``SRCN``.optype == OP_REG, uinstr_rd1.dst.opreg != uinstr_``STAGELC``0.src``SRCN``.opreg , $sformatf("Register collision! rd.dst <-> STAGELC.src%-d", SRCN))
     `MK_REG_COLLISION_ASRT(mm,1)
     `MK_REG_COLLISION_ASRT(mm,2)
     `MK_REG_COLLISION_ASRT(rb,1)

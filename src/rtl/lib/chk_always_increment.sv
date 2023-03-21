@@ -5,7 +5,7 @@
 `include "vroom_macros.sv"
 
 module chk_always_increment
-    #(parameter type T=logic, logic CONSECUTIVE=0)
+    #(parameter type T=logic, logic CONSECUTIVE=0, int INCR_BY=1)
 (
     input  logic clk,
     input  logic reset,
@@ -20,7 +20,7 @@ logic last_count_valid;
 `DFF(last_count_valid, valid | ~reset & last_count_valid, clk)
 
 if (CONSECUTIVE) begin
-    `VASSERT(a_not_mono_incr, valid & last_count_valid, count == last_count+1, "Count is not monotically incrementing!")
+    `VASSERT(a_not_mono_incr, valid & last_count_valid, count == last_count+INCR_BY, "Count is not monotically incrementing!")
 end else begin
     `VASSERT(a_not_mono_incr, valid & last_count_valid, count > last_count, "Count is not monotically incrementing!")
 end

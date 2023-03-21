@@ -10,13 +10,13 @@ module decode
 (
     input  logic             clk,
     input  logic             reset,
-    input  logic             fe_valid_de0,
-    input  t_rv_instr        instr_de0,
+    input  logic             valid_fe1,
+    input  t_instr_pkt       instr_fe1,
     input  logic             stall,
 
     output t_uinstr          uinstr_de0,
 
-    output t_uinstr          uinstr_rd0
+    output t_uinstr          uinstr_de1
 );
 
 localparam DE0 = 0;
@@ -29,8 +29,8 @@ localparam NUM_DE_STAGES = 1;
 // Nets
 //
 
+t_rv_instr        rv_instr_fe1;
 t_rv_instr_format ifmt_de0;
-t_uinstr          uinstr_de1;
 
 `ifdef SIMULATION
 int instr_cnt_inst;
@@ -41,12 +41,14 @@ int instr_cnt_inst;
 // Logic
 //
 
+always_comb rv_instr_fe1 = instr_fe1.instr;
+
 //
 // DE0
 //
 
-always_comb valid_dex[DE0] = fe_valid_de0 & ~reset;
-always_comb ifmt_de0       = get_instr_format(instr_de0.opcode);
+always_comb valid_dex[DE0] = valid_fe1 & ~reset;
+always_comb ifmt_de0       = get_instr_format(rv_instr_fe1.opcode);
 
 // `SIMID_STRUCT
 // logic[31:0]       imm32;
@@ -60,28 +62,28 @@ always_comb ifmt_de0       = get_instr_format(instr_de0.opcode);
 // logic             valid;
 always_comb begin
     uinstr_de0 = '0;
-    uinstr_de0.opcode = instr_de0.opcode;
+    uinstr_de0.opcode = rv_instr_fe1.opcode;
     uinstr_de0.valid  = valid_dex[DE0];
     uinstr_de0.ifmt   = ifmt_de0;
 
     unique case (ifmt_de0)
         RV_FMT_R: begin
-            uinstr_de0.funct7 = instr_de0.d.R.funct7;
-            uinstr_de0.funct3 = instr_de0.d.R.funct3;
-            uinstr_de0.dst    = '{opreg: instr_de0.d.R.rd,  optype: OP_REG, opsize: SZ_4B};
-            uinstr_de0.src1   = '{opreg: instr_de0.d.R.rs1, optype: OP_REG, opsize: SZ_4B};
-            uinstr_de0.src2   = '{opreg: instr_de0.d.R.rs2, optype: OP_REG, opsize: SZ_4B};
+            uinstr_de0.funct7 = rv_instr_fe1.d.R.funct7;
+            uinstr_de0.funct3 = rv_instr_fe1.d.R.funct3;
+            uinstr_de0.dst    = '{opreg: rv_instr_fe1.d.R.rd,  optype: OP_REG, opsize: SZ_4B};
+            uinstr_de0.src1   = '{opreg: rv_instr_fe1.d.R.rs1, optype: OP_REG, opsize: SZ_4B};
+            uinstr_de0.src2   = '{opreg: rv_instr_fe1.d.R.rs2, optype: OP_REG, opsize: SZ_4B};
             uinstr_de0.imm32  = '0;
-            uinstr_de0.uop    = rv_instr_to_uop(instr_de0);
+            uinstr_de0.uop    = rv_instr_to_uop(rv_instr_fe1);
         end
         RV_FMT_I: begin
             uinstr_de0.funct7 = '0;
-            uinstr_de0.funct3 = instr_de0.d.I.funct3;
-            uinstr_de0.dst    = '{opreg: instr_de0.d.I.rd,  optype: OP_REG, opsize: SZ_4B};
-            uinstr_de0.src1   = '{opreg: instr_de0.d.I.rs1, optype: OP_REG, opsize: SZ_4B};
+            uinstr_de0.funct3 = rv_instr_fe1.d.I.funct3;
+            uinstr_de0.dst    = '{opreg: rv_instr_fe1.d.I.rd,  optype: OP_REG, opsize: SZ_4B};
+            uinstr_de0.src1   = '{opreg: rv_instr_fe1.d.I.rs1, optype: OP_REG, opsize: SZ_4B};
             uinstr_de0.src2   = '{opreg: '0,                optype: OP_IMM, opsize: SZ_4B};
-            uinstr_de0.imm32  = { {(32-12){instr_de0.d.I.imm_11_0[11]}}, instr_de0.d.I.imm_11_0[11:0] };
-            uinstr_de0.uop    = rv_instr_to_uop(instr_de0);
+            uinstr_de0.imm32  = { {(32-12){rv_instr_fe1.d.I.imm_11_0[11]}}, rv_instr_fe1.d.I.imm_11_0[11:0] };
+            uinstr_de0.uop    = rv_instr_to_uop(rv_instr_fe1);
         end
         RV_FMT_S: begin
         end
@@ -96,7 +98,7 @@ always_comb begin
     endcase
 
     `ifdef SIMULATION
-    uinstr_de0.SIMID     = instr_de0.SIMID;
+    uinstr_de0.SIMID     = instr_fe1.SIMID;
     //uinstr_de0.SIMID.did = instr_cnt_inst;
     `endif
 
@@ -108,10 +110,6 @@ end
 //
 
 `DFF_EN(uinstr_de1, uinstr_de0, clk, ~stall)
-
-// RD0 assigns
-
-always_comb uinstr_rd0 = uinstr_de1;
 
 //
 // Debug
@@ -126,7 +124,7 @@ end
 `endif
 
 `ifdef ASSERT
-chk_no_change #(.T(t_uinstr)) cnc ( .clk, .reset, .hold(stall & uinstr_rd0.valid), .thing(uinstr_rd0) );
+chk_no_change #(.T(t_uinstr)) cnc ( .clk, .reset, .hold(stall & uinstr_de1.valid), .thing(uinstr_de1) );
 `endif
 
 endmodule

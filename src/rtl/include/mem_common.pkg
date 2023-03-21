@@ -1,0 +1,38 @@
+`ifndef __MEM_COMMON_PKG
+`define __MEM_COMMON_PKG 
+
+`include "verif.pkg"
+`include "common.pkg"
+
+package mem_common;
+    import common::*;
+
+    localparam MEMID_SZ     = 3;
+
+    typedef logic[MEMID_SZ-1:0] t_memid;
+    typedef logic[PA_SZ-1:0]    t_paddr;
+    typedef union packed {
+        t_byte [CL_SZ_BYTES-1:0]  B;
+        t_hword[CL_SZ_HWORDS-1:0] H;
+        t_word [CL_SZ_WORDS-1:0]  W;
+        logic[CL_SZ-1:0]       flat;
+    } t_cl;
+
+    typedef struct packed {
+        logic   valid;
+        t_memid id;
+        t_paddr addr;
+    } t_mem_req;
+
+    typedef struct packed {
+        logic   valid;
+        t_memid id;
+        t_cl    data;
+        `ifdef SIMULATION
+        t_paddr __addr_inst;
+        `endif
+    } t_mem_rsp;
+
+endpackage
+
+`endif // __MEM_COMMON_PKG 

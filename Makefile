@@ -2,11 +2,11 @@ INC_DIR   := src/rtl/include/
 SRC_DIR   := src/rtl/
 LIB_DIR   := src/rtl/lib/
 
+RTL_F := src/rtl.f
+
 INC_FILES := $(wildcard $(INC_DIR)/*.sv)
 LIB_FILES := $(wildcard $(LIB_DIR)/*.sv)
-SRC_FILES := $(wildcard src/*.sv) \
-             $(wildcard src/rtl/*.sv) \
-             $(wildcard src/rtl/*/*.sv)
+SRC_FILES := $(shell cat $(RTL_F))
 
 IVERILOG  := iverilog -g2012
 VERILATOR := verilator -Wall -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-UNUSEDPARAM --assert
@@ -27,7 +27,7 @@ Vtop: verilated
 
 .PHONY: verilated
 verilated: $(SRC_FILES) $(LIB_FILES) 
-	$(VERILATOR) $(VL_TRACE_FLAGS) --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) $(SRC_FILES) $(VL_DEFINES) -o Vtop 
+	$(VERILATOR) $(VL_TRACE_FLAGS) --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) -f $(RTL_F) $(VL_DEFINES) -o Vtop 
 
 .PHONY: clean
 clean:

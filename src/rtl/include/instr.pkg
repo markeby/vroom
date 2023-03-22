@@ -9,6 +9,7 @@ package instr;
     localparam RV_REG_ADDR_BITS = $clog2(RV_NUM_REGS);
     localparam RV_OPCODE_WIDTH  = 7;
     localparam RV_INSTR_WIDTH   = 32;
+    localparam RV_INSTR_BYTES   = RV_INSTR_WIDTH/8;
 
     import verif::*;
 

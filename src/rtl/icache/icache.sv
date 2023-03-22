@@ -12,8 +12,8 @@ module icache
 (
     input  logic      clk,
     input  logic      reset,
-    input  t_mem_req  fe_ic_req_nnn,
-    output t_mem_rsp  ic_fe_rsp_nnn
+    input  t_mem_req  fb_ic_req_nnn,
+    output t_mem_rsp  ic_fb_rsp_nnn
 );
 
 localparam IROM_SZ     = 128;
@@ -21,22 +21,25 @@ localparam IROM_SZ_LG2 = $clog2(IROM_SZ);
 
 t_word IROM [IROM_SZ-1:0];
 
-t_mem_rsp ic_fe_rsp_pipe_nnn [LATENCY-1:0];
+t_mem_rsp ic_fb_rsp_pipe_nnn [LATENCY-1:0];
 for (genvar i=1; i<LATENCY; i++) begin
-    `DFF(ic_fe_rsp_pipe_nnn[i], ic_fe_rsp_pipe_nnn[i-1], clk)
+    `DFF(ic_fb_rsp_pipe_nnn[i], ic_fb_rsp_pipe_nnn[i-1], clk)
 end
-always_comb ic_fe_rsp_nnn = ic_fe_rsp_pipe_nnn[LATENCY-1];
+always_comb ic_fb_rsp_nnn = ic_fb_rsp_pipe_nnn[LATENCY-1];
 
 //
 // Lookup
 //
 
 always_ff @(posedge clk) begin
-    ic_fe_rsp_pipe_nnn[0].valid <= fe_ic_req_nnn.valid;
-    ic_fe_rsp_pipe_nnn[0].id    <= fe_ic_req_nnn.id;
-    ic_fe_rsp_pipe_nnn[0].data  <= IROM[fe_ic_req_nnn.addr[IROM_SZ_LG2:1]];
+    ic_fb_rsp_pipe_nnn[0].valid <= fb_ic_req_nnn.valid;
+    ic_fb_rsp_pipe_nnn[0].id    <= fb_ic_req_nnn.id;
+    for (int w=0; w<CL_SZ_WORDS; w++) begin
+        int waddr = int'(fb_ic_req_nnn.addr[2 +: IROM_SZ_LG2]) + int'(w);
+        ic_fb_rsp_pipe_nnn[0].data.W[w]  <= IROM[waddr];
+    end
     `ifdef SIMULATION
-    ic_fe_rsp_pipe_nnn[0].__addr_inst <= fe_ic_req_nnn.addr;
+    ic_fb_rsp_pipe_nnn[0].__addr_inst <= fb_ic_req_nnn.addr;
     `endif
 end
 
@@ -52,11 +55,11 @@ initial begin
 
     a=0;
 
-    //define TEST_ALL_DEPS
-    //define TEST_NO_DEPS
-    //define TEST_ARITH
-    //define TEST_LOGICAL
-    //define TEST_SLT
+    `define TEST_ALL_DEPS
+    `define TEST_NO_DEPS
+    `define TEST_ARITH
+    `define TEST_LOGICAL
+    `define TEST_SLT
     `define TEST_BEEF
 
     IROM[a++] = rvXOR(1,1,1);
@@ -155,11 +158,11 @@ end
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (~reset & fe_ic_req_nnn.valid) begin
-        `MEMLOG(("unit:IC type:fe_ic_req_nnn id:%d addr:%h", fe_ic_req_nnn.id, fe_ic_req_nnn.addr))
+    if (~reset & fb_ic_req_nnn.valid) begin
+        `MEMLOG(("unit:IC type:fb_ic_req_nnn id:%d addr:%h", fb_ic_req_nnn.id, fb_ic_req_nnn.addr))
     end
-    if (~reset & ic_fe_rsp_nnn.valid) begin
-        `MEMLOG(("unit:IC type:ic_fe_rsp_nnn id:%d data:%h", ic_fe_rsp_nnn.id, ic_fe_rsp_nnn.data))
+    if (~reset & ic_fb_rsp_nnn.valid) begin
+        `MEMLOG(("unit:IC type:ic_fb_rsp_nnn id:%d data:%h", ic_fb_rsp_nnn.id, ic_fb_rsp_nnn.data))
     end
 end
 `endif

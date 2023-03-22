@@ -1,0 +1,30 @@
+`ifndef __GEN_FUNCS_PKG
+`define __GEN_FUNCS_PKG
+
+package gen_funcs;
+    virtual class gen_funcs #(parameter IWIDTH=8);
+        static function logic[IWIDTH-1:0] find_first (logic[IWIDTH-1:0] inp);
+            logic found = 1'b0;
+            find_first = '0;
+            find_first[0] = inp[0];
+            for (int i=0; i<IWIDTH; i++) begin
+                find_first[i] = inp[i] & ~found;
+                found |= inp[i];
+            end
+        endfunction
+
+        static function logic[$clog2(IWIDTH)-1:0] find_first_enc (logic[IWIDTH-1:0] inp);
+            logic[IWIDTH-1:0] inp_ff = find_first(inp);
+            find_first_enc = oh_encode(inp_ff);
+        endfunction
+
+        static function logic[$clog2(IWIDTH)-1:0] oh_encode (logic[IWIDTH-1:0] inp);
+            oh_encode = '0;
+            for (int i=0; i<IWIDTH; i++) begin
+                oh_encode |= (inp[i] ? i[$clog2(IWIDTH)-1:0] : '0);
+            end
+        endfunction
+    endclass
+endpackage
+
+`endif // __GEN_FUNCS_PKG

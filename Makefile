@@ -27,7 +27,7 @@ Vtop: verilated
 
 .PHONY: verilated
 verilated: $(SRC_FILES) $(LIB_FILES) 
-	$(VERILATOR) $(VL_TRACE_FLAGS) --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) -f $(RTL_F) $(VL_DEFINES) -o Vtop 
+	$(VERILATOR) $(VL_TRACE_FLAGS) --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) -f $(RTL_F) $(VL_DEFINES) -o Vtop --top-module top
 
 .PHONY: clean
 clean:

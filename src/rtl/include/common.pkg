@@ -4,15 +4,49 @@
 `include "verif.pkg"
 
 package common;
-    localparam PA_SZ        = 32;
-    localparam CL_SZ        = 32;
-    localparam CL_SZ_BYTES  = CL_SZ/8;
-    localparam CL_SZ_HWORDS = CL_SZ_BYTES/2;
-    localparam CL_SZ_WORDS  = CL_SZ_HWORDS/2;
+    localparam PA_SZ         = 32;
+    localparam CL_SZ         = 512;
+    localparam CL_SZ_BYTES   = CL_SZ/8;
+    localparam CL_SZ_HWORDS  = CL_SZ_BYTES/2;
+    localparam CL_SZ_WORDS   = CL_SZ_HWORDS/2;
+    localparam CL_ADDR_SZ    = $clog2(CL_SZ_BYTES);
+
+    localparam FE_FB_NUM_SETS     = 4;
+    localparam FE_FB_NUM_SETS_LG2 = $clog2(FE_FB_NUM_SETS);
+    localparam FE_FB_SET_BITS     = FE_FB_NUM_SETS_LG2;
+    localparam FE_FB_SET_LSB      = CL_ADDR_SZ;
+    localparam FE_FB_SET_MSB      = FE_FB_SET_LSB + FE_FB_SET_BITS - 1;
+
+    localparam FE_FB_NUM_ENTS     = 4;
+    localparam FE_FB_NUM_ENTS_LG2 = $clog2(FE_FB_NUM_ENTS);
+
+    typedef logic[PA_SZ-1:0]    t_paddr;
 
     typedef logic[ 7:0] t_byte;
     typedef logic[15:0] t_hword;
     typedef logic[31:0] t_word;
+
+    typedef union packed {
+        t_byte [CL_SZ_BYTES-1:0]  B;
+        t_hword[CL_SZ_HWORDS-1:0] H;
+        t_word [CL_SZ_WORDS-1:0]  W;
+        logic[CL_SZ-1:0]       flat;
+    } t_cl;
+
+    typedef logic[CL_ADDR_SZ-1:0] t_cl_offset;
+
+    function t_paddr get_cl_addr(t_paddr pa);
+        get_cl_addr                 = pa;
+        get_cl_addr[CL_ADDR_SZ-1:0] = '0;
+    endfunction
+
+    function logic[CL_ADDR_SZ-1:0] get_cl_offset(t_paddr pa);
+        get_cl_offset = pa[CL_ADDR_SZ-1:0];;
+    endfunction
+
+    function logic cl_match(t_paddr a, t_paddr b);
+        cl_match = get_cl_addr(a) == get_cl_addr(b);
+    endfunction
 
 endpackage
 

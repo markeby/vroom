@@ -42,8 +42,8 @@ t_rv_reg_data     wrdata_rb0;
 
 // icache
 
-t_mem_req fe_ic_req_nnn;
-t_mem_rsp ic_fe_rsp_nnn;
+t_mem_req fb_ic_req_nnn;
+t_mem_rsp ic_fb_rsp_nnn;
 
 //
 // Nets
@@ -52,8 +52,8 @@ t_mem_rsp ic_fe_rsp_nnn;
 fetch fetch (
     .clk,
     .reset,
-    .fe_ic_req_nnn,
-    .ic_fe_rsp_nnn,
+    .fb_ic_req_nnn,
+    .ic_fb_rsp_nnn,
     .valid_fe1,
     .instr_fe1,
     .stall
@@ -135,11 +135,11 @@ scoreboard scoreboard (
     .stall
 );
 
-icache icache (
+icache #(.LATENCY(5)) icache (
     .clk,
     .reset,
-    .fe_ic_req_nnn,
-    .ic_fe_rsp_nnn
+    .fb_ic_req_nnn,
+    .ic_fb_rsp_nnn
 );
 
 `ifdef ASSERT

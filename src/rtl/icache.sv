@@ -8,6 +8,7 @@
 
 module icache
     import instr::*, asm::*, mem_common::*, common::*;
+    #(parameter int LATENCY=1)
 (
     input  logic      clk,
     input  logic      reset,
@@ -20,17 +21,22 @@ localparam IROM_SZ_LG2 = $clog2(IROM_SZ);
 
 t_word IROM [IROM_SZ-1:0];
 
+t_mem_rsp ic_fe_rsp_pipe_nnn [LATENCY-1:0];
+for (genvar i=1; i<LATENCY; i++) begin
+    `DFF(ic_fe_rsp_pipe_nnn[i], ic_fe_rsp_pipe_nnn[i-1], clk)
+end
+always_comb ic_fe_rsp_nnn = ic_fe_rsp_pipe_nnn[LATENCY-1];
 
 //
 // Lookup
 //
 
 always_ff @(posedge clk) begin
-    ic_fe_rsp_nnn.valid <= fe_ic_req_nnn.valid;
-    ic_fe_rsp_nnn.id    <= fe_ic_req_nnn.id;
-    ic_fe_rsp_nnn.data  <= IROM[fe_ic_req_nnn.addr[IROM_SZ_LG2:1]];
+    ic_fe_rsp_pipe_nnn[0].valid <= fe_ic_req_nnn.valid;
+    ic_fe_rsp_pipe_nnn[0].id    <= fe_ic_req_nnn.id;
+    ic_fe_rsp_pipe_nnn[0].data  <= IROM[fe_ic_req_nnn.addr[IROM_SZ_LG2:1]];
     `ifdef SIMULATION
-    ic_fe_rsp_nnn.__addr_inst <= fe_ic_req_nnn.addr;
+    ic_fe_rsp_pipe_nnn[0].__addr_inst <= fe_ic_req_nnn.addr;
     `endif
 end
 

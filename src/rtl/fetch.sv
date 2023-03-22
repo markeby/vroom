@@ -96,8 +96,8 @@ t_mem_rsp ic_fe_capture_nnn;
 always_comb begin
     fe_ic_req_nnn = '0;
     fe_ic_req_nnn.valid = state == FE_REQ_IC
-                        | state == FE_PDG_IC    & ~stall
-                        | state == FE_PDG_STALL & ~stall;
+                        | state == FE_PDG_IC    & ~stall & ic_fe_rsp_nnn.valid
+                        | state == FE_PDG_STALL & ~stall & ic_fe_rsp_nnn.valid;
     fe_ic_req_nnn.addr  = PC;
     fe_ic_req_nnn.id    = 0;
 end

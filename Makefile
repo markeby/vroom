@@ -5,7 +5,8 @@ LIB_DIR   := src/rtl/lib/
 INC_FILES := $(wildcard $(INC_DIR)/*.sv)
 LIB_FILES := $(wildcard $(LIB_DIR)/*.sv)
 SRC_FILES := $(wildcard src/*.sv) \
-             $(wildcard src/rtl/*.sv) 
+             $(wildcard src/rtl/*.sv) \
+             $(wildcard src/rtl/*/*.sv)
 
 IVERILOG  := iverilog -g2012
 VERILATOR := verilator -Wall -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-UNUSEDPARAM --assert

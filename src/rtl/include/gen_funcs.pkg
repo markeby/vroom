@@ -1,6 +1,7 @@
 `ifndef __GEN_FUNCS_PKG
 `define __GEN_FUNCS_PKG
 
+/* verilator lint_off DECLFILENAME */
 package gen_funcs;
     virtual class gen_funcs #(parameter IWIDTH=8);
         static function logic[IWIDTH-1:0] find_first (logic[IWIDTH-1:0] inp);
@@ -25,6 +26,14 @@ package gen_funcs;
             end
         endfunction
     endclass
+
+    virtual class sext_funcs #(parameter IWIDTH=8, OWIDTH=32);
+        static function logic[OWIDTH-1:0] sext (logic[IWIDTH-1:0] inp);
+            sext[OWIDTH-1:0] = {OWIDTH{inp[IWIDTH-1]}};
+            sext[IWIDTH-1:0] = inp[IWIDTH-1:0];
+        endfunction
+    endclass
 endpackage
+/* verilator lint_on DECLFILENAME */
 
 `endif // __GEN_FUNCS_PKG

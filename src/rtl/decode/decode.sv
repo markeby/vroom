@@ -4,9 +4,10 @@
 `include "instr.pkg"
 `include "instr_decode.pkg"
 `include "vroom_macros.sv"
+`include "gen_funcs.pkg"
 
 module decode
-    import instr::*, instr_decode::*;
+    import instr::*, instr_decode::*, gen_funcs::*;
 (
     input  logic             clk,
     input  logic             reset,
@@ -82,8 +83,8 @@ always_comb begin
             uinstr_de0.funct3 = rv_instr_fe1.d.I.funct3;
             uinstr_de0.dst    = '{opreg: rv_instr_fe1.d.I.rd,  optype: OP_REG, opsize: SZ_4B};
             uinstr_de0.src1   = '{opreg: rv_instr_fe1.d.I.rs1, optype: OP_REG, opsize: SZ_4B};
-            uinstr_de0.src2   = '{opreg: '0,                optype: OP_IMM, opsize: SZ_4B};
-            uinstr_de0.imm32  = { {(32-12){rv_instr_fe1.d.I.imm_11_0[11]}}, rv_instr_fe1.d.I.imm_11_0[11:0] };
+            uinstr_de0.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_4B};
+            uinstr_de0.imm32  = sext_funcs#(.IWIDTH(12), .OWIDTH(32))::sext(rv_instr_fe1.d.I.imm_11_0);
             uinstr_de0.uop    = rv_instr_to_uop(rv_instr_fe1);
         end
         RV_FMT_S: begin
@@ -91,6 +92,17 @@ always_comb begin
         RV_FMT_J: begin
         end
         RV_FMT_B: begin
+            uinstr_de0.funct7 = '0;
+            uinstr_de0.funct3 = rv_instr_fe1.d.B.funct3;
+            uinstr_de0.dst    = '{opreg: '0, optype: OP_INVD, opsize: SZ_4B};
+            uinstr_de0.src1   = '{opreg: rv_instr_fe1.d.B.rs1, optype: OP_REG, opsize: SZ_4B};
+            uinstr_de0.src2   = '{opreg: rv_instr_fe1.d.B.rs2, optype: OP_REG, opsize: SZ_4B};
+            uinstr_de0.imm32  = sext_funcs#(.IWIDTH(13), .OWIDTH(32))::sext({rv_instr_fe1.d.B.imm_12,
+                                                                             rv_instr_fe1.d.B.imm_11,
+                                                                             rv_instr_fe1.d.B.imm_10_5,
+                                                                             rv_instr_fe1.d.B.imm_4_1,
+                                                                             1'b0});
+            uinstr_de0.uop    = rv_instr_to_uop(rv_instr_fe1);
         end
         RV_FMT_U: begin
         end

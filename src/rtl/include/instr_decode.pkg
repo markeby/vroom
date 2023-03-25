@@ -21,7 +21,8 @@ package instr_decode;
         U_SRL,
         U_SRA,
         U_OR,
-        U_AND 
+        U_AND,
+        U_BR
     } t_uop;
 
     typedef struct packed {
@@ -108,6 +109,10 @@ package instr_decode;
             RV_FMT_S: begin
             end
             RV_FMT_B: begin
+                unique casez(instr.opcode)
+                    RV_OP_BR: rv_instr_to_uop = U_BR;
+                    default: rv_instr_to_uop = U_INVALID;
+                endcase
             end
         endcase
     endfunction

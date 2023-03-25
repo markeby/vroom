@@ -13,6 +13,7 @@ VERILATOR := verilator -Wall -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-UNUSEDP
 VL_TRACE_FLAGS := --trace-fst --trace-structs --trace-params 
 
 VL_DEFINES := +define+SIMULATION=1 +define+ASSERT=1 #+define+DEBUGON=1
+VL_WAIVER_OUT := --waiver-output new_waivers.txt 
 
 .PHONY: run
 run: Vtop
@@ -27,7 +28,7 @@ Vtop: verilated
 
 .PHONY: verilated
 verilated: $(SRC_FILES) $(LIB_FILES) 
-	$(VERILATOR) $(VL_TRACE_FLAGS) --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) -f $(RTL_F) $(VL_DEFINES) -o Vtop --top-module top
+	$(VERILATOR) $(VL_TRACE_FLAGS) --exe tb_top.cpp --cc -y $(LIB_DIR) -I$(INC_DIR) -f $(RTL_F) $(VL_DEFINES) -o Vtop --top-module top $(VL_WAIVER_OUT)
 
 .PHONY: clean
 clean:

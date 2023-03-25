@@ -22,9 +22,9 @@
     $display("@[%-d] %-d tag: %s", $time(), top.cclk_count, $sformatf msg);
 
 `define RETLOG(msg)   `PMSG(RET,  msg)
-`define PIPELOG(msg)  `PMSG(PIPE, msg)
 `define INFO(msg)     `PMSG(INFO, msg)
 `define MEMLOG(msg)   `PMSG(MEM,  msg)
+`define GENLOG(pfx, msg)   `PMSG(pfx,  msg)
 
 `ifdef DEBUGON
     `define DEBUG(msg) \

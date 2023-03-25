@@ -229,6 +229,21 @@ end
 `endif
 */
 
+`ifdef SIMULATION
+always @(posedge clk) begin
+    if (~reset & fe_fb_req_fb0.valid) begin
+        `GENLOG(FE, ("type:fe_fb_req id:%d addr:%h", fe_fb_req_fb0.id, fe_fb_req_fb0.addr))
+    end
+    if (~reset & pf_fb_req_rq_pf0) begin
+        `GENLOG(FE, ("type:pf_fb_req addr:%h", pf_fb_req_pkt_pf0.addr))
+    end
+    if (~reset & fb_fe_rsp_nnn.valid) begin
+        `GENLOG(FE, ("type:fb_fe_rsp id:%d data:%0h", fb_fe_rsp_nnn.id, fb_fe_rsp_nnn.instr))
+    end
+end
+`endif
+
+
 `ifdef ASSERT
     /*
 logic valid_fe2_inst;

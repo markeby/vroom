@@ -4,6 +4,7 @@ src/rtl/core.sv
 src/rtl/decode/decode.sv
 
 src/rtl/exe/exe.sv
+src/rtl/exe/ialu.sv
 
 src/rtl/fetch/fetch.sv
 src/rtl/fetch/fe_ctl.sv

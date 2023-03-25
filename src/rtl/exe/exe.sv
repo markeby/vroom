@@ -1,5 +1,5 @@
-`ifndef __EX_SV
-`define __EX_SV
+`ifndef __EXE_SV
+`define __EXE_SV
 
 `include "instr.pkg"
 `include "vroom_macros.sv"
@@ -31,6 +31,9 @@ t_rv_reg_data src2val_ex0;
 
 t_uinstr uinstr_ql_ex0;
 
+logic         ialu_resvld_ex0;
+t_rv_reg_data ialu_result_ex0;
+
 `MKPIPE_INIT(t_uinstr,       uinstr_exx, uinstr_ql_ex0, EX0, NUM_EX_STAGES)
 `MKPIPE     (t_rv_reg_data,  result_exx,                EX0, NUM_EX_STAGES)
 
@@ -55,28 +58,30 @@ always_comb src1val_ex0 = rddatas_rd1[0];
 always_comb src2val_ex0 = (uinstr_rd1.src2.optype == OP_REG ? rddatas_rd1[1]   : '0)
                         | (uinstr_rd1.src2.optype == OP_IMM ? uinstr_rd1.imm32 : '0);
 
+// Execution units
+
+ialu ialu (
+    .clk,
+    .reset,
+
+    .uinstr_ex0  ( uinstr_rd1      ),
+    .src1val_ex0,
+    .src2val_ex0,
+
+    .resvld_ex0  ( ialu_resvld_ex0 ),
+    .result_ex0  ( ialu_result_ex0 )
+);
+
+// Combine outputs
+
 always_comb begin
-    result_exx[EX0] = '0;
-    unique case (uinstr_rd1.uop)
-        U_ADD:     result_exx[EX0] = src1val_ex0 + src2val_ex0;
-        U_SUB:     result_exx[EX0] = src1val_ex0 - src2val_ex0;
-        U_AND:     result_exx[EX0] = src1val_ex0 & src2val_ex0;
-        U_XOR:     result_exx[EX0] = src1val_ex0 ^ src2val_ex0;
-        U_OR:      result_exx[EX0] = src1val_ex0 | src2val_ex0;
-        U_SLL:     result_exx[EX0] = src1val_ex0 << src2val_ex0[4:0];
-        U_SRL:     result_exx[EX0] = src1val_ex0 >> src2val_ex0[4:0];
-        U_SRA:     result_exx[EX0] = int'(src1val_ex0) >>> src2val_ex0[4:0]; 
-        U_SLT:     result_exx[EX0] = int'(src1val_ex0) < int'(src2val_ex0) ? 32'd1 : 32'd0;
-        U_SLTU:    result_exx[EX0] = src1val_ex0 < src2val_ex0 ? 32'd1 : 32'd0;
-        default:   result_exx[EX0] = 32'hDEADBEEF;
-    endcase
+    result_exx[EX0]  = '0;
+    result_exx[EX0] |= ialu_resvld_ex0 ? ialu_result_ex0 : '0;
 end
 
 //
-// EX1/MM0
+// EX1
 //
-
-// MM0 assign
 
 always_comb uinstr_ex1 = uinstr_exx[EX1];
 always_comb result_ex1 = result_exx[EX1];
@@ -101,5 +106,5 @@ end
 
 endmodule
 
-`endif // __EX_SV
+`endif // __EXE_SV
 

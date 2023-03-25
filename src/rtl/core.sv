@@ -143,6 +143,12 @@ icache #(.LATENCY(5)) icache (
 );
 
 `ifdef ASSERT
+
+chk_instr_progress chk_instr_progress_fe (.clk, .reset, .valid_stgA_nn0(valid_fe1       ), .simid_stgA_nn0(instr_fe1.SIMID ), .valid_stgB_nn0(uinstr_de1.valid), .simid_stgB_nn0(uinstr_de1.SIMID));
+chk_instr_progress chk_instr_progress_de (.clk, .reset, .valid_stgA_nn0(uinstr_de1.valid), .simid_stgA_nn0(uinstr_de1.SIMID), .valid_stgB_nn0(uinstr_rd1.valid), .simid_stgB_nn0(uinstr_rd1.SIMID));
+chk_instr_progress chk_instr_progress_rd (.clk, .reset, .valid_stgA_nn0(uinstr_rd1.valid), .simid_stgA_nn0(uinstr_rd1.SIMID), .valid_stgB_nn0(uinstr_ex1.valid), .simid_stgB_nn0(uinstr_ex1.SIMID));
+chk_instr_progress chk_instr_progress_ex (.clk, .reset, .valid_stgA_nn0(uinstr_ex1.valid), .simid_stgA_nn0(uinstr_ex1.SIMID), .valid_stgB_nn0(uinstr_mm1.valid), .simid_stgB_nn0(uinstr_mm1.SIMID));
+
     /*
     `define MK_REG_COLLISION_ASRT(STAGELC,SRCN) \
         `VASSERT(a_collision_ex_``STAGELC``_``SRCN``, uinstr_rd1.valid & uinstr_rd1.dst.optype == OP_REG & uinstr_``STAGELC``0.valid & uinstr_``STAGELC``0.src``SRCN``.optype == OP_REG, uinstr_rd1.dst.opreg != uinstr_``STAGELC``0.src``SRCN``.opreg , $sformatf("Register collision! rd.dst <-> STAGELC.src%-d", SRCN))

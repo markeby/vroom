@@ -36,4 +36,7 @@
 `define VASSERT(name, antecedent, consequent, msg) \
     name: assert property (@(posedge clk) disable iff(reset) (antecedent) |-> (consequent)) else $error(msg);
 
+`define CHK_ONEHOT(name, valid, bits) \
+    name: assert property (@(posedge clk) disable iff(reset) (valid) |-> $onehot(bits)) else $error($sformatf("ONEHOT check failed! %b",bits));
+
 `endif // __VROOM_MACROS_SV 

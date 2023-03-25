@@ -2,10 +2,12 @@
 `define __EXE_SV
 
 `include "instr.pkg"
+`include "instr_decode.pkg"
+`include "common.pkg"
 `include "vroom_macros.sv"
 
 module exe
-    import instr::*, instr_decode::*;
+    import instr::*, instr_decode::*, common::*;
 (
     input  logic         clk,
     input  logic         reset,
@@ -33,6 +35,10 @@ t_uinstr uinstr_ql_ex0;
 
 logic         ialu_resvld_ex0;
 t_rv_reg_data ialu_result_ex0;
+
+logic         ibr_resvld_ex0;
+t_paddr       ibr_tgt_ex0;
+logic         ibr_mispred_ex0;
 
 `MKPIPE_INIT(t_uinstr,       uinstr_exx, uinstr_ql_ex0, EX0, NUM_EX_STAGES)
 `MKPIPE     (t_rv_reg_data,  result_exx,                EX0, NUM_EX_STAGES)
@@ -72,12 +78,32 @@ ialu ialu (
     .result_ex0  ( ialu_result_ex0 )
 );
 
+ibr ibr (
+    .clk,
+    .reset,
+
+    .uinstr_ex0  ( uinstr_rd1      ),
+    .src1val_ex0,
+    .src2val_ex0,
+
+    .resvld_ex0  ( ibr_resvld_ex0  ),
+    .br_tgt_ex0  ( ibr_tgt_ex0     ),
+    .mispred_ex0 ( ibr_mispred_ex0 )
+);
+
 // Combine outputs
 
 always_comb begin
     result_exx[EX0]  = '0;
     result_exx[EX0] |= ialu_resvld_ex0 ? ialu_result_ex0 : '0;
 end
+
+`ifdef ASSERT
+logic LOL;
+always_comb LOL = uinstr_rd1.uop == U_INVALID;
+
+`CHK_ONEHOT(exe_rslt_valid, uinstr_rd1.valid, {LOL,ialu_resvld_ex0,ibr_resvld_ex0})
+`endif
 
 //
 // EX1
@@ -98,11 +124,9 @@ always @(posedge clk) begin
 end
 `endif
 
-/*
 `ifdef ASSERT
-`VASSERT(a_illegal_format, uinstr_de1.valid, uinstr_de1.ifmt inside {RV_FMT_I,RV_FMT_R}, $sformatf("Unsupported instr fmt: %s", uinstr_de1.ifmt.name()))
+`VASSERT(a_br_mispred, uinstr_rd1.valid & ibr_resvld_ex0, ~ibr_mispred_ex0, "Branch mispredictions not yet supported.")
 `endif
-    */
 
 endmodule
 

@@ -40,6 +40,21 @@ package instr;
         ALU_AND  = 3'b111
     } t_rv_alu_op_funct3;
 
+    typedef enum logic[2:0] {
+        RV_BR_BEQ  = 3'b000,
+        RV_BR_BNE  = 3'b001,
+        RV_BR_BLT  = 3'b100,
+        RV_BR_BGE  = 3'b101,
+        RV_BR_BLTU = 3'b110,
+        RV_BR_BGEU = 3'b111
+    } t_rv_br_op_funct3;
+
+    typedef union packed {
+        t_rv_alu_op_funct3 alu;
+        t_rv_br_op_funct3  br;
+        logic[2:0]         flat;
+    } t_rv_funct3;
+
     typedef logic[RV_REG_ADDR_BITS-1:0] t_rv_reg_addr;
     typedef logic[RV_REG_BITS-1:0]      t_rv_reg_data;
 
@@ -58,22 +73,22 @@ package instr;
         logic[6:0]     funct7;
         t_rv_reg_addr  rs2;
         t_rv_reg_addr  rs1;
-        logic[2:0]     funct3;
+        t_rv_funct3    funct3;
         t_rv_reg_addr  rd;
     } t_instr_R_descr;
 
     typedef struct packed {
         logic[11:0] imm_11_0;
-        t_rv_reg_addr    rs1;
-        logic[2:0]  funct3;
-        t_rv_reg_addr    rd;
+        t_rv_reg_addr  rs1;
+        t_rv_funct3    funct3;
+        t_rv_reg_addr  rd;
     } t_instr_I_descr;
 
     typedef struct packed {
         logic[11:5] imm_11_5;
         t_rv_reg_addr    rs2;
         t_rv_reg_addr    rs1;
-        logic[2:0]  funct3;
+        t_rv_funct3      funct3;
         logic[4:0]  imm_4_0;
     } t_instr_S_descr;
 
@@ -82,7 +97,7 @@ package instr;
         logic[10:5]  imm_10_5;
         t_rv_reg_addr     rs2;
         t_rv_reg_addr     rs1;
-        logic[2:0]   funct3;
+        t_rv_funct3      funct3;
         logic[4:1]   imm_4_1;
         logic[11:11] imm_11;
     } t_instr_B_descr;

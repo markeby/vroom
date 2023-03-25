@@ -112,9 +112,10 @@ always_comb begin
                         | state == FE_PDG_STALL;
     instr_fe1       = t_instr_pkt'('0);
     instr_fe1.instr = ic_rsp.instr;
+    instr_fe1.pc    = ic_rsp.pc;
     `ifdef SIMULATION
     instr_fe1.SIMID.fid = instr_cnt_inst;
-    instr_fe1.SIMID.pc  = ic_rsp.__addr_inst;
+    instr_fe1.SIMID.pc  = ic_rsp.pc;
     `endif //SIMULATION
 end
 

@@ -22,9 +22,7 @@ package mem_common;
         logic      valid;
         t_memid    id;
         t_rv_instr instr;
-        `ifdef SIMULATION
-        t_paddr    __addr_inst;
-        `endif
+        t_paddr    pc;
     } t_fb_fe_rsp;
 
     typedef struct packed {

@@ -65,6 +65,7 @@ always_comb begin
     uinstr_de0.opcode = rv_instr_fe1.opcode;
     uinstr_de0.valid  = valid_dex[DE0];
     uinstr_de0.ifmt   = ifmt_de0;
+    uinstr_de0.pc     = instr_fe1.pc;
 
     unique case (ifmt_de0)
         RV_FMT_R: begin

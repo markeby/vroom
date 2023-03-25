@@ -160,9 +160,7 @@ always_comb begin
         fb_fe_rsp_nxt_nnn.valid = 1'b1;
         fb_fe_rsp_nxt_nnn.instr = instr_from_cl(ent_sel_fb0.data, get_cl_offset(fe_fb_req_fb0.addr));
         fb_fe_rsp_nxt_nnn.id    = fe_fb_req_fb0.id;
-        `ifdef SIMULATION
-        fb_fe_rsp_nxt_nnn.__addr_inst = fe_fb_req_fb0.addr;
-        `endif
+        fb_fe_rsp_nxt_nnn.pc    = fe_fb_req_fb0.addr;
     end else begin
         for (int i=0; i<FE_FB_NUM_ENTS; i++) begin
             fb_fe_rsp_nxt_nnn    |= e_fe_rsp_gn_nnn[i] ? e_fe_rsp_pkt_nnn[i] : '0;

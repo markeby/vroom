@@ -99,9 +99,7 @@ always_comb begin
     e_fe_rsp_pkt_nnn       = '0;
     e_fe_rsp_pkt_nnn.valid = state == REQ_FE;
     e_fe_rsp_pkt_nnn.instr = e_active_nnn.instr;
-    `ifdef SIMULATION
-    e_fe_rsp_pkt_nnn.__addr_inst = e_static_nnn.req.addr;
-    `endif
+    e_fe_rsp_pkt_nnn.pc    = e_static_nnn.req.addr;
 end
 
 

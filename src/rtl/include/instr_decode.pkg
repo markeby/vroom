@@ -1,9 +1,13 @@
 `ifndef __INSTR_DECODE_PKG
 `define __INSTR_DECODE_PKG 
 
-package instr_decode;
+`include "instr.pkg"
+`include "verif.pkg"
+`include "common.pkg"
 
+package instr_decode;
     import instr::*;
+    import common::*;
     import verif::*;
 
     typedef enum logic[4:0] {
@@ -37,6 +41,7 @@ package instr_decode;
         t_rv_opcode       opcode;
         t_rv_instr_format ifmt;
         t_uop             uop;
+        t_paddr           pc;
         logic             valid;
     } t_uinstr;
 

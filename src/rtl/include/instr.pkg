@@ -2,6 +2,7 @@
 `define __INSTR_PKG 
 
 `include "verif.pkg"
+`include "common.pkg"
 
 package instr;
     localparam RV_REG_BITS      = 32;
@@ -12,6 +13,7 @@ package instr;
     localparam RV_INSTR_BYTES   = RV_INSTR_WIDTH/8;
 
     import verif::*;
+    import common::*;
 
     typedef enum logic[RV_OPCODE_WIDTH-1:0] {
         RV_OP_LUI    = 7'b0110111,
@@ -116,6 +118,7 @@ package instr;
 
     typedef struct packed {
         `SIMID_STRUCT
+        t_paddr    pc;
         t_rv_instr instr;
     } t_instr_pkt;
 

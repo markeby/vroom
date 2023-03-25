@@ -54,7 +54,7 @@ set sigs      [list fe_fb_req_fb0.valid fe_fb_req_fb0.addr fe_req_hit_fb0 fe_req
 set fe_sigs   [prefixAll "${FE_BUF}." $sigs]
 addSignalGroup "FE_BUF_REQ" $fe_sigs
 
-set sigs      [list fb_fe_rsp_nnn.valid fb_fe_rsp_nnn.__addr_inst f__fb_fe_rsp_nnn_data]
+set sigs      [list fb_fe_rsp_nnn.valid fb_fe_rsp_nnn.pc f__fb_fe_rsp_nnn_data]
 set fe_sigs   [prefixAll "${FE_BUF}." $sigs]
 addSignalGroup "FE_BUF_RSP" $fe_sigs
 

@@ -60,9 +60,9 @@ initial begin
     //define TEST_ARITH
     //define TEST_LOGICAL
     //define TEST_SLT
-    `define TEST_BEEF
     `define TEST_BR_NT
-    //define TEST_BR_T
+    `define TEST_BR_T
+    //define TEST_BEEF
 
     IROM[a++] = rvXOR(1,1,1);
     IROM[a++] = rvXOR(2,2,2);

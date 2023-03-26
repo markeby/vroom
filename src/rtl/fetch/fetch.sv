@@ -64,6 +64,8 @@ fe_buf fe_buf (
 //
 
 `ifdef ASSERT
+`VASSERT(a_corrupt_instr, valid_fe1, instr_fe1.instr == t_rv_instr'(core.icache.IROM[instr_fe1.pc >> 2]), $sformatf("Instruction mismatch simid:%s exp(%h) != act(%h)", format_simid(instr_fe1.SIMID), core.icache.IROM[instr_fe1.pc >> 2], instr_fe1.instr))
+
     /*
 logic valid_fe2_inst;
 

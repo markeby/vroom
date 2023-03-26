@@ -96,8 +96,8 @@ always_comb fe_req_mis_fb0 = fe_fb_req_fb0.valid & ~fe_req_hit_fb0;
 always_ff @(posedge clk) begin
     t_fe_fb_static rsp_ent = e_static_nnn[ic_fb_rsp_nnn.id[FE_FB_NUM_ENTS_LG2-1:0]];
     automatic t_setid setid_fb1 = get_setid(rsp_ent.req.addr);
-    if (ic_fb_rsp_nnn.valid) begin
-        FBUF[setid_fb1].data    <= ic_fb_rsp_nnn.data;
+    if (ic_fb_rsp_nnn.valid & ~rsp_ent.pf) begin
+        FBUF[setid_fb1].data    <= ic_fb_rsp_nnn.data.flat;
         FBUF[setid_fb1].valid   <= 1'b1;
         FBUF[setid_fb1].cl_addr <= get_cl_addr(rsp_ent.req.addr);
     end

@@ -16,6 +16,9 @@ module fe_ctl
     output t_fe_fb_req fe_fb_req_nnn,
     input  t_fb_fe_rsp fb_fe_rsp_nnn,
                        
+    input  t_paddr     br_tgt_rb1,
+    input  logic       br_mispred_rb1,
+
     output logic       valid_fe1,
     output t_instr_pkt instr_fe1,
     input  logic       stall

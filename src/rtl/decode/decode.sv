@@ -14,6 +14,7 @@ module decode
     input  logic             valid_fe1,
     input  t_instr_pkt       instr_fe1,
     input  logic             stall,
+    input  logic             br_mispred_rb1,
 
     output t_uinstr          uinstr_de0,
 

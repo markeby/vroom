@@ -34,15 +34,17 @@ t_rv_reg_data rddatas_rd1 [1:0];
 t_uinstr      uinstr_ex1;
 t_rv_reg_data result_ex1;
 
-t_paddr       br_tgt_ex0;
-logic         br_mispred_ex0;
+t_paddr       br_tgt_rb1;
+logic         br_mispred_rb1;
 
 t_uinstr      uinstr_mm1;
 t_rv_reg_data result_mm1;
 
-logic             wren_rb0;
-t_rv_reg_addr     wraddr_rb0;
-t_rv_reg_data     wrdata_rb0;
+t_uinstr      uinstr_rb1;
+
+logic             wren_rb1;
+t_rv_reg_addr     wraddr_rb1;
+t_rv_reg_data     wrdata_rb1;
 
 // icache
 
@@ -60,12 +62,15 @@ fetch fetch (
     .ic_fb_rsp_nnn,
     .valid_fe1,
     .instr_fe1,
+    .br_tgt_rb1,
+    .br_mispred_rb1,
     .stall
 );
 
 decode decode (
     .clk,
     .reset,
+    .br_mispred_rb1,
 
     .valid_fe1,
     .stall,
@@ -77,6 +82,7 @@ decode decode (
 regrd regrd (
     .clk,
     .reset,
+    .br_mispred_rb1,
     .uinstr_de1,
     .rdens_rd0,
     .rdaddrs_rd0,
@@ -89,10 +95,9 @@ exe exe (
     .clk,
     .reset,
     .stall,
+    .br_mispred_rb1,
     .uinstr_rd1,
     .rddatas_rd1,
-    .br_tgt_ex0,
-    .br_mispred_ex0,
     .uinstr_ex1,
     .result_ex1
 );
@@ -100,6 +105,7 @@ exe exe (
 mem mem (
     .clk,
     .reset,
+    .br_mispred_rb1,
     .uinstr_ex1,
     .result_ex1,
     .uinstr_mm1,
@@ -111,9 +117,12 @@ retire retire (
     .reset,
     .uinstr_mm1,
     .result_mm1,
-    .wren_rb0,
-    .wraddr_rb0,
-    .wrdata_rb0
+    .uinstr_rb1,
+    .wren_rb1,
+    .wraddr_rb1,
+    .wrdata_rb1,
+    .br_mispred_rb1,
+    .br_tgt_rb1
 );
 
 gprs gprs (
@@ -124,9 +133,9 @@ gprs gprs (
     .rdaddr ( rdaddrs_rd0 ),
     .rddata ( rddatas_rd1 ),
 
-    .wren   ( '{wren_rb0  } ),
-    .wraddr ( '{wraddr_rb0} ),
-    .wrdata ( '{wrdata_rb0} )
+    .wren   ( '{wren_rb1  } ),
+    .wraddr ( '{wraddr_rb1} ),
+    .wrdata ( '{wrdata_rb1} )
 );
 
 scoreboard scoreboard (
@@ -138,6 +147,7 @@ scoreboard scoreboard (
     .uinstr_rd1,
     .uinstr_ex1,
     .uinstr_mm1,
+    .uinstr_rb1,
     .stall
 );
 
@@ -154,6 +164,7 @@ chk_instr_progress #(.A("FE"), .B("DE")) chk_instr_progress_fe (.clk, .reset, .v
 chk_instr_progress #(.A("DE"), .B("RD")) chk_instr_progress_de (.clk, .reset, .valid_stgA_nn0(uinstr_de1.valid), .simid_stgA_nn0(uinstr_de1.SIMID), .valid_stgB_nn0(uinstr_rd1.valid), .simid_stgB_nn0(uinstr_rd1.SIMID));
 chk_instr_progress #(.A("RD"), .B("EX")) chk_instr_progress_rd (.clk, .reset, .valid_stgA_nn0(uinstr_rd1.valid), .simid_stgA_nn0(uinstr_rd1.SIMID), .valid_stgB_nn0(uinstr_ex1.valid), .simid_stgB_nn0(uinstr_ex1.SIMID));
 chk_instr_progress #(.A("EX"), .B("MM")) chk_instr_progress_ex (.clk, .reset, .valid_stgA_nn0(uinstr_ex1.valid), .simid_stgA_nn0(uinstr_ex1.SIMID), .valid_stgB_nn0(uinstr_mm1.valid), .simid_stgB_nn0(uinstr_mm1.SIMID));
+chk_instr_progress #(.A("MM"), .B("RB")) chk_instr_progress_mm (.clk, .reset, .valid_stgA_nn0(uinstr_mm1.valid), .simid_stgA_nn0(uinstr_mm1.SIMID), .valid_stgB_nn0(uinstr_rb1.valid), .simid_stgB_nn0(uinstr_rb1.SIMID));
 
 `endif
 

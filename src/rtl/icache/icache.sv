@@ -61,7 +61,7 @@ initial begin
     `define TEST_LOGICAL
     `define TEST_SLT
     `define TEST_BR_NT
-    //define TEST_BR_T
+    `define TEST_BR_T
     `define TEST_BEEF
 
     IROM[a++] = rvXOR(1,1,1);

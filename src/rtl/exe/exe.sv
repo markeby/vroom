@@ -16,8 +16,7 @@ module exe
     input  t_uinstr      uinstr_rd1,
     input  t_rv_reg_data rddatas_rd1 [1:0],
 
-    output t_paddr       br_tgt_ex0,
-    output logic         br_mispred_ex0,
+    input  logic         br_mispred_rb1,
 
     output t_uinstr      uinstr_ex1,
     output t_rv_reg_data result_ex1
@@ -52,6 +51,7 @@ logic         ibr_mispred_ex0;
 
 always_comb begin
     uinstr_ql_ex0 = uinstr_rd1;
+    uinstr_ql_ex0.mispred = ibr_mispred_ex0;
     `ifdef SIMULATION
     uinstr_ql_ex0.SIMID.src1_val   = src1val_ex0;
     uinstr_ql_ex0.SIMID.src2_val   = src2val_ex0;
@@ -99,10 +99,8 @@ ibr ibr (
 always_comb begin
     result_exx[EX0]  = '0;
     result_exx[EX0] |= ialu_resvld_ex0 ? ialu_result_ex0 : '0;
+    result_exx[EX0] |= ibr_resvld_ex0  ? ibr_tgt_ex0     : '0;
 end
-
-always_comb br_tgt_ex0     = ibr_tgt_ex0;
-always_comb br_mispred_ex0 = ibr_mispred_ex0;
 
 `ifdef ASSERT
 logic LOL;
@@ -131,7 +129,7 @@ end
 `endif
 
 `ifdef ASSERT
-`VASSERT(a_br_mispred, uinstr_rd1.valid & ibr_resvld_ex0, ~ibr_mispred_ex0, "Branch mispredictions not yet supported.")
+//VASSERT(a_br_mispred, uinstr_rd1.valid & ibr_resvld_ex0, ~ibr_mispred_ex0, "Branch mispredictions not yet supported.")
 `endif
 
 endmodule

@@ -3,18 +3,23 @@
 
 `include "instr.pkg"
 `include "vroom_macros.sv"
+`include "common.pkg"
 
 module retire
-    import instr::*, instr_decode::*, verif::*;
+    import instr::*, instr_decode::*, verif::*, common::*;
 (
     input  logic             clk,
     input  logic             reset,
     input  t_uinstr          uinstr_mm1,
     input  t_rv_reg_data     result_mm1,
 
-    output logic             wren_rb0,
-    output t_rv_reg_addr     wraddr_rb0,
-    output t_rv_reg_data     wrdata_rb0
+    output t_uinstr          uinstr_rb1,
+    output logic             wren_rb1,
+    output t_rv_reg_addr     wraddr_rb1,
+    output t_rv_reg_data     wrdata_rb1,
+
+    output logic             br_mispred_rb1,
+    output t_paddr           br_tgt_rb1
 );
 
 localparam RB0 = 0;
@@ -22,6 +27,7 @@ localparam RB1 = 1;
 localparam NUM_RB_STAGES = 1;
 
 `MKPIPE_INIT(t_uinstr,       uinstr_rbx, uinstr_mm1, RB0, NUM_RB_STAGES)
+`MKPIPE_INIT(t_rv_reg_data,  result_rbx, result_mm1, RB0, NUM_RB_STAGES)
 
 //
 // Nets
@@ -35,9 +41,14 @@ localparam NUM_RB_STAGES = 1;
 // RB0
 //
 
-always_comb wren_rb0   = uinstr_mm1.dst.optype == OP_REG & uinstr_mm1.valid;
-always_comb wraddr_rb0 = uinstr_mm1.dst.opreg;
-always_comb wrdata_rb0 = result_mm1;
+always_comb wren_rb1   = uinstr_rbx[RB1].dst.optype == OP_REG & uinstr_rbx[RB1].valid;
+always_comb wraddr_rb1 = uinstr_rbx[RB1].dst.opreg;
+always_comb wrdata_rb1 = result_rbx[RB1];
+always_comb uinstr_rb1 = uinstr_rbx[RB1];
+
+always_comb br_mispred_rb1 = uinstr_rbx[RB1].valid
+                           & uinstr_rbx[RB1].mispred;
+always_comb br_tgt_rb1     = result_rbx[RB1];
 
 //
 // RB1
@@ -60,7 +71,7 @@ always @(posedge clk) begin
         print_retire_info(uinstr_mm1);
     end
 
-    if (wren_rb0 & wraddr_rb0 == 0 & wrdata_rb0 == 32'h666) begin
+    if (wren_rb1 & wraddr_rb1 == 0 & wrdata_rb1 == 32'h666) begin
         `INFO(("Saw write of 666 to x0... goodbye, folks!"))
         boom_pipe[0] <= 1'b1;
     end

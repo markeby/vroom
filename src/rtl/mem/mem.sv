@@ -12,6 +12,7 @@ module mem
 
     input  t_uinstr      uinstr_ex1,
     input  t_rv_reg_data result_ex1,
+    input  logic         br_mispred_rb1,
 
     output t_uinstr      uinstr_mm1,
     output t_rv_reg_data result_mm1

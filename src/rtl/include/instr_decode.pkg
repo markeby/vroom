@@ -35,6 +35,7 @@ package instr_decode;
         `SIMID_STRUCT
         logic[31:0]       imm32;
         logic[6:0]        funct7;
+        logic             mispred;
         t_rv_funct3       funct3;
         t_uopnd_descr     src2;
         t_uopnd_descr     src1;

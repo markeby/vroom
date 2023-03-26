@@ -5,10 +5,11 @@
 `include "verif.pkg"
 `include "asm.pkg"
 `include "mem_common.pkg"
+`include "common.pkg"
 `include "vroom_macros.sv"
 
 module fetch
-    import instr::*, mem_common::*, verif::*;
+    import instr::*, mem_common::*, verif::*, common::*;
 (
     input  logic       clk,
     input  logic       reset,
@@ -16,6 +17,9 @@ module fetch
     output t_mem_req   fb_ic_req_nnn,
     input  t_mem_rsp   ic_fb_rsp_nnn,
                        
+    input  t_paddr     br_tgt_rb1,
+    input  logic       br_mispred_rb1,
+
     output logic       valid_fe1,
     output t_instr_pkt instr_fe1,
     input  logic       stall
@@ -39,6 +43,9 @@ t_fb_fe_rsp fb_fe_rsp_nnn;
 fe_ctl fe_ctl (
     .clk,
     .reset,
+
+    .br_tgt_rb1,
+    .br_mispred_rb1,
 
     .fe_fb_req_nnn,
     .fb_fe_rsp_nnn,

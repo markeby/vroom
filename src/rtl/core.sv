@@ -4,10 +4,11 @@
 `include "instr.pkg"
 `include "instr_decode.pkg"
 `include "mem_common.pkg"
+`include "common.pkg"
 `include "vroom_macros.sv"
 
 module core
-    import instr::*, instr_decode::*, mem_common::*;
+    import instr::*, instr_decode::*, mem_common::*, common::*;
 (
     input  logic clk,
     input  logic reset
@@ -32,6 +33,9 @@ t_rv_reg_data rddatas_rd1 [1:0];
 
 t_uinstr      uinstr_ex1;
 t_rv_reg_data result_ex1;
+
+t_paddr       br_tgt_ex0;
+logic         br_mispred_ex0;
 
 t_uinstr      uinstr_mm1;
 t_rv_reg_data result_mm1;
@@ -87,6 +91,8 @@ exe exe (
     .stall,
     .uinstr_rd1,
     .rddatas_rd1,
+    .br_tgt_ex0,
+    .br_mispred_ex0,
     .uinstr_ex1,
     .result_ex1
 );

@@ -60,9 +60,9 @@ initial begin
     //define TEST_ARITH
     //define TEST_LOGICAL
     //define TEST_SLT
-    //define TEST_BEEF
+    `define TEST_BEEF
     `define TEST_BR_NT
-    `define TEST_BR_T
+    //define TEST_BR_T
 
     IROM[a++] = rvXOR(1,1,1);
     IROM[a++] = rvXOR(2,2,2);
@@ -70,7 +70,6 @@ initial begin
     IROM[a++] = rvXOR(4,4,4);
     IROM[a++] = rvXOR(5,5,5);
 
-    /*
     IROM[a++] = rvXOR(1,1,1);
     IROM[a++] = rvXOR(2,1,1);
     IROM[a++] = rvXOR(3,2,2);
@@ -80,7 +79,6 @@ initial begin
     IROM[a++] = rvXOR(7,6,6);
     IROM[a++] = rvXOR(8,7,7);
     IROM[a++] = rvXOR(9,8,8);
-    */
 
     `ifdef TEST_BR_NT
         IROM[a++] = rvXOR(1,1,1);

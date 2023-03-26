@@ -16,6 +16,9 @@ module exe
     input  t_uinstr      uinstr_rd1,
     input  t_rv_reg_data rddatas_rd1 [1:0],
 
+    output t_paddr       br_tgt_ex0,
+    output logic         br_mispred_ex0,
+
     output t_uinstr      uinstr_ex1,
     output t_rv_reg_data result_ex1
 );
@@ -82,13 +85,13 @@ ibr ibr (
     .clk,
     .reset,
 
-    .uinstr_ex0  ( uinstr_rd1      ),
+    .uinstr_ex0     ( uinstr_rd1      ),
     .src1val_ex0,
     .src2val_ex0,
 
-    .resvld_ex0  ( ibr_resvld_ex0  ),
-    .br_tgt_ex0  ( ibr_tgt_ex0     ),
-    .mispred_ex0 ( ibr_mispred_ex0 )
+    .resvld_ex0     ( ibr_resvld_ex0  ),
+    .br_tgt_ex0     ( ibr_tgt_ex0     ),
+    .br_mispred_ex0 ( ibr_mispred_ex0 )
 );
 
 // Combine outputs
@@ -97,6 +100,9 @@ always_comb begin
     result_exx[EX0]  = '0;
     result_exx[EX0] |= ialu_resvld_ex0 ? ialu_result_ex0 : '0;
 end
+
+always_comb br_tgt_ex0     = ibr_tgt_ex0;
+always_comb br_mispred_ex0 = ibr_mispred_ex0;
 
 `ifdef ASSERT
 logic LOL;

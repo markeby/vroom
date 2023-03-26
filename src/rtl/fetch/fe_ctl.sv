@@ -26,6 +26,7 @@ typedef enum logic[2:0] {
     FE_REQ_IC,
     FE_PDG_IC,
     FE_PDG_STALL,
+    FE_DRAIN,
     FE_HALT
 } t_fsm_fe;
 
@@ -69,9 +70,10 @@ always_comb begin
         FE_PDG_IC:    if (fb_fe_rsp_nnn.valid & ~stall ) state_nxt = FE_PDG_IC;    // no stall -> early send
                  else if (fb_fe_rsp_nnn.valid &  stall ) state_nxt = FE_PDG_STALL; // wait for stall to resolve
         FE_PDG_STALL: if (~stall                       ) state_nxt = FE_PDG_IC;
+        FE_DRAIN:     if (~stall                       ) state_nxt = FE_HALT;
         default:                                         state_nxt = state;
     endcase
-    if (halt ) state_nxt = FE_HALT;
+    if (halt ) state_nxt = FE_DRAIN;
     if (reset) state_nxt = FE_IDLE;
 end
 `DFF(state, state_nxt, clk)
@@ -109,7 +111,8 @@ always_comb begin
     ic_rsp = (state == FE_PDG_IC) ? fb_fe_rsp_nnn : fb_fe_capture_nnn;
 
     valid_fe1           = state == FE_PDG_IC & fb_fe_rsp_nnn.valid
-                        | state == FE_PDG_STALL;
+                        | state == FE_PDG_STALL
+                        | state == FE_DRAIN;
     instr_fe1       = t_instr_pkt'('0);
     instr_fe1.instr = ic_rsp.instr;
     instr_fe1.pc    = ic_rsp.pc;

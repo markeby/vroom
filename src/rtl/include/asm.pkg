@@ -50,6 +50,26 @@ package asm;
     function t_word rvSLTU(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU_R, rd, rs1, rs2, ALU_SLTU, 7'b0000000); endfunction
     function t_word rvHALT(                                                      ); return __rvR(RV_OP_MISC , '0, '0,  '0,  3'b000,   7'b0000000); endfunction
 
+    // B-format instructions
+
+    function t_word __rvB(t_rv_opcode op, t_rv_br_op_funct3 cond, t_rv_reg_addr rs1, t_rv_reg_addr rs2, logic[12:0] imm13);
+        __rvB = (t_word'(op            ) <<  0)
+              | (t_word'(imm13[11]     ) <<  7)
+              | (t_word'(imm13[4:1]    ) <<  8)
+              | (t_word'(cond          ) << 12)
+              | (t_word'(rs1           ) << 15)
+              | (t_word'(rs2           ) << 20)
+              | (t_word'(imm13[10:5]   ) << 25)
+              | (t_word'(imm13[12]     ) << 31);
+    endfunction
+
+    function t_word rvBEQ (t_rv_reg_addr rs1, t_rv_reg_addr rs2, logic[12:0] imm13); return __rvB(RV_OP_BR, RV_BR_BEQ , rs1, rs2, imm13); endfunction
+    function t_word rvBNE (t_rv_reg_addr rs1, t_rv_reg_addr rs2, logic[12:0] imm13); return __rvB(RV_OP_BR, RV_BR_BNE , rs1, rs2, imm13); endfunction
+    function t_word rvBLT (t_rv_reg_addr rs1, t_rv_reg_addr rs2, logic[12:0] imm13); return __rvB(RV_OP_BR, RV_BR_BLT , rs1, rs2, imm13); endfunction
+    function t_word rvBGE (t_rv_reg_addr rs1, t_rv_reg_addr rs2, logic[12:0] imm13); return __rvB(RV_OP_BR, RV_BR_BEQ , rs1, rs2, imm13); endfunction
+    function t_word rvBLTU(t_rv_reg_addr rs1, t_rv_reg_addr rs2, logic[12:0] imm13); return __rvB(RV_OP_BR, RV_BR_BLTU, rs1, rs2, imm13); endfunction
+    function t_word rvBGEU(t_rv_reg_addr rs1, t_rv_reg_addr rs2, logic[12:0] imm13); return __rvB(RV_OP_BR, RV_BR_BGEU, rs1, rs2, imm13); endfunction
+
 endpackage
 
 `endif // __ASM_PKG 

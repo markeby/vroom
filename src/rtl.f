@@ -12,6 +12,7 @@ src/rtl/fetch/fe_ctl.sv
 src/rtl/fetch/fe_fb_entry.sv
 src/rtl/fetch/fe_buf.sv
 src/rtl/fetch/fe_pf.sv
+src/rtl/fetch/fetch_chk.sv
 
 src/rtl/globals/gprs.sv
 src/rtl/globals/scoreboard.sv

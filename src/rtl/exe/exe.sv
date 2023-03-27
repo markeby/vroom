@@ -113,8 +113,11 @@ always_comb LOL = uinstr_rd1.uop == U_INVALID;
 // EX1
 //
 
-always_comb uinstr_ex1 = uinstr_exx[EX1];
-always_comb result_ex1 = result_exx[EX1];
+always_comb begin
+    result_ex1 = result_exx[EX1];
+    uinstr_ex1 = uinstr_exx[EX1];
+    uinstr_ex1.valid  &= ~br_mispred_rb1;
+end
 
 //
 // Debug

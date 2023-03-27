@@ -43,8 +43,12 @@ localparam NUM_MM_STAGES = 1;
 
 // RB0 assign
 
-always_comb uinstr_mm1 = uinstr_mmx[MM1];
-always_comb result_mm1 = result_mmx[MM1];
+always_comb begin
+    result_mm1 = result_mmx[MM1];
+    uinstr_mm1 = uinstr_mmx[MM1];
+    uinstr_mm1.valid  &= ~br_mispred_rb1;
+end
+
 
 //
 // Debug

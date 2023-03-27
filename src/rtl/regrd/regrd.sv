@@ -48,11 +48,17 @@ end
 //
 
 t_uinstr uinstr_ql_rd0;
+t_uinstr uinstr_nq_rd1;
 always_comb begin
     uinstr_ql_rd0 = uinstr_de1;
     uinstr_ql_rd0.valid &= ~stall;
 end
-`DFF(uinstr_rd1, uinstr_ql_rd0, clk);
+`DFF(uinstr_nq_rd1, uinstr_ql_rd0, clk);
+
+always_comb begin
+    uinstr_rd1 = uinstr_nq_rd1;
+    uinstr_rd1.valid  &= ~br_mispred_rb1;
+end
 
 //
 // Debug

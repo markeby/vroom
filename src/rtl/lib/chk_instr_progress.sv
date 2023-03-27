@@ -11,6 +11,7 @@ module chk_instr_progress
 (
     input  logic     clk,
     input  logic     reset,
+    input  logic     br_mispred_rb1,
     input  logic     valid_stgA_nn0,
     input  t_simid   simid_stgA_nn0,
     input  logic     valid_stgB_nn0,
@@ -24,7 +25,7 @@ t_simid simid_stgA_nn1;
 `DFF(simid_stgA_nn1, simid_stgA_nn0, clk)
 
 // if instr left stage A, it must be in stage B
-`VASSERT(a_lost_instr, valid_stgA_nn1 & (~valid_stgA_nn0 | simid_stgA_nn0.fid != simid_stgA_nn1.fid), valid_stgB_nn0 & simid_stgA_nn1.fid == simid_stgB_nn0.fid, $sformatf("Instr left stg %s but is not in stg %s (simid:%s)", A, B, format_simid(simid_stgA_nn1)))
+`VASSERT(a_lost_instr, valid_stgA_nn1 & (~valid_stgA_nn0 | simid_stgA_nn0.fid != simid_stgA_nn1.fid), br_mispred_rb1 | valid_stgB_nn0 & simid_stgA_nn1.fid == simid_stgB_nn0.fid, $sformatf("Instr left stg %s but is not in stg %s (simid:%s)", A, B, format_simid(simid_stgA_nn1)))
 // if instr remains in stage A, it must not be in stage B
 `VASSERT(a_grew_instr, valid_stgA_nn1 & valid_stgB_nn0, simid_stgA_nn0.fid != simid_stgB_nn0.fid, $sformatf("Instr still in stg %s propagated to stg %s (simid: %s)", A, B, format_simid(simid_stgA_nn1)))
 

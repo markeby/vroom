@@ -148,6 +148,7 @@ scoreboard scoreboard (
     .uinstr_ex1,
     .uinstr_mm1,
     .uinstr_rb1,
+    .br_mispred_rb1,
     .stall
 );
 
@@ -160,11 +161,11 @@ icache #(.LATENCY(5)) icache (
 
 `ifdef ASSERT
 
-chk_instr_progress #(.A("FE"), .B("DE")) chk_instr_progress_fe (.clk, .reset, .valid_stgA_nn0(valid_fe1       ), .simid_stgA_nn0(instr_fe1.SIMID ), .valid_stgB_nn0(uinstr_de1.valid), .simid_stgB_nn0(uinstr_de1.SIMID));
-chk_instr_progress #(.A("DE"), .B("RD")) chk_instr_progress_de (.clk, .reset, .valid_stgA_nn0(uinstr_de1.valid), .simid_stgA_nn0(uinstr_de1.SIMID), .valid_stgB_nn0(uinstr_rd1.valid), .simid_stgB_nn0(uinstr_rd1.SIMID));
-chk_instr_progress #(.A("RD"), .B("EX")) chk_instr_progress_rd (.clk, .reset, .valid_stgA_nn0(uinstr_rd1.valid), .simid_stgA_nn0(uinstr_rd1.SIMID), .valid_stgB_nn0(uinstr_ex1.valid), .simid_stgB_nn0(uinstr_ex1.SIMID));
-chk_instr_progress #(.A("EX"), .B("MM")) chk_instr_progress_ex (.clk, .reset, .valid_stgA_nn0(uinstr_ex1.valid), .simid_stgA_nn0(uinstr_ex1.SIMID), .valid_stgB_nn0(uinstr_mm1.valid), .simid_stgB_nn0(uinstr_mm1.SIMID));
-chk_instr_progress #(.A("MM"), .B("RB")) chk_instr_progress_mm (.clk, .reset, .valid_stgA_nn0(uinstr_mm1.valid), .simid_stgA_nn0(uinstr_mm1.SIMID), .valid_stgB_nn0(uinstr_rb1.valid), .simid_stgB_nn0(uinstr_rb1.SIMID));
+chk_instr_progress #(.A("FE"), .B("DE")) chk_instr_progress_fe (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(valid_fe1       ), .simid_stgA_nn0(instr_fe1.SIMID ), .valid_stgB_nn0(uinstr_de1.valid), .simid_stgB_nn0(uinstr_de1.SIMID));
+chk_instr_progress #(.A("DE"), .B("RD")) chk_instr_progress_de (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(uinstr_de1.valid), .simid_stgA_nn0(uinstr_de1.SIMID), .valid_stgB_nn0(uinstr_rd1.valid), .simid_stgB_nn0(uinstr_rd1.SIMID));
+chk_instr_progress #(.A("RD"), .B("EX")) chk_instr_progress_rd (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(uinstr_rd1.valid), .simid_stgA_nn0(uinstr_rd1.SIMID), .valid_stgB_nn0(uinstr_ex1.valid), .simid_stgB_nn0(uinstr_ex1.SIMID));
+chk_instr_progress #(.A("EX"), .B("MM")) chk_instr_progress_ex (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(uinstr_ex1.valid), .simid_stgA_nn0(uinstr_ex1.SIMID), .valid_stgB_nn0(uinstr_mm1.valid), .simid_stgB_nn0(uinstr_mm1.SIMID));
+chk_instr_progress #(.A("MM"), .B("RB")) chk_instr_progress_mm (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(uinstr_mm1.valid), .simid_stgA_nn0(uinstr_mm1.SIMID), .valid_stgB_nn0(uinstr_rb1.valid), .simid_stgB_nn0(uinstr_rb1.SIMID));
 
 `endif
 

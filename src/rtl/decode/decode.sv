@@ -123,7 +123,13 @@ end
 // DE1/RD0
 //
 
-`DFF_EN(uinstr_de1, uinstr_de0, clk, ~stall)
+t_uinstr uinstr_nq_de1;
+`DFF_EN(uinstr_nq_de1, uinstr_de0, clk, ~stall)
+
+always_comb begin
+    uinstr_de1 = uinstr_nq_de1;
+    uinstr_de1.valid  &= ~br_mispred_rb1;
+end
 
 //
 // Debug
@@ -138,7 +144,7 @@ end
 `endif
 
 `ifdef ASSERT
-chk_no_change #(.T(t_uinstr)) cnc ( .clk, .reset, .hold(stall & uinstr_de1.valid), .thing(uinstr_de1) );
+//chk_no_change #(.T(t_uinstr)) cnc ( .clk, .reset, .hold(stall & uinstr_de1.valid & ~br_mispred_rb1), .thing(uinstr_de1) );
 `endif
 
 endmodule

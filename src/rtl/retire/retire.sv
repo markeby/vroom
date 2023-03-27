@@ -26,8 +26,9 @@ localparam RB0 = 0;
 localparam RB1 = 1;
 localparam NUM_RB_STAGES = 1;
 
-`MKPIPE_INIT(t_uinstr,       uinstr_rbx, uinstr_mm1, RB0, NUM_RB_STAGES)
 `MKPIPE_INIT(t_rv_reg_data,  result_rbx, result_mm1, RB0, NUM_RB_STAGES)
+
+t_uinstr uinstr_rb0;
 
 //
 // Nets
@@ -41,18 +42,20 @@ localparam NUM_RB_STAGES = 1;
 // RB0
 //
 
-always_comb wren_rb1   = uinstr_rbx[RB1].dst.optype == OP_REG & uinstr_rbx[RB1].valid;
-always_comb wraddr_rb1 = uinstr_rbx[RB1].dst.opreg;
+always_comb uinstr_rb0 = uinstr_mm1;
+always_comb wren_rb1   = uinstr_rb1.dst.optype == OP_REG & uinstr_rb1.valid;
+always_comb wraddr_rb1 = uinstr_rb1.dst.opreg;
 always_comb wrdata_rb1 = result_rbx[RB1];
-always_comb uinstr_rb1 = uinstr_rbx[RB1];
-
-always_comb br_mispred_rb1 = uinstr_rbx[RB1].valid
-                           & uinstr_rbx[RB1].mispred;
-always_comb br_tgt_rb1     = result_rbx[RB1];
 
 //
 // RB1
 //
+
+`DFF(uinstr_rb1, uinstr_rb0, clk)
+
+always_comb br_mispred_rb1 = uinstr_rb1.valid
+                           & uinstr_rb1.mispred;
+always_comb br_tgt_rb1     = result_rbx[RB1];
 
 //
 // Debug
@@ -85,7 +88,7 @@ end
 `endif
 
 `ifdef ASSERT
-chk_always_increment #(.T(int), .CONSECUTIVE(1)) fid_counting_up (
+chk_always_increment #(.T(int)) fid_counting_up (
     .clk,
     .reset,
     .valid ( uinstr_mm1.valid     ),

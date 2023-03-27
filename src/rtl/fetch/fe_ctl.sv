@@ -86,9 +86,10 @@ end
 assign incr_pc_nnn = fe_fb_req_nnn.valid;
 
 t_paddr PCNxt;
-always_comb PCNxt = reset       ? '0     :
-                    incr_pc_nnn ? PC + 4 :
-                                  PC;
+always_comb PCNxt = reset          ? '0         :
+                    br_mispred_rb1 ? br_tgt_rb1 : 
+                    incr_pc_nnn    ? PC + 4     :
+                                     PC;
 `DFF(PC, PCNxt, clk)
 
 // Capture response

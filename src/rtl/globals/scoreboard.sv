@@ -18,6 +18,8 @@ module scoreboard
     input  t_uinstr          uinstr_mm1,
     input  t_uinstr          uinstr_rb1,
 
+    input  logic             br_mispred_rb1,
+
     output logic             stall
 );
 
@@ -66,7 +68,7 @@ always_comb stall = |( regrd_mask_de1
                        | regwr_mask_mm1 
                        | regwr_mask_rb1
                        ) 
-                     );
+                     ) & ~br_mispred_rb1;
 
 //
 // Debug

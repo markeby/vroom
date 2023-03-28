@@ -7,7 +7,12 @@ addSignalGroup "Core" $sigs
 puts $sigs
 
 # Fetch signals
-set sigs      [list state stall PC instr_fe0.opcode f__instr_fe0]
+set sigs      [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]
+set fe_sigs   [prefixAll "${FE_CTL}." $sigs]
+addSignalGroup "FE" $fe_sigs
+
+# Fetch signals
+set sigs      [list state PC]
 set fe_sigs   [prefixAll "${FE_CTL}." $sigs]
 addSignalGroup "FE_CTL" $fe_sigs
 

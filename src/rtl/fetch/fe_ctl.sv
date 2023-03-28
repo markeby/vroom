@@ -76,6 +76,7 @@ always_comb begin
         FE_DRAIN:     if (~stall                       ) state_nxt = FE_HALT;
         default:                                         state_nxt = state;
     endcase
+    if (br_mispred_rb1 ) state_nxt = FE_REQ_IC;
     if (halt ) state_nxt = FE_DRAIN;
     if (reset) state_nxt = FE_IDLE;
 end
@@ -114,9 +115,10 @@ always_comb begin
     automatic t_fb_fe_rsp ic_rsp;
     ic_rsp = (state == FE_PDG_IC) ? fb_fe_rsp_nnn : fb_fe_capture_nnn;
 
-    valid_fe1           = state == FE_PDG_IC & fb_fe_rsp_nnn.valid
-                        | state == FE_PDG_STALL
-                        | state == FE_DRAIN;
+    valid_fe1           = ( state == FE_PDG_IC & fb_fe_rsp_nnn.valid
+                          | state == FE_PDG_STALL
+                          | state == FE_DRAIN 
+                          ) & ~br_mispred_rb1 & ~halt;
     instr_fe1       = t_instr_pkt'('0);
     instr_fe1.instr = ic_rsp.instr;
     instr_fe1.pc    = ic_rsp.pc;

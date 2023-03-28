@@ -62,7 +62,7 @@ always_comb begin
 end
 
 always_comb tru_tgt_ex0    = tkn_ex0 ? tkn_tgt_ex0 : pcnxt_ex0;
-always_comb br_mispred_ex0 = tru_tgt_ex0 != pcnxt_ex0;
+always_comb br_mispred_ex0 = tru_tgt_ex0 != pcnxt_ex0 & resvld_ex0;;
 always_comb br_tgt_ex0     = tru_tgt_ex0;
 
 ///

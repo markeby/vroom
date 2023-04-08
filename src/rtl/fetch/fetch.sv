@@ -72,7 +72,9 @@ fe_buf fe_buf (
 
 `ifdef ASSERT
 
-`VASSERT(a_corrupt_instr, valid_fe1, instr_fe1.instr == t_rv_instr'(core.icache.IROM[instr_fe1.pc >> 2]), $sformatf("Instruction mismatch simid:%s exp(%h) != act(%h)", format_simid(instr_fe1.SIMID), core.icache.IROM[instr_fe1.pc >> 2], instr_fe1.instr))
+logic[$clog2(128)-1:0] irom_index;
+always_comb irom_index = instr_fe1.pc[$clog2(128)+1:2];
+`VASSERT(a_corrupt_instr, valid_fe1, instr_fe1.instr == t_rv_instr'(core.icache.IROM[irom_index]), $sformatf("Instruction mismatch simid:%s exp(%h) != act(%h)", format_simid(instr_fe1.SIMID), core.icache.IROM[irom_index], instr_fe1.instr))
 
 fetch_chk fechk (
     .clk,

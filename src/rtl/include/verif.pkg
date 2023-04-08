@@ -9,10 +9,10 @@ package verif;
 
         typedef struct packed {
             int         fid;
-            logic[31:0] pc;
-            logic[31:0] src1_val;
-            logic[31:0] src2_val;
-            logic[31:0] result_val;
+            logic[63:0] pc;
+            logic[63:0] src1_val;
+            logic[63:0] src2_val;
+            logic[63:0] result_val;
             //int did;
         } t_simid;
         `define SIMID_STRUCT t_simid SIMID;

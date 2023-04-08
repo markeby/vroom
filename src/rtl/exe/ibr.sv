@@ -46,8 +46,8 @@ always_comb begin
     endcase
 end
 
-always_comb pcnxt_ex0   = uinstr_ex0.pc + 32'd4;
-always_comb tkn_tgt_ex0 = uinstr_ex0.pc + uinstr_ex0.imm32;
+always_comb pcnxt_ex0   = uinstr_ex0.pc + 4;
+always_comb tkn_tgt_ex0 = uinstr_ex0.pc + uinstr_ex0.imm64;
 
 always_comb begin
     tkn_ex0 = 1'b0;

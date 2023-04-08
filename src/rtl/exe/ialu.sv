@@ -30,6 +30,9 @@ module ialu
 // EX0
 //
 
+logic signed [XLEN-1:0] src1val_signed_ex0; always_comb src1val_signed_ex0 = src1val_ex0;
+logic signed [XLEN-1:0] src2val_signed_ex0; always_comb src2val_signed_ex0 = src2val_ex0;
+
 always_comb begin
     result_ex0 = '0;
     resvld_ex0 = uinstr_ex0.valid;
@@ -41,12 +44,12 @@ always_comb begin
         U_OR:      result_ex0 = src1val_ex0 | src2val_ex0;
         U_SLL:     result_ex0 = src1val_ex0 << src2val_ex0[4:0];
         U_SRL:     result_ex0 = src1val_ex0 >> src2val_ex0[4:0];
-        U_SRA:     result_ex0 = int'(src1val_ex0) >>> src2val_ex0[4:0]; 
-        U_SLT:     result_ex0 = int'(src1val_ex0) < int'(src2val_ex0) ? 32'd1 : 32'd0;
-        U_SLTU:    result_ex0 = src1val_ex0 < src2val_ex0 ? 32'd1 : 32'd0;
+        U_SRA:     result_ex0 = src1val_signed_ex0 >>> src2val_ex0[4:0]; 
+        U_SLT:     result_ex0 = src1val_signed_ex0 < src2val_signed_ex0 ? t_rv_reg_data'(1) : t_rv_reg_data'(0);
+        U_SLTU:    result_ex0 = src1val_ex0 < src2val_ex0 ? t_rv_reg_data'(1) : t_rv_reg_data'(0);
         default: begin
             resvld_ex0 = 1'b0;
-            result_ex0 = 32'h00000000;
+            result_ex0 = '0;
         end
     endcase
 end

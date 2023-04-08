@@ -65,7 +65,7 @@ end
 
 always_comb src1val_ex0 = rddatas_rd1[0];
 always_comb src2val_ex0 = (uinstr_rd1.src2.optype == OP_REG ? rddatas_rd1[1]   : '0)
-                        | (uinstr_rd1.src2.optype == OP_IMM ? uinstr_rd1.imm32 : '0);
+                        | (uinstr_rd1.src2.optype == OP_IMM ? uinstr_rd1.imm64 : '0);
 
 // Execution units
 

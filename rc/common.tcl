@@ -9,14 +9,31 @@ proc prefixAll {prefix xs} {
     return $finals
 }
 
-proc addSignalGroup {name sigs_list} {
-    gtkwave::addSignalsFromList $sigs_list
-    groupSignals $name $sigs_list
+proc maybeCollapse {collapse} {
+    if {$collapse == 1}  {
+        gtkwave::/Edit/Toggle_Group_Open|Close
+    }
 }
 
-proc groupSignals {name sigs_list} {
+proc addSignalGroup {name sigs_list {collapse 0}} {
+    gtkwave::addSignalsFromList $sigs_list
+    groupSignals $name $sigs_list $collapse
+}
+
+proc groupSignals {name sigs_list {collapse 0}} {
     gtkwave::highlightSignalsFromList $sigs_list
     gtkwave::/Edit/Create_Group $name
+    maybeCollapse $collapse
+    gtkwave::/Edit/UnHighlight_All
+}
+
+proc groupGroups {name group_list {collapse 0}} {
+    gtkwave::/Edit/UnHighlight_All
+    foreach grp $group_list {
+        gtkwave::/Edit/Highlight_Regexp $grp
+    }
+    gtkwave::/Edit/Create_Group $name
+    maybeCollapse $collapse
     gtkwave::/Edit/UnHighlight_All
 }
 

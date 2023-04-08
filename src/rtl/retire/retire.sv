@@ -74,7 +74,7 @@ always @(posedge clk) begin
         print_retire_info(uinstr_mm1);
     end
 
-    if (wren_rb1 & wraddr_rb1 == 0 & wrdata_rb1 == 32'h666) begin
+    if (wren_rb1 & wraddr_rb1 == 0 & wrdata_rb1 == 64'h666) begin
         `INFO(("Saw write of 666 to x0... goodbye, folks!"))
         boom_pipe[0] <= 1'b1;
     end

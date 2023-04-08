@@ -5,7 +5,8 @@
 `include "common.pkg"
 
 package instr;
-    localparam RV_REG_BITS      = 32;
+    localparam XLEN             = 64;
+    localparam RV_REG_BITS      = XLEN;
     localparam RV_NUM_REGS      = 32;
     localparam RV_REG_ADDR_BITS = $clog2(RV_NUM_REGS);
     localparam RV_OPCODE_WIDTH  = 7;
@@ -23,8 +24,10 @@ package instr;
         RV_OP_BR     = 7'b1100011,
         RV_OP_LD     = 7'b0000011,
         RV_OP_ST     = 7'b0100011,
-        RV_OP_ALU_I  = 7'b0010011,
-        RV_OP_ALU_R  = 7'b0110011,
+        RV_OP_ALU0_I = 7'b0010011,
+        RV_OP_ALU1_I = 7'b0011011,
+        RV_OP_ALU0_R = 7'b0110011,
+        RV_OP_ALU1_R = 7'b0111011,
         RV_OP_FENCE  = 7'b0001111,
         RV_OP_MISC   = 7'b1110011
     } t_rv_opcode;
@@ -139,11 +142,12 @@ package instr;
 
     // Expanded uop format
 
-    typedef enum logic[1:0] {
-        SZ_INV = 2'b00,
-        SZ_1B  = 2'b01,
-        SZ_2B  = 2'b10,
-        SZ_4B  = 2'b11
+    typedef enum logic[2:0] {
+        SZ_INV = 3'b000,
+        SZ_1B  = 3'b001,
+        SZ_2B  = 3'b010,
+        SZ_4B  = 3'b011,
+        SZ_8B  = 3'b100
     } t_size;
 
     typedef enum logic[2:0] {

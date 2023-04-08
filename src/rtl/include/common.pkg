@@ -4,11 +4,12 @@
 `include "verif.pkg"
 
 package common;
-    localparam PA_SZ         = 32;
+    localparam PA_SZ         = 64;
     localparam CL_SZ         = 512;
     localparam CL_SZ_BYTES   = CL_SZ/8;
     localparam CL_SZ_HWORDS  = CL_SZ_BYTES/2;
     localparam CL_SZ_WORDS   = CL_SZ_HWORDS/2;
+    localparam CL_SZ_DWORDS  = CL_SZ_WORDS/2;
     localparam CL_ADDR_SZ    = $clog2(CL_SZ_BYTES);
 
     localparam FE_FB_NUM_SETS     = 4;
@@ -25,11 +26,13 @@ package common;
     typedef logic[ 7:0] t_byte;
     typedef logic[15:0] t_hword;
     typedef logic[31:0] t_word;
+    typedef logic[63:0] t_dword;
 
     typedef union packed {
         t_byte [CL_SZ_BYTES-1:0]  B;
         t_hword[CL_SZ_HWORDS-1:0] H;
         t_word [CL_SZ_WORDS-1:0]  W;
+        t_word [CL_SZ_DWORDS-1:0] D;
         logic[CL_SZ-1:0]       flat;
     } t_cl;
 

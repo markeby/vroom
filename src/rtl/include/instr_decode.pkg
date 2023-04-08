@@ -13,13 +13,18 @@ package instr_decode;
     typedef enum logic[4:0] {
         U_INVALID,
         U_ADD,
+        U_ADDW,
         U_SUB,
+        U_SUBW,
         U_SLL,
+        U_SLLW,
         U_SLT,
         U_SLTU,
         U_XOR,
         U_SRL,
+        U_SRLW,
         U_SRA,
+        U_SRAW,
         U_OR,
         U_AND,
         U_BR
@@ -33,7 +38,7 @@ package instr_decode;
 
     typedef struct packed {
         `SIMID_STRUCT
-        logic[31:0]       imm32;
+        logic[63:0]       imm64;
         logic[6:0]        funct7;
         logic             mispred;
         t_rv_funct3       funct3;
@@ -56,8 +61,10 @@ package instr_decode;
             RV_OP_BR    : get_instr_format = RV_FMT_B; 
             RV_OP_LD    : get_instr_format = RV_FMT_I; 
             RV_OP_ST    : get_instr_format = RV_FMT_S; 
-            RV_OP_ALU_I : get_instr_format = RV_FMT_I; 
-            RV_OP_ALU_R : get_instr_format = RV_FMT_R; 
+            RV_OP_ALU0_I : get_instr_format = RV_FMT_I; 
+            RV_OP_ALU1_I : get_instr_format = RV_FMT_I; 
+            RV_OP_ALU0_R : get_instr_format = RV_FMT_R; 
+            RV_OP_ALU1_R : get_instr_format = RV_FMT_R; 
             RV_OP_FENCE : get_instr_format = RV_FMT_I; 
             RV_OP_MISC  : get_instr_format = RV_FMT_I; 
         endcase
@@ -70,22 +77,35 @@ package instr_decode;
             RV_FMT_R: begin
                 // opcode = RV_OP_ALU_R
                 t_rv_alu_op_funct3 alu_op = t_rv_alu_op_funct3'(instr.d.R.funct3);
-                unique casez(alu_op)
-                    ALU_ADD:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SUB : U_ADD;
-                    ALU_SHL:  rv_instr_to_uop = U_SLL;
-                    ALU_SLT:  rv_instr_to_uop = U_SLT;
-                    ALU_SLTU: rv_instr_to_uop = U_SLTU;
-                    ALU_XOR:  rv_instr_to_uop = U_XOR;
-                    ALU_SHR:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SRA : U_SRL;
-                    ALU_OR:   rv_instr_to_uop = U_OR;
-                    ALU_AND:  rv_instr_to_uop = U_AND;
+                unique casez(instr.opcode) 
+                    RV_OP_ALU0_R:
+                        unique casez(alu_op)
+                            ALU_ADD:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SUB : U_ADD;
+                            ALU_SHL:  rv_instr_to_uop = U_SLL;
+                            ALU_SLT:  rv_instr_to_uop = U_SLT;
+                            ALU_SLTU: rv_instr_to_uop = U_SLTU;
+                            ALU_XOR:  rv_instr_to_uop = U_XOR;
+                            ALU_SHR:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SRA : U_SRL;
+                            ALU_OR:   rv_instr_to_uop = U_OR;
+                            ALU_AND:  rv_instr_to_uop = U_AND;
+                        endcase
+                    RV_OP_ALU1_R:
+                        unique casez(alu_op)
+                            ALU_ADD:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SUBW : U_ADDW;
+                            ALU_SHL:  rv_instr_to_uop = U_SLLW;
+                            ALU_SHR:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SRAW : U_SRLW;
+                            default:  rv_instr_to_uop = U_INVALID;
+                        endcase
+                    default:
+                        rv_instr_to_uop = U_INVALID;
                 endcase
+
             end
             RV_FMT_I: begin
                 unique casez(instr.opcode) 
                     RV_OP_JALR  : rv_instr_to_uop = U_INVALID;
                     RV_OP_LD    : rv_instr_to_uop = U_INVALID;
-                    RV_OP_ALU_I : begin
+                    RV_OP_ALU0_I : begin
                         t_rv_alu_op_funct3 alu_op = t_rv_alu_op_funct3'(instr.d.R.funct3);
                         unique casez(alu_op)
                             ALU_ADD:  rv_instr_to_uop = U_ADD;
@@ -96,6 +116,15 @@ package instr_decode;
                             ALU_SHR:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SRA : U_SRL; // same as R-type decode
                             ALU_OR:   rv_instr_to_uop = U_OR;
                             ALU_AND:  rv_instr_to_uop = U_AND;
+                        endcase
+                    end
+                    RV_OP_ALU1_I : begin
+                        t_rv_alu_op_funct3 alu_op = t_rv_alu_op_funct3'(instr.d.R.funct3);
+                        unique casez(alu_op)
+                            ALU_ADD:  rv_instr_to_uop = U_ADDW;
+                            ALU_SHL:  rv_instr_to_uop = U_SLLW;
+                            ALU_SHR:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SRAW : U_SRLW; // same as R-type decode
+                            default:  rv_instr_to_uop = U_INVALID;
                         endcase
                     end
                     RV_OP_FENCE : rv_instr_to_uop = U_INVALID;
@@ -141,16 +170,16 @@ package instr_decode;
     function string describe_uinstr(t_uinstr uinstr);
         describe_uinstr = $sformatf("SIMID:%s opcode:%s uop:%s ifmt:%s", format_simid(uinstr.SIMID), uinstr.opcode.name(), uinstr.uop.name(), uinstr.ifmt.name());
         case (uinstr.ifmt)
-            RV_FMT_I: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d imm32:0x%h funct3:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.imm32, uinstr.funct3);
+            RV_FMT_I: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d imm64:0x%h funct3:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.imm64, uinstr.funct3);
             RV_FMT_R: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d rs2:x%-d funct3:%-d funct7:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.src2.opreg, uinstr.funct3, uinstr.funct7);
             default:  describe_uinstr = describe_uinstr;
         endcase
     endfunction
 
-    function string describe_opnd(t_uopnd_descr opnd, logic[31:0] val32);
+    function string describe_opnd(t_uopnd_descr opnd, logic[63:0] val64);
         unique case (opnd.optype)
-            OP_REG:  describe_opnd = $sformatf("reg,x%-2d 0x%08h", opnd.opreg, val32);
-            OP_IMM:  describe_opnd = $sformatf("imm     0x%08h", val32);
+            OP_REG:  describe_opnd = $sformatf("reg,x%-2d 0x%016h", opnd.opreg, val64);
+            OP_IMM:  describe_opnd = $sformatf("imm     0x%016h", val64);
             default: describe_opnd = "UNDEF";
         endcase
     endfunction

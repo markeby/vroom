@@ -102,13 +102,13 @@ initial begin
     `endif
     `ifdef TEST_BEEF
         IROM[a++] = rvXOR(1,1,1);
-        IROM[a++] = rvADDI(1,1,12'hDE); IROM[a++] = rvSLLI(1,1,5'd8);
-        IROM[a++] = rvADDI(1,1,12'hAD); IROM[a++] = rvSLLI(1,1,5'd8);
-        IROM[a++] = rvADDI(1,1,12'hBE); IROM[a++] = rvSLLI(1,1,5'd8);
+        IROM[a++] = rvADDI(1,1,12'hDE); IROM[a++] = rvSLLI(1,1,6'd8);
+        IROM[a++] = rvADDI(1,1,12'hAD); IROM[a++] = rvSLLI(1,1,6'd8);
+        IROM[a++] = rvADDI(1,1,12'hBE); IROM[a++] = rvSLLI(1,1,6'd8);
         IROM[a++] = rvADDI(1,1,12'hEF); 
-        IROM[a++] = rvADDI(2,2,12'hCA); IROM[a++] = rvSLLI(2,2,5'd8);
-        IROM[a++] = rvADDI(2,2,12'hFE); IROM[a++] = rvSLLI(2,2,5'd8);
-        IROM[a++] = rvADDI(2,2,12'hBA); IROM[a++] = rvSLLI(2,2,5'd8);
+        IROM[a++] = rvADDI(2,2,12'hCA); IROM[a++] = rvSLLI(2,2,6'd8);
+        IROM[a++] = rvADDI(2,2,12'hFE); IROM[a++] = rvSLLI(2,2,6'd8);
+        IROM[a++] = rvADDI(2,2,12'hBA); IROM[a++] = rvSLLI(2,2,6'd8);
         IROM[a++] = rvADDI(2,2,12'hBE); 
     `endif
     `ifdef TEST_ALL_DEPS
@@ -138,8 +138,8 @@ initial begin
         IROM[a++] = rvADDI(1,0,12'h111);
         IROM[a++] = rvADDI(17,0,12'h654);
         IROM[a++] = rvXORI(18,16,12'hfff);
-        IROM[a++] = rvSRAI(20,18,5'h1);
-        IROM[a++] = rvSRLI(21,18,5'h1);
+        IROM[a++] = rvSRAI(20,18,6'h1);
+        IROM[a++] = rvSRLI(21,18,6'h1);
         IROM[a++] = rvXOR(22,20,21);
     `endif //TEST_LOGICAL
     `ifdef TEST_SLT

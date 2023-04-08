@@ -7,18 +7,29 @@ addSignalGroup "Core" $sigs
 puts $sigs
 
 proc addGroupDict {grpd} {
+    set child_names [list]
+
     if {[dict exists $grpd children]} {
         set children [dict get $grpd children]
         foreach child $children {
             addGroupDict $child
+            lappend child_names [dict get $child group_name]
         }
     }
+
+    gtkwave::/Edit/UnHighlight_All
 
     if {[dict exists $grpd signals]} {
         set group_name [dict get $grpd group_name]
         set signals    [dict get $grpd signals]
-        addSignalGroup $group_name $signals 0
+        gtkwave::addSignalsFromList $signals 
+        gtkwave::highlightSignalsFromList $signals
     }
+
+    foreach grp $child_names {
+        gtkwave::/Edit/Highlight_Regexp $grp
+    }
+    gtkwave::/Edit/Create_Group [dict get $grpd group_name]
 }
 
 set fetch [dict create]

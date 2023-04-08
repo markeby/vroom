@@ -8,7 +8,7 @@ puts $sigs
 
 proc addGroupDict {grpd} {
     if {[dict exists $grpd children]} {
-        set children [dict get children]
+        set children [dict get $grpd children]
         foreach child $children {
             addGroupDict $child
         }
@@ -26,14 +26,15 @@ set fetch [dict create]
 set sigs [prefixAll "${FE_CTL}." [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]]
 dict set fetch group_name "FE" 
 dict set fetch signals $sigs
-#dict set fetch children [list]
-addGroupDict $fetch
+dict set fetch children [list]
 
-#set fe_ctl [dict create]
-#set sigs [prefixAll "${FE_CTL}." [list state PC]]
-#dict set fe_ctl group_name "FE_CTL" 
-#dict set fe_ctl signals $sigs
-#lappend [dict get $fetch children] fe_ctl
+set fe_ctl [dict create]
+set sigs [prefixAll "${FE_CTL}." [list state PC]]
+dict set fe_ctl group_name "FE_CTL" 
+dict set fe_ctl signals $sigs
+dict lappend fetch children $fe_ctl
+
+addGroupDict $fetch
 
 #set fetch [dict create]
 #

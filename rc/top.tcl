@@ -6,19 +6,48 @@ set sigs      [prefixAll "${CORE}." $sigs]
 addSignalGroup "Core" $sigs
 puts $sigs
 
+proc addGroupDict {grpd} {
+    if {[dict exists $grpd children]} {
+        set children [dict get children]
+        foreach child $children {
+            addGroupDict $child
+        }
+    }
+
+    if {[dict exists $grpd signals]} {
+        set group_name [dict get $grpd group_name]
+        set signals    [dict get $grpd signals]
+        addSignalGroup $group_name $signals 0
+    }
+}
+
 set fetch [dict create]
 
-set sigs [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]
-dict set fetch "FE" [dict create sigs [prefixAll "${FE_CTL}." $sigs] collapse 0]
-set sigs [list state PC]
-dict set fetch "FE_CTL" [dict create sigs [prefixAll "${FE_CTL}." $sigs] collapse 1]
+set sigs [prefixAll "${FE_CTL}." [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]]
+dict set fetch group_name "FE" 
+dict set fetch signals $sigs
+#dict set fetch children [list]
+addGroupDict $fetch
 
-dict for {grp grpd} $fetch {
-    set sigs     [dict get $grpd sigs]
-    set collapse [dict get $grpd collapse]
-    addSignalGroup $grp $sigs $collapse
-}
-groupGroups "Fetch" [dict keys $fetch] 0
+#set fe_ctl [dict create]
+#set sigs [prefixAll "${FE_CTL}." [list state PC]]
+#dict set fe_ctl group_name "FE_CTL" 
+#dict set fe_ctl signals $sigs
+#lappend [dict get $fetch children] fe_ctl
+
+#set fetch [dict create]
+#
+#set sigs [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]
+#dict set fetch "FE" [dict create sigs [prefixAll "${FE_CTL}." $sigs] collapse 0]
+#set sigs [list state PC]
+#dict set fetch "FE_CTL" [dict create sigs [prefixAll "${FE_CTL}." $sigs] collapse 1]
+#
+#dict for {grp grpd} $fetch {
+#    set sigs     [dict get $grpd sigs]
+#    set collapse [dict get $grpd collapse]
+#    addSignalGroup $grp $sigs $collapse
+#}
+#groupGroups "Fetch" [dict keys $fetch] 0
 
 # Decode signals
 set uinstr_fields [prefixAll "uinstr_de1." [list valid SIMID.fid uop funct imm64 opcode]]

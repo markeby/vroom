@@ -1,5 +1,3 @@
-gtkwave::/Edit/Insert_Comment "Vroom"
-
 # Helper procs
 proc prefixAll {prefix xs} {
     set finals [list]
@@ -7,6 +5,11 @@ proc prefixAll {prefix xs} {
         lappend finals [format "%s%s" $prefix $x]
     }
     return $finals
+}
+
+proc clear_screen {} {
+    gtkwave::/Edit/Highlight_All
+    gtkwave::/Edit/Cut
 }
 
 proc maybeCollapse {collapse} {
@@ -51,4 +54,7 @@ set SCORE  "${CORE}.scoreboard"
 set GPRS   "${CORE}.gprs"
 
 set T_OPND        [list opreg opsize optype]
+
+clear_screen
+gtkwave::/Edit/Insert_Comment "Vroom"
 

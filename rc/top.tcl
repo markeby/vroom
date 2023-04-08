@@ -6,17 +6,19 @@ set sigs      [prefixAll "${CORE}." $sigs]
 addSignalGroup "Core" $sigs
 puts $sigs
 
-# Fetch signals
-set sigs      [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]
-set fe_sigs   [prefixAll "${FE_CTL}." $sigs]
-addSignalGroup "FE" $fe_sigs
+set fetch [dict create]
 
-# Fetch signals
-set sigs       [list state PC]
-set fectl_sigs [prefixAll "${FE_CTL}." $sigs]
-addSignalGroup "FE_CTL" $fectl_sigs 1
+set sigs [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]
+dict set fetch "FE" [dict create sigs [prefixAll "${FE_CTL}." $sigs] collapse 0]
+set sigs [list state PC]
+dict set fetch "FE_CTL" [dict create sigs [prefixAll "${FE_CTL}." $sigs] collapse 1]
 
-groupGroups "Fetch" [list "FE" "FE_CTL"] 
+dict for {grp grpd} $fetch {
+    set sigs     [dict get $grpd sigs]
+    set collapse [dict get $grpd collapse]
+    addSignalGroup $grp $sigs $collapse
+}
+groupGroups "Fetch" [dict keys $fetch] 0
 
 # Decode signals
 set uinstr_fields [prefixAll "uinstr_de1." [list valid SIMID.fid uop funct imm64 opcode]]

@@ -40,29 +40,28 @@ proc addGroupDict {grpd} {
     gtkwave::/Edit/Create_Group [dict get $grpd group_name]
 }
 
-set fetch [dict create]
-dict set fetch group_name "FE" 
-dict set fetch children [list]
+proc makeParent {name kids} {
+    set grp [dict create]
+    dict set grp group_name $name
+    dict set grp children $kids
+    return $grp
+}
 
-#proc makeLeaf {name pfx sigs} {
-#    set grp [dict create]
-#    set sigs [prefixAll $pfx $sigs]
-#    dict set grp group_name $name
-#    dict set grp signals $sigs
-#    return grp
-#}
+proc makeLeaf {name sigs {pfx ""}} {
+    set grp [dict create]
+    set sigs [prefixAll $pfx $sigs]
+    dict set grp group_name $name
+    dict set grp signals $sigs
+    return $grp
+}
 
-set grp [dict create]
 set sigs [prefixAll "${FE_CTL}." [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]]
-dict set grp group_name "FE_CTL" 
-dict set grp signals $sigs
-dict lappend fetch children $grp
+set fe_ctl [makeLeaf "FE CTL" $sigs]
 
-set grp [dict create]
 set sigs [prefixAll "${FE_CTL}." [list state PC]]
-dict set grp group_name "FE_MISC" 
-dict set grp signals $sigs
-dict lappend fetch children $grp
+set fe_misc [makeLeaf "FE MISC" $sigs]
+
+set fetch [makeParent "FE" [list $fe_ctl $fe_misc]]
 
 addGroupDict $fetch
 

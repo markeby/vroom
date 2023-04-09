@@ -55,14 +55,13 @@ proc makeLeaf {name sigs {pfx ""}} {
     return $grp
 }
 
-set sigs [prefixAll "${FE_CTL}." [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]]
-set fe_ctl [makeLeaf "FE CTL" $sigs]
+set sigs [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]
+set fe_ctl [makeLeaf "FE CTL" $sigs "${FE_CTL}."]
 
-set sigs [prefixAll "${FE_CTL}." [list state PC]]
-set fe_misc [makeLeaf "FE MISC" $sigs]
+set sigs [list state PC]
+set fe_misc [makeLeaf "FE MISC" $sigs "${FE_CTL}."]
 
 set fetch [makeParent "FE" [list $fe_ctl $fe_misc]]
-
 addGroupDict $fetch
 
 #set fetch [dict create]

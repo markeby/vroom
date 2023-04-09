@@ -7,43 +7,62 @@ addSignalGroup "Core" $sigs
 puts $sigs
 
 proc addGroupDict {grpd} {
-    set child_names [list]
+    gtkwave::/Edit/UnHighlight_All
 
+    # then children
     if {[dict exists $grpd children]} {
         set children [dict get $grpd children]
         foreach child $children {
             addGroupDict $child
-            lappend child_names [dict get $child group_name]
         }
     }
 
-    gtkwave::/Edit/UnHighlight_All
-
+    # first add all signals
     if {[dict exists $grpd signals]} {
-        set group_name [dict get $grpd group_name]
         set signals    [dict get $grpd signals]
         gtkwave::addSignalsFromList $signals 
-        gtkwave::highlightSignalsFromList $signals
     }
 
-    foreach grp $child_names {
-        gtkwave::/Edit/Highlight_Regexp $grp
+    #gtkwave::/Edit/UnHighlight_All
+
+    # then iterate over signals again, highlighting
+    if {[dict exists $grpd signals]} {
+        gtkwave::highlightSignalsFromList [dict get $grpd signals]
     }
+
+    # ditto groups
+    if {[dict exists $grpd children]} {
+        foreach child [dict get $grpd children] {
+            gtkwave::/Edit/Highlight_Regexp [dict get $child group_name]
+        }
+    }
+
     gtkwave::/Edit/Create_Group [dict get $grpd group_name]
 }
 
 set fetch [dict create]
-
-set sigs [prefixAll "${FE_CTL}." [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]]
 dict set fetch group_name "FE" 
-dict set fetch signals $sigs
 dict set fetch children [list]
 
-set fe_ctl [dict create]
+#proc makeLeaf {name pfx sigs} {
+#    set grp [dict create]
+#    set sigs [prefixAll $pfx $sigs]
+#    dict set grp group_name $name
+#    dict set grp signals $sigs
+#    return grp
+#}
+
+set grp [dict create]
+set sigs [prefixAll "${FE_CTL}." [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]]
+dict set grp group_name "FE_CTL" 
+dict set grp signals $sigs
+dict lappend fetch children $grp
+
+set grp [dict create]
 set sigs [prefixAll "${FE_CTL}." [list state PC]]
-dict set fe_ctl group_name "FE_CTL" 
-dict set fe_ctl signals $sigs
-dict lappend fetch children $fe_ctl
+dict set grp group_name "FE_MISC" 
+dict set grp signals $sigs
+dict lappend fetch children $grp
 
 addGroupDict $fetch
 

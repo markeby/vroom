@@ -40,73 +40,53 @@ proc addGroupDict {grpd} {
     gtkwave::/Edit/Create_Group [dict get $grpd group_name]
 }
 
-proc makeParent {name kids} {
-    set grp [dict create]
-    dict set grp group_name $name
-    dict set grp signals [list]
-    dict set grp children $kids
-    return $grp
-}
-
-proc makeLeaf {name pfx sigs} {
+proc makeNode {name pfx sigs kids} {
     set grp [dict create]
     set sigs [prefixAll $pfx $sigs]
     dict set grp group_name $name
     dict set grp signals $sigs
-    dict set grp children [list]
+    dict set grp children $kids
     return $grp
 }
 
-#proc makeNode {name pfx sigs kids} {
-#    set grp [dict create]
-#    set sigs [prefixAll $pfx $sigs]
-#    dict set grp group_name $name
-#    dict set grp signals $sigs
-#    dict set grp children $kids
-#    return $grp
-#}
+proc makeParent {name kids} {
+    return [makeNode $name "" [list] $kids]
+}
 
-set fetch [makeParent "FE" [list]]
+proc makeLeaf {name pfx sigs} {
+    return [makeNode $name $pfx $sigs [list]]
+}
 
 set sigs [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]
 set fe_ctl [makeLeaf "FE CTL" "${FE_CTL}." $sigs]
-lappend [dict get $fetch children] $fe_ctl
-dict lappend fetch children $fe_ctl
 
 set sigs [list state PC]
 set fe_misc [makeLeaf "FE MISC" "${FE_CTL}." $sigs]
-dict lappend fetch children $fe_misc
 
-set sigs      [list fb_ic_req_nnn.valid fb_ic_req_nnn.addr]
+set sigs [list fb_ic_req_nnn.valid fb_ic_req_nnn.addr]
 set fb_ic_req [makeLeaf "FB2IC Req" "${FE_BUF}." $sigs]
-dict lappend fetch children $fb_ic_req
 
+set fetch [makeParent "FE" [list $fe_ctl $fe_misc $fb_ic_req]]
 addGroupDict $fetch
-
-return
-
-#set fetch [dict create]
-#
-#set sigs [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]
-#dict set fetch "FE" [dict create sigs [prefixAll "${FE_CTL}." $sigs] collapse 0]
-#set sigs [list state PC]
-#dict set fetch "FE_CTL" [dict create sigs [prefixAll "${FE_CTL}." $sigs] collapse 1]
-#
-#dict for {grp grpd} $fetch {
-#    set sigs     [dict get $grpd sigs]
-#    set collapse [dict get $grpd collapse]
-#    addSignalGroup $grp $sigs $collapse
-#}
-#groupGroups "Fetch" [dict keys $fetch] 0
 
 # Decode signals
 set uinstr_fields [prefixAll "uinstr_de1." [list valid SIMID.fid uop funct imm64 opcode]]
-set src1          [prefixAll "uinstr_de1.src1." $T_OPND]
+
+set sigs [list valid_fe1]
+set de_ctl [makeLeaf "DE CTL" "${DECODE}." $sigs]
+
+set src1 [prefixAll "uinstr_de1.src1." $T_OPND]
+set src1 [makeLeaf "DE Src1" "${DECODE}." $src1]
+
 set src2          [prefixAll "uinstr_de1.src2." $T_OPND]
+set src2 [makeLeaf "DE Src2" "${DECODE}." $src2]
+
 set dst           [prefixAll "uinstr_de1.dst."  $T_OPND]
-set sigs      [list fe_valid_de0 {*}$uinstr_fields {*}$dst {*}$src1 {*}$src2]
-set de_sigs   [prefixAll "${DECODE}." $sigs]
-addSignalGroup "DE" $de_sigs 1
+set dst  [makeLeaf "DE Dst" "${DECODE}." $dst]
+
+set de [makeNode "Decode" "${DECODE}." [list] [list $de_ctl $src1 $src2 $dst]]
+addGroupDict $de
+return
 
 # RegRd  signals
 set uinstr_fields [prefixAll "uinstr_rd1." [list valid SIMID.fid uop funct imm64 opcode]]

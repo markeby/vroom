@@ -43,26 +43,47 @@ proc addGroupDict {grpd} {
 proc makeParent {name kids} {
     set grp [dict create]
     dict set grp group_name $name
+    dict set grp signals [list]
     dict set grp children $kids
     return $grp
 }
 
-proc makeLeaf {name sigs {pfx ""}} {
+proc makeLeaf {name pfx sigs} {
     set grp [dict create]
     set sigs [prefixAll $pfx $sigs]
     dict set grp group_name $name
     dict set grp signals $sigs
+    dict set grp children [list]
     return $grp
 }
 
+#proc makeNode {name pfx sigs kids} {
+#    set grp [dict create]
+#    set sigs [prefixAll $pfx $sigs]
+#    dict set grp group_name $name
+#    dict set grp signals $sigs
+#    dict set grp children $kids
+#    return $grp
+#}
+
+set fetch [makeParent "FE" [list]]
+
 set sigs [list br_mispred_rb1 br_tgt_rb1 stall valid_fe1 instr_fe1.instr.opcode instr_fe1.pc f__instr_fe1]
-set fe_ctl [makeLeaf "FE CTL" $sigs "${FE_CTL}."]
+set fe_ctl [makeLeaf "FE CTL" "${FE_CTL}." $sigs]
+lappend [dict get $fetch children] $fe_ctl
+dict lappend fetch children $fe_ctl
 
 set sigs [list state PC]
-set fe_misc [makeLeaf "FE MISC" $sigs "${FE_CTL}."]
+set fe_misc [makeLeaf "FE MISC" "${FE_CTL}." $sigs]
+dict lappend fetch children $fe_misc
 
-set fetch [makeParent "FE" [list $fe_ctl $fe_misc]]
+set sigs      [list fb_ic_req_nnn.valid fb_ic_req_nnn.addr]
+set fb_ic_req [makeLeaf "FB2IC Req" "${FE_BUF}." $sigs]
+dict lappend fetch children $fb_ic_req
+
 addGroupDict $fetch
+
+return
 
 #set fetch [dict create]
 #

@@ -6,28 +6,30 @@ set sigs      [prefixAll "${CORE}." $sigs]
 addSignalGroup "Core" $sigs
 puts $sigs
 
-proc addGroupDict {grpd} {
+proc addGroupDict {grpd {pfx ""}} {
     gtkwave::/Edit/UnHighlight_All
 
     # then children
     if {[dict exists $grpd children]} {
         set children [dict get $grpd children]
         foreach child $children {
-            addGroupDict $child
+            set my_pfx [dict get $grpd prefix]
+            addGroupDict $child "${pfx}${my_pfx}"
         }
     }
 
     # first add all signals
+    set signals [dict get $grpd signals]
+    set pfx_signals [prefixAll [dict get $grpd prefix] $signals]
     if {[dict exists $grpd signals]} {
-        set signals    [dict get $grpd signals]
-        gtkwave::addSignalsFromList $signals 
+        gtkwave::addSignalsFromList $pfx_signals 
     }
 
     #gtkwave::/Edit/UnHighlight_All
 
     # then iterate over signals again, highlighting
     if {[dict exists $grpd signals]} {
-        gtkwave::highlightSignalsFromList [dict get $grpd signals]
+        gtkwave::highlightSignalsFromList $pfx_signals
     }
 
     # ditto groups
@@ -42,14 +44,14 @@ proc addGroupDict {grpd} {
 
 proc makeNode {name pfx sigs kids} {
     set grp [dict create]
-    set sigs [prefixAll $pfx $sigs]
+    dict set grp prefix $pfx
     dict set grp group_name $name
     dict set grp signals $sigs
     dict set grp children $kids
     return $grp
 }
 
-proc makeParent {name kids} {
+proc makeParent {name pfx kids} {
     return [makeNode $name "" [list] $kids]
 }
 
@@ -66,23 +68,18 @@ set fe_misc [makeLeaf "FE MISC" "${FE_CTL}." $sigs]
 set sigs [list fb_ic_req_nnn.valid fb_ic_req_nnn.addr]
 set fb_ic_req [makeLeaf "FB2IC Req" "${FE_BUF}." $sigs]
 
-set fetch [makeParent "FE" [list $fe_ctl $fe_misc $fb_ic_req]]
+set fetch [makeParent "FE" "" [list $fe_ctl $fe_misc $fb_ic_req]]
 addGroupDict $fetch
 
 # Decode signals
 set uinstr_fields [prefixAll "uinstr_de1." [list valid SIMID.fid uop funct imm64 opcode]]
 
 set sigs [list valid_fe1]
-set de_ctl [makeLeaf "DE CTL" "${DECODE}." $sigs]
+set de_ctl [makeLeaf "DE CTL" "" $sigs]
 
-set src1 [prefixAll "uinstr_de1.src1." $T_OPND]
-set src1 [makeLeaf "DE Src1" "${DECODE}." $src1]
-
-set src2          [prefixAll "uinstr_de1.src2." $T_OPND]
-set src2 [makeLeaf "DE Src2" "${DECODE}." $src2]
-
-set dst           [prefixAll "uinstr_de1.dst."  $T_OPND]
-set dst  [makeLeaf "DE Dst" "${DECODE}." $dst]
+set src1 [makeLeaf "DE Src1" "uinstr_de1.src1." $T_OPND]
+set src2 [makeLeaf "DE Src2" "uinstr_de1.src2." $T_OPND]
+set dst  [makeLeaf "DE Dst"  "uinstr_de1.dst."  $T_OPND]
 
 set de [makeNode "Decode" "${DECODE}." [list] [list $de_ctl $src1 $src2 $dst]]
 addGroupDict $de

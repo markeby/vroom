@@ -83,16 +83,15 @@ set dst  [makeLeaf "DE Dst"  "uinstr_de1.dst."  $T_OPND]
 
 set de [makeNode "Decode" "${DECODE}." [list] [list $de_ctl $src1 $src2 $dst]]
 addGroupDict $de
-return
 
 # RegRd  signals
-set uinstr_fields [prefixAll "uinstr_rd1." [list valid SIMID.fid uop funct imm64 opcode]]
-set src1          [prefixAll "uinstr_rd1.src1." $T_OPND]
-set src2          [prefixAll "uinstr_rd1.src2." $T_OPND]
-set dst           [prefixAll "uinstr_rd1.dst."  $T_OPND]
-set sigs      [list {*}$uinstr_fields {*}$dst {*}$src1 {*}$src2]
-set rd_sigs   [prefixAll "${REGRD}." $sigs]
-addSignalGroup "RD" $rd_sigs 1
+set uinstr_fields [makeLeaf "RD Ctl" "uinstr_rd1." [list valid SIMID.fid uop funct imm64 opcode]]
+set src1          [makeLeaf "RD Src1" "uinstr_rd1.src1." $T_OPND]
+set src2          [makeLeaf "RD Src2" "uinstr_rd1.src2." $T_OPND]
+set dst           [makeLeaf "RD Dst"  "uinstr_rd1.dst."  $T_OPND]
+set regrd [makeNode "RD" "${REGRD}." [list] [list $uinstr_fields $dst $src1 $src2]]
+addGroupDict $regrd
+return
 
 # EXE  signals
 set uinstr_fields [prefixAll "uinstr_ex1." [list valid SIMID.fid uop funct imm64 opcode]]

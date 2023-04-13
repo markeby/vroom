@@ -74,42 +74,34 @@ addGroupDict $fetch
 # Decode signals
 set uinstr_fields [prefixAll "uinstr_de1." [list valid SIMID.fid uop funct imm64 opcode]]
 
-set sigs [list valid_fe1]
-set de_ctl [makeLeaf "DE CTL" "" $sigs]
+set de_ctl [makeLeaf "DE CTL" "" [list valid_fe1]]
+set src1   [makeLeaf "DE Src1" "uinstr_de1.src1." $T_OPND]
+set src2   [makeLeaf "DE Src2" "uinstr_de1.src2." $T_OPND]
+set dst    [makeLeaf "DE Dst"  "uinstr_de1.dst."  $T_OPND]
 
-set src1 [makeLeaf "DE Src1" "uinstr_de1.src1." $T_OPND]
-set src2 [makeLeaf "DE Src2" "uinstr_de1.src2." $T_OPND]
-set dst  [makeLeaf "DE Dst"  "uinstr_de1.dst."  $T_OPND]
-
-set de [makeNode "Decode" "${DECODE}." [list] [list $de_ctl $src1 $src2 $dst]]
-addGroupDict $de
+addGroupDict [makeNode "Decode" "${DECODE}." [list] [list $de_ctl $src1 $src2 $dst]]
 
 # RegRd  signals
-set uinstr_fields [makeLeaf "RD Ctl" "uinstr_rd1." [list valid SIMID.fid uop funct imm64 opcode]]
+set uinstr_fields [makeLeaf "RD Uop" "uinstr_rd1." [list valid SIMID.fid uop funct imm64 opcode]]
 set src1          [makeLeaf "RD Src1" "uinstr_rd1.src1." $T_OPND]
 set src2          [makeLeaf "RD Src2" "uinstr_rd1.src2." $T_OPND]
 set dst           [makeLeaf "RD Dst"  "uinstr_rd1.dst."  $T_OPND]
-set regrd [makeNode "RD" "${REGRD}." [list] [list $uinstr_fields $dst $src1 $src2]]
-addGroupDict $regrd
-return
+addGroupDict [makeNode "RD" "${REGRD}." [list] [list $uinstr_fields $dst $src1 $src2]]
 
 # EXE  signals
-set uinstr_fields [prefixAll "uinstr_ex1." [list valid SIMID.fid uop funct imm64 opcode]]
-set src1          [prefixAll "uinstr_ex1.src1." $T_OPND]
-set src2          [prefixAll "uinstr_ex1.src2." $T_OPND]
-set dst           [prefixAll "uinstr_ex1.dst."  $T_OPND]
-set sigs      [list {*}$uinstr_fields {*}$dst {*}$src1 {*}$src2]
-set ex_sigs   [prefixAll "${EXE}." $sigs]
-addSignalGroup "EX" $ex_sigs 1
+set uinstr_fields [makeLeaf "EXE Uop"  "uinstr_ex1." [list valid SIMID.fid uop funct imm64 opcode]]
+set src1          [makeLeaf "EXE Src1" "uinstr_ex1.src1." $T_OPND]
+set src2          [makeLeaf "EXE Src2" "uinstr_ex1.src2." $T_OPND]
+set dst           [makeLeaf "EXE Dst"  "uinstr_ex1.dst."  $T_OPND]
+addGroupDict [makeNode "EX" "${EXE}." [list] [list $uinstr_fields $src1 $src2 $dst]]
 
 # Mem  signals
-set uinstr_fields [prefixAll "uinstr_mm1." [list valid SIMID.fid uop funct imm64 opcode]]
-set src1          [prefixAll "uinstr_mm1.src1." $T_OPND]
-set src2          [prefixAll "uinstr_mm1.src2." $T_OPND]
-set dst           [prefixAll "uinstr_mm1.dst."  $T_OPND]
-set sigs      [list {*}$uinstr_fields {*}$dst {*}$src1 {*}$src2]
-set mm_sigs   [prefixAll "${MEM}." $sigs]
-addSignalGroup "MM" $mm_sigs 1
+set uinstr_fields [makeLeaf "MEM Uop" "uinstr_mm1." [list valid SIMID.fid uop funct imm64 opcode]]
+set src1          [makeLeaf "MEM Src1" "uinstr_mm1.src1." $T_OPND]
+set src2          [makeLeaf "MEM Src2" "uinstr_mm1.src2." $T_OPND]
+set dst           [makeLeaf "MEM Dst"  "uinstr_mm1.dst."  $T_OPND]
+addGroupDict [makeNode "MM" "${MEM}." [list] [list $uinstr_fields $src1 $src2 $dst]]
+return
 
 # Retire signals
 set uinstr_fields [prefixAll "uinstr_rb0." [list valid SIMID.fid uop funct imm64 opcode]]

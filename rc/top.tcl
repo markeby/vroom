@@ -82,36 +82,39 @@ addGroupDict $fetch
 # Decode signals
 set uinstr_fields [prefixAll "uinstr_de1." [list valid SIMID.fid uop funct imm64 opcode]]
 
-set de_ctl [makeLeaf "DE CTL" "" [list valid_fe1]]
-set ops    [makeUopSrcDst "DE Operands" "${DECODE}." "uinstr_de1" $T_OPND]
-addGroupDict [makeNode "Decode" "${DECODE}." [list] [list $de_ctl $ops]]
+set glst [list]
+lappend glst [makeLeaf "DE CTL" "" [list valid_fe1]]
+lappend glst [makeUopSrcDst "DE Operands" "${DECODE}." "uinstr_de1" $T_OPND]
+addGroupDict [makeNode "Decode" "${DECODE}." [list] $glst]
 
 # RegRd  signals
-set uinstr_fields [makeLeaf "RD Uop" "uinstr_rd1." [list valid SIMID.fid uop funct imm64 opcode]]
-set ops    [makeUopSrcDst "RD Operands" "${REGRD}." "uinstr_rd1" $T_OPND]
-addGroupDict [makeNode "RD" "${REGRD}." [list] [list $uinstr_fields $ops]]
+set glst [list]
+lappend glst [makeLeaf "RD Uop" "uinstr_rd1." [list valid SIMID.fid uop funct imm64 opcode]]
+lappend glst [makeUopSrcDst "RD Operands" "${REGRD}." "uinstr_rd1" $T_OPND]
+addGroupDict [makeNode "RD" "${REGRD}." [list] $glst]
 
 # EXE  signals
-set uinstr_fields [makeLeaf "EXE Uop"  "uinstr_ex1." [list valid SIMID.fid uop funct imm64 opcode]]
-set ops           [makeUopSrcDst "EXE Operands" "${EXE}." "uinstr_ex1" $T_OPND]
-addGroupDict [makeNode "EX" "${EXE}." [list] [list $uinstr_fields $ops]]
+set glst [list]
+lappend glst [makeLeaf "EXE Uop"  "uinstr_ex1." [list valid SIMID.fid uop funct imm64 opcode]]
+lappend glst [makeUopSrcDst "EXE Operands" "${EXE}." "uinstr_ex1" $T_OPND]
+addGroupDict [makeNode "EX" "${EXE}." [list] $glst]
 
 # Mem  signals
-set uinstr_fields [makeLeaf "MEM Uop" "uinstr_mm1." [list valid SIMID.fid uop funct imm64 opcode]]
-set ops           [makeUopSrcDst "MEM Operands" "${MEM}." "uinstr_mm1" $T_OPND]
-addGroupDict [makeNode "MM" "${MEM}." [list] [list $uinstr_fields $ops]]
+set glst [list]
+lappend glst [makeLeaf "MEM Uop" "uinstr_mm1." [list valid SIMID.fid uop funct imm64 opcode]]
+lappend glst [makeUopSrcDst "MEM Operands" "${MEM}." "uinstr_mm1" $T_OPND]
+addGroupDict [makeNode "MM" "${MEM}." [list] $glst]
 
 # Retire signals
-set uinstr_fields [makeLeaf "RB Uop" "uinstr_rb0." [list valid SIMID.fid uop funct imm64 opcode]]
-set ops           [makeUopSrcDst "RB Operands" "${RETIRE}." "uinstr_rb1" $T_OPND]
-set regwr         [makeLeaf "RB RegWr" "" [list wren_rb0 wraddr_rb0 wrdata_rb0]]
-addGroupDict [makeNode "RB" "${RETIRE}." [list] [list $uinstr_fields $regwr $ops]]
-return
+set glst []
+lappend glst [makeLeaf "RB Uop" "uinstr_rb0." [list valid SIMID.fid uop funct imm64 opcode]]
+lappend glst [makeUopSrcDst "RB Operands" "${RETIRE}." "uinstr_rb1" $T_OPND]
+lappend glst [makeLeaf "RB RegWr" "" [list wren_rb0 wraddr_rb0 wrdata_rb0]]
+addGroupDict [makeNode "RB" "${RETIRE}." [list] $glst]
 
 # Scoreboard
-set sigs      [list stall]
-set sb_sigs   [prefixAll "${SCORE}." $sigs]
-addSignalGroup "Scoreboard" $sb_sigs 1
+addGroupDict [makeLeaf "Scoreboard" "${SCORE}." [list stall]]
+return
 
 # Regfile
 set sigs      [list]

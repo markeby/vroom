@@ -114,13 +114,11 @@ addGroupDict [makeNode "RB" "${RETIRE}." [list] $glst]
 
 # Scoreboard
 addGroupDict [makeLeaf "Scoreboard" "${SCORE}." [list stall]]
-return
 
 # Regfile
 set sigs      [list]
 for {set i 0} {$i < 32} {incr i} {
     lappend sigs "REGS\[$i\]"
 }
-set gpr_sigs  [prefixAll "${GPRS}." $sigs]
-addSignalGroup "GPRs" $gpr_sigs 1
+addGroupDict [makeLeaf "GPRs" "${GPRS}." $sigs]
 

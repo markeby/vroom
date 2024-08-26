@@ -1,0 +1,33 @@
+`ifndef __ROB_PKG
+`define __ROB_PKG
+
+`include "verif.pkg"
+`include "common.pkg"
+
+package rob;
+
+    function common::t_rob_id f_incr_robid(common::t_rob_id robid);
+       f_incr_robid = robid;
+       if ({1'b0,f_incr_robid.idx} == RB_NUM_ENTS-1) begin
+          f_incr_robid.wrap ^= 1'b1;
+          f_incr_robid.idx   = '0;
+       end else begin
+          f_incr_robid.idx  += 1'b1;
+       end
+    endfunction
+
+    function logic f_rob_empty(common::t_rob_id rob_head, common::t_rob_id rob_tail);
+       f_rob_empty = rob_head == rob_tail;
+    endfunction
+
+    function logic f_rob_full(common::t_rob_id rob_head, common::t_rob_id rob_tail);
+       common::t_rob_id rob_head_wflip;
+       rob_head_wflip = rob_head;
+       rob_head_wflip.wrap ^= 1'b1;
+       f_rob_full = rob_head_wflip == rob_tail;
+    endfunction
+
+endpackage
+
+`endif // __ROB_PKG
+

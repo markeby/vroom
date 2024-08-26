@@ -1,5 +1,5 @@
 `ifndef __COMMON_PKG
-`define __COMMON_PKG 
+`define __COMMON_PKG
 
 `include "verif.pkg"
 
@@ -20,6 +20,14 @@ package common;
 
     localparam FE_FB_NUM_ENTS     = 4;
     localparam FE_FB_NUM_ENTS_LG2 = $clog2(FE_FB_NUM_ENTS);
+
+    localparam RB_NUM_ENTS = 8;
+    localparam RB_NUM_ENTS_LG2 = $clog2(RB_NUM_ENTS);
+    typedef logic[RB_NUM_ENTS_LG2-1:0] t_rob_ptr;
+    typedef struct packed {
+       logic     wrap;
+       t_rob_ptr idx;
+    } t_rob_id;
 
     typedef logic[PA_SZ-1:0]    t_paddr;
 
@@ -53,4 +61,4 @@ package common;
 
 endpackage
 
-`endif // __COMMON_PKG 
+`endif // __COMMON_PKG

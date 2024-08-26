@@ -96,6 +96,21 @@ chk_always_increment #(.T(int)) fid_counting_up (
 );
 `endif
 
+rob rob (
+    .clk,
+    .reset,
+    .uinstr_de1,
+    .uinstr_mm1,
+    .result_mm1,
+
+    .uinstr_rb1 (),
+    .wren_rb1 (),
+    .wraddr_rb1 (),
+    .wrdata_rb1 (),
+
+    .br_mispred_rb1 (),
+    .br_tgt_rb1
+);
 endmodule
 
 `endif // __RETIRE_SV

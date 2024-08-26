@@ -44,7 +44,7 @@ always_comb begin
         U_OR:      result_ex0 = src1val_ex0 | src2val_ex0;
         U_SLL:     result_ex0 = src1val_ex0 << src2val_ex0[4:0];
         U_SRL:     result_ex0 = src1val_ex0 >> src2val_ex0[4:0];
-        U_SRA:     result_ex0 = src1val_signed_ex0 >>> src2val_ex0[4:0]; 
+        U_SRA:     result_ex0 = src1val_signed_ex0 >>> src2val_ex0[4:0];
         U_SLT:     result_ex0 = src1val_signed_ex0 < src2val_signed_ex0 ? t_rv_reg_data'(1) : t_rv_reg_data'(0);
         U_SLTU:    result_ex0 = src1val_ex0 < src2val_ex0 ? t_rv_reg_data'(1) : t_rv_reg_data'(0);
         default: begin

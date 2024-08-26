@@ -105,11 +105,11 @@ initial begin
         IROM[a++] = rvADDI(1,1,12'hDE); IROM[a++] = rvSLLI(1,1,6'd8);
         IROM[a++] = rvADDI(1,1,12'hAD); IROM[a++] = rvSLLI(1,1,6'd8);
         IROM[a++] = rvADDI(1,1,12'hBE); IROM[a++] = rvSLLI(1,1,6'd8);
-        IROM[a++] = rvADDI(1,1,12'hEF); 
+        IROM[a++] = rvADDI(1,1,12'hEF);
         IROM[a++] = rvADDI(2,2,12'hCA); IROM[a++] = rvSLLI(2,2,6'd8);
         IROM[a++] = rvADDI(2,2,12'hFE); IROM[a++] = rvSLLI(2,2,6'd8);
         IROM[a++] = rvADDI(2,2,12'hBA); IROM[a++] = rvSLLI(2,2,6'd8);
-        IROM[a++] = rvADDI(2,2,12'hBE); 
+        IROM[a++] = rvADDI(2,2,12'hBE);
     `endif
     `ifdef TEST_ALL_DEPS
         IROM[a++] = rvADDI(1,1,1);

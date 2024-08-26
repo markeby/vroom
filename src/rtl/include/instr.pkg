@@ -1,5 +1,5 @@
 `ifndef __INSTR_PKG
-`define __INSTR_PKG 
+`define __INSTR_PKG
 
 `include "verif.pkg"
 `include "common.pkg"
@@ -175,4 +175,4 @@ package instr;
 
 endpackage
 
-`endif // __INSTR_PKG 
+`endif // __INSTR_PKG

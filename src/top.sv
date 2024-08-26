@@ -1,5 +1,5 @@
 `ifndef __TOP_SV
-`define __TOP_SV 
+`define __TOP_SV
 
 `include "vroom_macros.sv"
 
@@ -24,4 +24,4 @@ core core (
 );
 endmodule
 
-`endif // __TOP_SV 
+`endif // __TOP_SV

@@ -1,5 +1,5 @@
 `ifndef __INSTR_DECODE_PKG
-`define __INSTR_DECODE_PKG 
+`define __INSTR_DECODE_PKG
 
 `include "instr.pkg"
 `include "verif.pkg"
@@ -72,18 +72,18 @@ package instr_decode;
     function t_rv_instr_format get_instr_format (t_rv_opcode opcode);
         unique casez (opcode)
             RV_OP_LUI   : get_instr_format = RV_FMT_U;
-            RV_OP_AUIPC : get_instr_format = RV_FMT_U; 
-            RV_OP_JAL   : get_instr_format = RV_FMT_J; 
-            RV_OP_JALR  : get_instr_format = RV_FMT_I; 
-            RV_OP_BR    : get_instr_format = RV_FMT_B; 
-            RV_OP_LD    : get_instr_format = RV_FMT_I; 
-            RV_OP_ST    : get_instr_format = RV_FMT_S; 
-            RV_OP_ALU0_I : get_instr_format = RV_FMT_I; 
-            RV_OP_ALU1_I : get_instr_format = RV_FMT_I; 
-            RV_OP_ALU0_R : get_instr_format = RV_FMT_R; 
-            RV_OP_ALU1_R : get_instr_format = RV_FMT_R; 
-            RV_OP_FENCE : get_instr_format = RV_FMT_I; 
-            RV_OP_MISC  : get_instr_format = RV_FMT_I; 
+            RV_OP_AUIPC : get_instr_format = RV_FMT_U;
+            RV_OP_JAL   : get_instr_format = RV_FMT_J;
+            RV_OP_JALR  : get_instr_format = RV_FMT_I;
+            RV_OP_BR    : get_instr_format = RV_FMT_B;
+            RV_OP_LD    : get_instr_format = RV_FMT_I;
+            RV_OP_ST    : get_instr_format = RV_FMT_S;
+            RV_OP_ALU0_I : get_instr_format = RV_FMT_I;
+            RV_OP_ALU1_I : get_instr_format = RV_FMT_I;
+            RV_OP_ALU0_R : get_instr_format = RV_FMT_R;
+            RV_OP_ALU1_R : get_instr_format = RV_FMT_R;
+            RV_OP_FENCE : get_instr_format = RV_FMT_I;
+            RV_OP_MISC  : get_instr_format = RV_FMT_I;
         endcase
     endfunction
 
@@ -94,7 +94,7 @@ package instr_decode;
             RV_FMT_R: begin
                 // opcode = RV_OP_ALU_R
                 t_rv_alu_op_funct3 alu_op = t_rv_alu_op_funct3'(instr.d.R.funct3);
-                unique casez(instr.opcode) 
+                unique casez(instr.opcode)
                     RV_OP_ALU0_R:
                         unique casez(alu_op)
                             ALU_ADD:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SUB : U_ADD;
@@ -119,7 +119,7 @@ package instr_decode;
 
             end
             RV_FMT_I: begin
-                unique casez(instr.opcode) 
+                unique casez(instr.opcode)
                     RV_OP_JALR  : rv_instr_to_uop = U_INVALID;
                     RV_OP_LD    : begin
                         //t_rv_ld_op_funct3 ld_op = t_rv_ld_op_funct3'(instr.d.I.funct3);
@@ -215,4 +215,4 @@ package instr_decode;
 
 endpackage
 
-`endif // __INSTR_DECODE_PKG 
+`endif // __INSTR_DECODE_PKG

@@ -1,5 +1,5 @@
 `ifndef __ASM_PKG
-`define __ASM_PKG 
+`define __ASM_PKG
 
 `include "common.pkg"
 
@@ -81,4 +81,4 @@ package asm;
 
 endpackage
 
-`endif // __ASM_PKG 
+`endif // __ASM_PKG

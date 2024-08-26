@@ -1,5 +1,5 @@
 `ifndef __VROOM_MACROS_SV
-`define __VROOM_MACROS_SV 
+`define __VROOM_MACROS_SV
 
 `define DFF(Q,D,clk) \
     always_ff @(posedge clk) Q <= D;
@@ -16,7 +16,7 @@
 
 `define MKPIPE_INIT(tp, sigx, sig0, fr, to) \
     `MKPIPE(tp,sigx,fr,to) \
-    always_comb sigx[fr]=sig0; 
+    always_comb sigx[fr]=sig0;
 
 `define PMSG(tag, msg) \
     $display("@[%-d] %-d tag: %s", $time(), top.cclk_count, $sformatf msg);
@@ -30,7 +30,7 @@
     `define DEBUG(msg) \
         `PMSG(D, msg)
 `else
-    `define DEBUG(msg) 
+    `define DEBUG(msg)
 `endif
 
 `define VASSERT(name, antecedent, consequent, msg) \
@@ -39,4 +39,4 @@
 `define CHK_ONEHOT(name, valid, bits) \
     name: assert property (@(posedge clk) disable iff(reset) (valid) |-> $onehot(bits)) else $error($sformatf("ONEHOT check failed! %b",bits));
 
-`endif // __VROOM_MACROS_SV 
+`endif // __VROOM_MACROS_SV

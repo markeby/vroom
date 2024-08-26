@@ -63,11 +63,11 @@ always_comb regwr_mask_rb1 = uinstr_to_wrmask(uinstr_rb1);
 //
 // When stall is asserted, a valid uop in FE, DE, or RD must stay in place!
 always_comb stall = |( regrd_mask_de1
-                     & ( regwr_mask_rd1 
-                       | regwr_mask_ex1 
-                       | regwr_mask_mm1 
+                     & ( regwr_mask_rd1
+                       | regwr_mask_ex1
+                       | regwr_mask_mm1
                        | regwr_mask_rb1
-                       ) 
+                       )
                      ) & ~br_mispred_rb1;
 
 //

@@ -12,10 +12,10 @@ module fe_ctl
 (
     input  logic       clk,
     input  logic       reset,
-                       
+
     output t_fe_fb_req fe_fb_req_nnn,
     input  t_fb_fe_rsp fb_fe_rsp_nnn,
-                       
+
     input  t_paddr     br_tgt_rb1,
     input  logic       br_mispred_rb1,
 
@@ -67,7 +67,7 @@ always_comb halt = fb_fe_rsp_nnn.valid & fb_fe_rsp_nnn_instr.opcode == RV_OP_MIS
 
 always_comb begin
     state_nxt = state;
-    unique case(state) 
+    unique case(state)
         FE_IDLE:      if (~halt                        ) state_nxt = FE_REQ_IC;
         FE_REQ_IC:    if (1'b1                         ) state_nxt = FE_PDG_IC;
         FE_PDG_IC:    if (fb_fe_rsp_nnn.valid & ~stall ) state_nxt = FE_PDG_IC;    // no stall -> early send
@@ -88,7 +88,7 @@ assign incr_pc_nnn = fe_fb_req_nnn.valid;
 
 t_paddr PCNxt;
 always_comb PCNxt = reset          ? '0         :
-                    br_mispred_rb1 ? br_tgt_rb1 : 
+                    br_mispred_rb1 ? br_tgt_rb1 :
                     incr_pc_nnn    ? PC + 4     :
                                      PC;
 `DFF(PC, PCNxt, clk)
@@ -117,7 +117,7 @@ always_comb begin
 
     valid_fe1           = ( state == FE_PDG_IC & fb_fe_rsp_nnn.valid
                           | state == FE_PDG_STALL
-                          | state == FE_DRAIN 
+                          | state == FE_DRAIN
                           ) & ~br_mispred_rb1 & ~halt;
     instr_fe1       = t_instr_pkt'('0);
     instr_fe1.instr = ic_rsp.instr;

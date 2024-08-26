@@ -13,10 +13,10 @@ module fe_pf
 (
     input  logic       clk,
     input  logic       reset,
-                       
+
     // FE inputs
     input  t_fe_fb_req fe_fb_req_fb0,
-                       
+
     // IC
     output logic       pf_fb_req_rq_pf0,
     output t_fe_fb_req pf_fb_req_pkt_pf0,
@@ -41,7 +41,7 @@ t_paddr next_line;
 
 always_comb begin
     state_nxt = state;
-    unique case(state) 
+    unique case(state)
         IDLE:      if (fe_fb_req_fb0.valid                     ) state_nxt = REQ_PF;
         REQ_PF:    if (pf_fb_req_gn_pf0 & ~fe_fb_req_fb0.valid ) state_nxt = IDLE;
               else if (pf_fb_req_gn_pf0 &  fe_fb_req_fb0.valid ) state_nxt = REQ_PF;

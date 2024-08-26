@@ -13,10 +13,10 @@ module fetch
 (
     input  logic       clk,
     input  logic       reset,
-                       
+
     output t_mem_req   fb_ic_req_nnn,
     input  t_mem_rsp   ic_fb_rsp_nnn,
-                       
+
     input  t_paddr     br_tgt_rb1,
     input  logic       br_mispred_rb1,
 

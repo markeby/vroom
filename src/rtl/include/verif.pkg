@@ -1,5 +1,5 @@
 `ifndef __VERIF_PKG
-`define __VERIF_PKG 
+`define __VERIF_PKG
 
 `include "instr.pkg"
 
@@ -29,4 +29,4 @@ package verif;
 
 endpackage
 
-`endif // __VERIF_PKG 
+`endif // __VERIF_PKG

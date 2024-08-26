@@ -1,5 +1,5 @@
 `ifndef __MEM_COMMON_PKG
-`define __MEM_COMMON_PKG 
+`define __MEM_COMMON_PKG
 
 `include "verif.pkg"
 `include "common.pkg"
@@ -46,4 +46,4 @@ package mem_common;
 
 endpackage
 
-`endif // __MEM_COMMON_PKG 
+`endif // __MEM_COMMON_PKG

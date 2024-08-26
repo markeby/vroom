@@ -22,7 +22,7 @@ module fe_fb_entry
 (
     input  logic           clk,
     input  logic           reset,
-                           
+
     // Entry state
     input  logic           e_push_fb0,
     input  t_fe_fb_static  c_push_static_fb0,
@@ -64,7 +64,7 @@ t_fsm state, state_nxt;
 
 always_comb begin
     state_nxt = state;
-    unique case(state) 
+    unique case(state)
         IDLE:      if (e_push_fb0                                ) state_nxt = REQ_IC;
         REQ_IC:    if (e_ic_req_gn_nnn                           ) state_nxt = PDG_IC;
         PDG_IC:    if (e_ic_rsp_pkt_nnn.valid & ~e_static_nnn.pf ) state_nxt = REQ_FE;

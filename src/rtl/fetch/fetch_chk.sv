@@ -13,7 +13,7 @@ module fetch_chk
     input  logic       clk,
     input  logic       reset,
     input  logic       stall,
-                       
+
     input  logic       valid_fe1,
     input  t_instr_pkt instr_fe1,
 
@@ -45,7 +45,7 @@ t_fsm state_nxt;
 
 always_comb begin
     state_nxt = state;
-    unique case(state) 
+    unique case(state)
         IDLE:         if (valid_fe1                    ) state_nxt = PDG_NXT_SEQ;
         PDG_NXT_SEQ:  if (br_mispred_rb1               ) state_nxt = PDG_BRANCH;
         PDG_BRANCH:   if (valid_fe1                    ) state_nxt = PDG_NXT_SEQ;

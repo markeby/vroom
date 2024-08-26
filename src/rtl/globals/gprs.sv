@@ -4,7 +4,7 @@
 `include "instr.pkg"
 `include "vroom_macros.sv"
 
-module gprs 
+module gprs
     import instr::*;
 #(parameter int NUMRD=2, NUMWR=1)
 (

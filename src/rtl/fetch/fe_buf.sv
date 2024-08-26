@@ -13,11 +13,11 @@ module fe_buf
 (
     input  logic       clk,
     input  logic       reset,
-                       
+
     // FE
     input  t_fe_fb_req fe_fb_req_fb0,
     output t_fb_fe_rsp fb_fe_rsp_nnn,
-                       
+
     // IC
     output t_mem_req   fb_ic_req_nnn,
     input  t_mem_rsp   ic_fb_rsp_nnn
@@ -140,7 +140,7 @@ for (genvar i=0; i<FE_FB_NUM_ENTS; i++) begin : g_fbent
         .e_ic_rsp_pkt_nnn ( e_ic_rsp_pkt_nnn[i] ) ,
         .e_fe_rsp_rq_nnn  ( e_fe_rsp_rq_nnn[i]  ) ,
         .e_fe_rsp_pkt_nnn ( e_fe_rsp_pkt_nnn[i] ) ,
-        .e_fe_rsp_gn_nnn  ( e_fe_rsp_gn_nnn[i]  ) 
+        .e_fe_rsp_gn_nnn  ( e_fe_rsp_gn_nnn[i]  )
     );
 end
 

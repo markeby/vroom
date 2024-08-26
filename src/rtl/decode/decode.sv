@@ -81,16 +81,20 @@ always_comb begin
         RV_FMT_I: begin
             uinstr_de0.funct7 = '0;
             uinstr_de0.funct3 = rv_instr_fe1.d.I.funct3;
-            if (~rv_instr_fe1.opcode[3]) begin
-                // 64b version
-                uinstr_de0.dst    = '{opreg: rv_instr_fe1.d.I.rd,  optype: OP_REG, opsize: SZ_8B};
-                uinstr_de0.src1   = '{opreg: rv_instr_fe1.d.I.rs1, optype: OP_REG, opsize: SZ_8B};
-                uinstr_de0.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_8B};
-            end else begin
-                // 32b (W-suffix) version
-                uinstr_de0.dst    = '{opreg: rv_instr_fe1.d.I.rd,  optype: OP_REG, opsize: SZ_4B};
-                uinstr_de0.src1   = '{opreg: rv_instr_fe1.d.I.rs1, optype: OP_REG, opsize: SZ_4B};
-                uinstr_de0.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_4B};
+            if (rv_opcode_is_alu(rv_instr_fe1.opcode)) begin
+                if (~rv_instr_fe1.opcode[3]) begin
+                    // 64b version
+                    uinstr_de0.dst    = '{opreg: rv_instr_fe1.d.I.rd,  optype: OP_REG, opsize: SZ_8B};
+                    uinstr_de0.src1   = '{opreg: rv_instr_fe1.d.I.rs1, optype: OP_REG, opsize: SZ_8B};
+                    uinstr_de0.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_8B};
+                end else begin
+                    // 32b (W-suffix) version
+                    uinstr_de0.dst    = '{opreg: rv_instr_fe1.d.I.rd,  optype: OP_REG, opsize: SZ_4B};
+                    uinstr_de0.src1   = '{opreg: rv_instr_fe1.d.I.rs1, optype: OP_REG, opsize: SZ_4B};
+                    uinstr_de0.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_4B};
+                end
+            // end else if (rv_opcode_is_ld(rv_instr_fe1.opcode)) begin
+                // t_rv_ld_op_funct3 f3 = t_rv_ld_op_funct3'(uinstr_de0.funct3);
             end
             uinstr_de0.imm64  = sext_funcs#(.IWIDTH(12), .OWIDTH(64))::sext(rv_instr_fe1.d.I.imm_11_0);
             uinstr_de0.uop    = rv_instr_to_uop(rv_instr_fe1);

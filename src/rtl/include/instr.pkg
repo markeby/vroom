@@ -33,6 +33,14 @@ package instr;
     } t_rv_opcode;
 
     typedef enum logic[2:0] {
+        LD_BYTE   = 3'b000,
+        LD_HALF   = 3'b001,
+        LD_WORD   = 3'b010,
+        LD_BYTE_U = 3'b100,
+        LD_BYTE_L = 3'b101
+    } t_rv_ld_op_funct3;
+
+    typedef enum logic[2:0] {
         ALU_ADD  = 3'b000,
         ALU_SHL  = 3'b001,
         ALU_SLT  = 3'b010,
@@ -54,6 +62,7 @@ package instr;
 
     typedef union packed {
         t_rv_alu_op_funct3 alu;
+        t_rv_ld_op_funct3  ld;
         t_rv_br_op_funct3  br;
         logic[2:0]         flat;
     } t_rv_funct3;

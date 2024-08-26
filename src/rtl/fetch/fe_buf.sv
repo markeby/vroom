@@ -125,7 +125,7 @@ always_comb begin
 end
 always_comb pf_fb_req_gn_pf0 = pf_fb_req_rq_pf0 & ~fe_req_mis_fb0;
 
-for (genvar i=0; i<FE_FB_NUM_ENTS; i++) begin
+for (genvar i=0; i<FE_FB_NUM_ENTS; i++) begin : g_fbent
     fe_fb_entry fe_fb_entry (
         .clk,
         .reset,

@@ -22,7 +22,7 @@ localparam IROM_SZ_LG2 = $clog2(IROM_SZ);
 t_word IROM [IROM_SZ-1:0];
 
 t_mem_rsp ic_fb_rsp_pipe_nnn [LATENCY-1:0];
-for (genvar i=1; i<LATENCY; i++) begin
+for (genvar i=1; i<LATENCY; i++) begin : g_fbrsppipe
     `DFF(ic_fb_rsp_pipe_nnn[i], ic_fb_rsp_pipe_nnn[i-1], clk)
 end
 always_comb ic_fb_rsp_nnn = ic_fb_rsp_pipe_nnn[LATENCY-1];

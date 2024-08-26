@@ -27,7 +27,8 @@ package instr_decode;
         U_SRAW,
         U_OR,
         U_AND,
-        U_BR
+        U_BR,
+        U_LD_BYTE
     } t_uop;
 
     typedef struct packed {
@@ -51,6 +52,22 @@ package instr_decode;
         t_paddr           pc;
         logic             valid;
     } t_uinstr;
+
+    function logic rv_opcode_is_alu(t_rv_opcode opcode);
+        return opcode inside {RV_OP_ALU0_I, RV_OP_ALU1_I, RV_OP_ALU0_R, RV_OP_ALU0_I};
+    endfunction
+
+    function logic rv_opcode_is_st(t_rv_opcode opcode);
+        return opcode inside {RV_OP_ST};
+    endfunction
+
+    function logic rv_opcode_is_ld(t_rv_opcode opcode);
+        return opcode inside {RV_OP_LD};
+    endfunction
+
+    function logic rv_opcode_is_ldst(t_rv_opcode opcode);
+        return rv_opcode_is_ld(opcode) | rv_opcode_is_st(opcode);
+    endfunction
 
     function t_rv_instr_format get_instr_format (t_rv_opcode opcode);
         unique casez (opcode)
@@ -104,7 +121,10 @@ package instr_decode;
             RV_FMT_I: begin
                 unique casez(instr.opcode) 
                     RV_OP_JALR  : rv_instr_to_uop = U_INVALID;
-                    RV_OP_LD    : rv_instr_to_uop = U_INVALID;
+                    RV_OP_LD    : begin
+                        //t_rv_ld_op_funct3 ld_op = t_rv_ld_op_funct3'(instr.d.I.funct3);
+                        rv_instr_to_uop = U_LD_BYTE;
+                    end
                     RV_OP_ALU0_I : begin
                         t_rv_alu_op_funct3 alu_op = t_rv_alu_op_funct3'(instr.d.R.funct3);
                         unique casez(alu_op)

@@ -12,7 +12,7 @@
 
 `define MKPIPE(tp, sigx, fr, to) \
     tp sigx [``to``:``fr``]; \
-    for (genvar stg=``fr``+1; stg<=``to``; stg++) `DFF(``sigx``[stg], ``sigx``[stg-1], clk)
+    for (genvar stg=``fr``+1; stg<=``to``; stg++) begin: g_mkpipe``sigx`` `DFF(``sigx``[stg], ``sigx``[stg-1], clk) end
 
 `define MKPIPE_INIT(tp, sigx, sig0, fr, to) \
     `MKPIPE(tp,sigx,fr,to) \

@@ -115,6 +115,7 @@ mem mem (
 retire retire (
     .clk,
     .reset,
+    .uinstr_de1,
     .uinstr_mm1,
     .result_mm1,
     .uinstr_rb1,

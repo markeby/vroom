@@ -3,11 +3,11 @@
 
 `include "instr.pkg"
 `include "vroom_macros.sv"
-`include "rob.pkg"
 `include "common.pkg"
+`include "rob_defs.pkg"
 
 module rob
-    import instr::*, instr_decode::*, verif::*, common::*, rob::*;
+    import instr::*, instr_decode::*, verif::*, common::*, rob_defs::*;
 (
     input  logic             clk,
     input  logic             reset,
@@ -26,69 +26,86 @@ module rob
     output t_paddr           br_tgt_rb1
 );
 
-    // typedef struct packed {
-    //     `SIMID_STRUCT
-    //     logic[63:0]       imm64;
-    //     logic[6:0]        funct7;
-    //     logic             mispred;
-    //     t_rv_funct3       funct3;
-    //     t_uopnd_descr     src2;
-    //     t_uopnd_descr     src1;
-    //     t_uopnd_descr     dst;
-    //     t_rv_opcode       opcode;
-    //     t_rv_instr_format ifmt;
-    //     t_uop             uop;
-    //     t_paddr           pc;
-    //     logic             valid;
-    // } t_uinstr;
-
-    typedef struct packed {
-       t_uinstr uinstr;
-    } t_rob_ent_static;
-
-    typedef struct packed {
-       logic valid;
-       logic ready;
-    } t_rob_ent_dynamic;
-
-    typedef struct packed {
-       t_rob_ent_static  s;
-       t_rob_ent_dynamic d;
-    } t_rob_ent;
-
 //
 // Nets
 //
 
-   t_rob_ent ROB [RB_NUM_ENTS-1:0];
-   t_rob_id head_id;
-   t_rob_id tail_id;
-   logic    retire_valid_rb1;
+t_rob_id head_id; // pointer to oldest valid ROBID (if ~empty)
+t_rob_id tail_id; // pointer to first invalid ROBID (if ~full)
+
+t_rob_ent entries [RB_NUM_ENTS-1:0];
+logic     retire_valid_rb1;
+
+logic                  q_alloc_de1;
+logic[RB_NUM_ENTS-1:0] e_alloc_de1;
+logic                  rob_full_de1;
+logic                  rob_empty_de1;
 
 //
 // Logic
 //
 
-   // ROB pointers
+// ROB pointers
 
-   if(1) begin : g_rob_head_ptr
-      t_rob_id head_id_nxt;
-      assign head_id_nxt = reset     ? '0                    :
-                           alloc_de1 ? f_incr_robid(head_id) :
-                                       head_id;
-   end : g_rob_head_ptr
+if(1) begin : g_rob_head_ptr
+   t_rob_id head_id_nxt;
+   assign head_id_nxt = reset       ? '0                    :
+                        q_alloc_de1 ? f_incr_robid(head_id) :
+                                      head_id;
+   `DFF(head_id, head_id_nxt, clk)
+end : g_rob_head_ptr
 
-   if(1) begin : g_rob_tail_ptr
-      t_rob_id tail_id_nxt;
-      assign tail_id_nxt = reset            ? '0                    :
-                           retire_valid_rb1 ? f_incr_robid(head_id) :
-                                              head_id;
-   end : g_rob_tail_ptr
+if(1) begin : g_rob_tail_ptr
+   t_rob_id tail_id_nxt;
+   assign tail_id_nxt = reset            ? '0                    :
+                        retire_valid_rb1 ? f_incr_robid(head_id) :
+                                           head_id;
+   `DFF(tail_id, tail_id_nxt, clk)
+end : g_rob_tail_ptr
 
-   assign rob_empty_de1 = f_rob_empty(head_id, tail_id);
-   assign rob_full_de1  = f_rob_full(head_id, tail_id);
+assign rob_empty_de1 = f_rob_empty(head_id, tail_id);
+assign rob_full_de1  = f_rob_full(head_id, tail_id);
 
-   // ROB pointers
+// Retire
+
+assign retire_valid_rb1 = ~rob_empty_de1 & entries[head_id.idx].d.ready;
+
+// Tieoffs
+
+always_comb begin
+   uinstr_rb1 = '0;
+   wren_rb1 = '0;
+   wraddr_rb1 = '0;
+   wrdata_rb1 = '0;
+   br_mispred_rb1 = '0;
+   br_tgt_rb1 = '0;
+end
+
+//
+// Alloc
+//
+
+assign q_alloc_de1 = uinstr_de1.valid;
+assign e_alloc_de1 = q_alloc_de1 ? (1<<tail_id) : '0;
+
+//
+// ROB Entries
+//
+
+t_rob_ent_static rob_st_new_de1;
+always_comb begin
+   rob_st_new_de1.uinstr = uinstr_de1;
+end
+
+for (genvar i=0; i<RB_NUM_ENTS; i++) begin : g_rob_ents
+   rob_entry rbent (
+      .clk,
+      .reset,
+      .q_alloc_s_de1 ( rob_st_new_de1 ),
+      .e_alloc_de1   ( e_alloc_de1[i] ),
+      .rob_entry     ( entries[i]     )
+   );
+end
 
 //
 // Debug
@@ -96,37 +113,10 @@ module rob
 
 `ifdef SIMULATION
 
-localparam FAIL_DLY = 10;
-logic[FAIL_DLY:0] boom_pipe;
-`DFF(boom_pipe[FAIL_DLY:1], boom_pipe[FAIL_DLY-1:0], clk);
-
-always @(posedge clk) begin
-    boom_pipe[0] <= 1'b0;
-    if (uinstr_mm1.valid) begin
-        `INFO(("unit:RB %s result:%08h", describe_uinstr(uinstr_mm1), result_mm1))
-        print_rob_info(uinstr_mm1);
-    end
-
-    if (wren_rb1 & wraddr_rb1 == 0 & wrdata_rb1 == 64'h666) begin
-        `INFO(("Saw write of 666 to x0... goodbye, folks!"))
-        boom_pipe[0] <= 1'b1;
-    end
-
-    if (boom_pipe[FAIL_DLY]) begin
-        $finish();
-        $finish();
-        $finish();
-    end
-end
 `endif
 
 `ifdef ASSERT
-chk_always_increment #(.T(int)) fid_counting_up (
-    .clk,
-    .reset,
-    .valid ( uinstr_mm1.valid     ),
-    .count ( uinstr_mm1.SIMID.fid )
-);
+
 `endif
 
 endmodule

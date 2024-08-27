@@ -10,6 +10,8 @@ module retire
 (
     input  logic             clk,
     input  logic             reset,
+    input  t_uinstr          uinstr_de1,
+
     input  t_uinstr          uinstr_mm1,
     input  t_rv_reg_data     result_mm1,
 
@@ -109,7 +111,7 @@ rob rob (
     .wrdata_rb1 (),
 
     .br_mispred_rb1 (),
-    .br_tgt_rb1
+    .br_tgt_rb1 ()
 );
 endmodule
 

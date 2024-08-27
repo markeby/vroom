@@ -10,10 +10,10 @@ SRC_FILES := $(shell cat $(RTL_F))
 
 IVERILOG  := iverilog -g2012
 VERILATOR := verilator -Wall -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-UNUSEDPARAM --assert
-VL_TRACE_FLAGS := --trace-fst --trace-structs --trace-params 
+VL_TRACE_FLAGS := --trace-fst --trace-structs --trace-params
 
 VL_DEFINES := +define+SIMULATION=1 +define+ASSERT=1 #+define+DEBUGON=1
-VL_WAIVER_OUT := --waiver-output new_waivers.txt 
+VL_WAIVER_OUT := --waiver-output new_waivers.txt
 
 .PHONY: run
 run: Vtop

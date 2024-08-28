@@ -79,6 +79,20 @@ decode decode (
     .uinstr_de1
 );
 
+t_rob_id next_robid_ra0;
+alloc alloc (
+    .clk,
+    .reset,
+    .uinstr_de1,
+    .next_robid_ra0,
+    .rs_stall_ex_rs0,
+    .disp_valid_ex_rs1,
+    .disp_ex_rs1,
+    .rs_stall_mm_rs0,
+    .disp_valid_mm_rs1,
+    .disp_mm_rs1
+);
+
 regrd regrd (
     .clk,
     .reset,
@@ -115,6 +129,7 @@ mem mem (
 retire retire (
     .clk,
     .reset,
+    .next_robid_ra0,
     .uinstr_de1,
     .uinstr_mm1,
     .result_mm1,

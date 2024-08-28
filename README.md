@@ -27,13 +27,23 @@ gtkwave -S rc/top.tcl waves.fst
 Pipeline
 --------
 
-vroom has a simple six-stage pipeline:
+vroom is going out-of-order!  The pipeline looks like this:
 
-* **FETCH** has a FSM to read instructions from main memory.  
+**In-Order**
+
+* **FETCH** has a FSM to read instructions from main memory.
 * **DECODE** receives instructions from **FETCH** and decodes them into uops.
-* **REGRD** receives uops from **DECODE** and reads registers, if needed.
-* **EXE** receives uops from **REGRD** with register sources resolved.
-* **MEM** receives uops from **EXE** with address calculations performed, and does requisite memory accesses.
-* **WB** receives uops from **MEM** and updates registers as needed.
+* **ALLOC** receives decoded instructions from **DECODE**, assigns ROBIDs, and sends uops to the appropriate **RS**.
 
-Branches are resolved in **EXE**.  Branches are currently always predicted NT.  
+**Out-of-Order**
+
+* **EXE** executes integer uops from its **RS** when its deps are available, and writes back to the **ROB**.
+* **MEM** executes memory uops from its **RS** when its deps are available, and writes back to the **ROB**.
+
+**In-Order**
+
+* **RETIRE** receives writebacks from the OoO part of the pipe and writes them back.
+
+Presently, renaming is *super* basic.  In **ALLOC**, we scan the ROB for the youngest older instruction that is writing each of our source operands.  If any such instructions exist, the RS will wait for that ROB result to be written; otherwise, reads come out of the GPR RF.  Eventually we'll do full renaming with a PRF, keeping a free list and reclaiming registers, etc...  but not today.
+
+Branches are resolved in **EXE** but not taken until **RETIRE**.  Branches are currently always predicted NT.

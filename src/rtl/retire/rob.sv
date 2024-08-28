@@ -13,6 +13,7 @@ module rob
     input  logic             reset,
 
     input  t_uinstr          uinstr_de1,
+    output t_rob_id          next_robid_ra0,
 
     input  t_uinstr          uinstr_mm1,
     input  t_rv_reg_data     result_mm1,
@@ -67,6 +68,8 @@ if(1) begin : g_rob_tail_ptr
                                        head_id;
    `DFF(tail_id, tail_id_nxt, clk)
 end : g_rob_tail_ptr
+
+assign next_robid_ra0 = tail_id;
 
 assign rob_empty_de1 = f_rob_empty(head_id, tail_id);
 assign rob_full_de1  = f_rob_full(head_id, tail_id);

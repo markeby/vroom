@@ -53,6 +53,15 @@ package instr_decode;
         logic             valid;
     } t_uinstr;
 
+    typedef struct packed {
+       t_uinstr uinstr;
+       t_rob_id robid;
+       logic    src1_rob_pdg;
+       t_rob_id src1_robid;
+       logic    src2_rob_pdg;
+       t_rob_id src2_robid;
+    } t_uinstr_disp;
+
     function logic rv_opcode_is_alu(t_rv_opcode opcode);
         return opcode inside {RV_OP_ALU0_I, RV_OP_ALU1_I, RV_OP_ALU0_R, RV_OP_ALU0_I};
     endfunction

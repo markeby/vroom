@@ -34,12 +34,17 @@ t_rob_id head_id; // pointer to oldest valid ROBID (if ~empty)
 t_rob_id tail_id; // pointer to first invalid ROBID (if ~full)
 
 t_rob_ent entries [RB_NUM_ENTS-1:0];
-logic     retire_valid_rb1;
+logic                  q_retire_rb1;
+logic[RB_NUM_ENTS-1:0] e_retire_rb1;
+
+t_rv_reg_data          result_rb1;
 
 logic                  q_alloc_de1;
 logic[RB_NUM_ENTS-1:0] e_alloc_de1;
 logic                  rob_full_de1;
 logic                  rob_empty_de1;
+
+logic                  q_flush_now_rb1;
 
 //
 // Logic
@@ -57,9 +62,9 @@ end : g_rob_head_ptr
 
 if(1) begin : g_rob_tail_ptr
    t_rob_id tail_id_nxt;
-   assign tail_id_nxt = reset            ? '0                    :
-                        retire_valid_rb1 ? f_incr_robid(head_id) :
-                                           head_id;
+   assign tail_id_nxt = reset        ? '0                    :
+                        q_retire_rb1 ? f_incr_robid(tail_id) :
+                                       head_id;
    `DFF(tail_id, tail_id_nxt, clk)
 end : g_rob_tail_ptr
 
@@ -68,18 +73,23 @@ assign rob_full_de1  = f_rob_full(head_id, tail_id);
 
 // Retire
 
-assign retire_valid_rb1 = ~rob_empty_de1 & entries[head_id.idx].d.ready;
+t_rob_ent head_entry;
+assign head_entry = entries[head_id.idx];
 
-// Tieoffs
+assign q_retire_rb1 = ~rob_empty_de1 & head_entry.d.ready;
+assign e_retire_rb1 = q_retire_rb1 ? (1 << head_id.idx) : '0;
 
-always_comb begin
-   uinstr_rb1 = '0;
-   wren_rb1 = '0;
-   wraddr_rb1 = '0;
-   wrdata_rb1 = '0;
-   br_mispred_rb1 = '0;
-   br_tgt_rb1 = '0;
-end
+assign uinstr_rb1 = head_entry.s.uinstr;
+assign result_rb1 = head_entry.d.result;
+
+assign wren_rb1   = q_retire_rb1 & uinstr_rb1.dst.optype == OP_REG;
+assign wraddr_rb1 = uinstr_rb1.dst.opreg;
+assign wrdata_rb1 = result_rb1;
+
+assign q_flush_now_rb1 = ~rob_empty_de1 & head_entry.d.flush_needed;
+
+assign br_mispred_rb1 = q_flush_now_rb1 & uinstr_rb1.mispred;
+assign br_tgt_rb1     = result_rb1;
 
 //
 // Alloc
@@ -101,9 +111,13 @@ for (genvar i=0; i<RB_NUM_ENTS; i++) begin : g_rob_ents
    rob_entry rbent (
       .clk,
       .reset,
-      .q_alloc_s_de1 ( rob_st_new_de1 ),
-      .e_alloc_de1   ( e_alloc_de1[i] ),
-      .rob_entry     ( entries[i]     )
+      .q_alloc_s_de1 ( rob_st_new_de1  ),
+      .e_alloc_de1   ( e_alloc_de1[i]  ),
+      .uinstr_mm1,
+      .result_mm1,
+      .q_flush_now_rb1,
+      .e_retire_rb1  ( e_retire_rb1[i] ),
+      .rob_entry     ( entries[i]      )
    );
 end
 

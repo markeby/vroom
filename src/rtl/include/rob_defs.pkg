@@ -12,7 +12,9 @@ package rob_defs;
 
     typedef struct packed {
        logic         ready;
-       instr_decode::t_rv_reg_data value;
+       logic         flush_needed;
+       instr_decode::t_rv_reg_data
+                     result;
     } t_rob_ent_dynamic;
 
     typedef struct packed {

@@ -15,8 +15,8 @@ module rob
     input  t_uinstr          uinstr_de1,
     output t_rob_id          next_robid_ra0,
 
-    input  t_uinstr          uinstr_mm1,
-    input  t_rv_reg_data     result_mm1,
+    input  logic             ro_valid_rb0,
+    input  t_rob_result      ro_result_rb0,
 
     output t_uinstr          uinstr_rb1,
     output logic             wren_rb1,
@@ -114,10 +114,11 @@ for (genvar i=0; i<RB_NUM_ENTS; i++) begin : g_rob_ents
    rob_entry rbent (
       .clk,
       .reset,
+      .robid         ( t_rob_id'(i)    ),
       .q_alloc_s_de1 ( rob_st_new_de1  ),
       .e_alloc_de1   ( e_alloc_de1[i]  ),
-      .uinstr_mm1,
-      .result_mm1,
+      .ro_valid_rb0,
+      .ro_result_rb0,
       .q_flush_now_rb1,
       .e_retire_rb1  ( e_retire_rb1[i] ),
       .rob_entry     ( entries[i]      )

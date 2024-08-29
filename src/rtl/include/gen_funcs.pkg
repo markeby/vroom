@@ -3,7 +3,7 @@
 
 /* verilator lint_off DECLFILENAME */
 package gen_funcs;
-    virtual class gen_funcs #(parameter IWIDTH=8);
+    virtual class gen_funcs #(parameter IWIDTH=8, parameter type T=logic);
         static function logic[IWIDTH-1:0] find_first (logic[IWIDTH-1:0] inp);
             logic found = 1'b0;
             find_first = '0;
@@ -23,6 +23,13 @@ package gen_funcs;
             oh_encode = '0;
             for (int i=0; i<IWIDTH; i++) begin
                 oh_encode |= (inp[i] ? i[$clog2(IWIDTH)-1:0] : '0);
+            end
+        endfunction
+
+        static function T uaomux (T inps [IWIDTH-1:0], logic[IWIDTH-1:0] sels);
+            uaomux = T'('0);
+            for (int i=0; i<IWIDTH; i++) begin
+                uaomux |= (sels[i] ? inps[i] : '0);
             end
         endfunction
     endclass

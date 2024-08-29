@@ -10,20 +10,15 @@ module mem
     input  logic         clk,
     input  logic         reset,
 
-    input  t_uinstr      uinstr_ex1,
-    input  t_rv_reg_data result_ex1,
-    input  logic         br_mispred_rb1,
+    input  logic         iss_mm0,
+    input  t_uinstr_iss  iss_pkt_mm0,
 
-    output t_uinstr      uinstr_mm1,
     output t_rv_reg_data result_mm1
 );
 
 localparam MM0 = 0;
 localparam MM1 = 1;
 localparam NUM_MM_STAGES = 1;
-
-`MKPIPE_INIT(t_uinstr,       uinstr_mmx, uinstr_ex1, MM0, NUM_MM_STAGES)
-`MKPIPE_INIT(t_rv_reg_data,  result_mmx, result_ex1, MM0, NUM_MM_STAGES)
 
 //
 // Nets
@@ -44,9 +39,7 @@ localparam NUM_MM_STAGES = 1;
 // RB0 assign
 
 always_comb begin
-    result_mm1 = result_mmx[MM1];
-    uinstr_mm1 = uinstr_mmx[MM1];
-    uinstr_mm1.valid  &= ~br_mispred_rb1;
+    result_mm1 = '0;
 end
 
 
@@ -56,8 +49,8 @@ end
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (uinstr_ex1.valid) begin
-        `INFO(("unit:MM %s", describe_uinstr(uinstr_ex1)))
+    if (iss_mm0) begin
+        `INFO(("unit:MM %s", describe_uinstr(iss_pkt_mm0.uinstr)))
     end
 end
 `endif

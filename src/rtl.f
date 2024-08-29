@@ -26,3 +26,7 @@ src/rtl/regrd/regrd.sv
 src/rtl/retire/retire.sv
 src/rtl/retire/rob.sv
 src/rtl/retire/rob_entry.sv
+
+src/rtl/rs/rs_reg_trk.sv
+src/rtl/rs/rs_entry.sv
+src/rtl/rs/rs.sv

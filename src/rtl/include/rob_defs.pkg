@@ -7,33 +7,39 @@
 package rob_defs;
 
     typedef struct packed {
-       instr_decode::t_uinstr uinstr;
+        instr_decode::t_uinstr uinstr;
     } t_rob_ent_static;
 
     typedef struct packed {
-       logic         ready;
-       logic         flush_needed;
-       instr_decode::t_rv_reg_data
-                     result;
+        logic         ready;
+        logic         flush_needed;
+        instr_decode::t_rv_reg_data
+                      result;
     } t_rob_ent_dynamic;
 
     typedef struct packed {
-       t_rob_ent_static  s;
-       t_rob_ent_dynamic d;
+        t_rob_ent_static  s;
+        t_rob_ent_dynamic d;
     } t_rob_ent;
 
+    typedef struct packed {
+        common::t_rob_id            robid;
+        instr_decode::t_rv_reg_data value;
+        logic                       mispred;
+    } t_rob_result;
+
     function common::t_rob_id f_incr_robid(common::t_rob_id robid);
-       f_incr_robid = robid;
-       if ({1'b0,f_incr_robid.idx} == common::RB_NUM_ENTS-1) begin
-          f_incr_robid.wrap ^= 1'b1;
-          f_incr_robid.idx   = '0;
-       end else begin
-          f_incr_robid.idx  += 1'b1;
-       end
+        f_incr_robid = robid;
+        if ({1'b0,f_incr_robid.idx} == common::RB_NUM_ENTS-1) begin
+            f_incr_robid.wrap ^= 1'b1;
+            f_incr_robid.idx   = '0;
+        end else begin
+            f_incr_robid.idx  += 1'b1;
+        end
     endfunction
 
     function logic f_rob_empty(common::t_rob_id rob_head, common::t_rob_id rob_tail);
-       f_rob_empty = rob_head == rob_tail;
+        f_rob_empty = rob_head == rob_tail;
     endfunction
 
     function logic f_rob_full(common::t_rob_id rob_head, common::t_rob_id rob_tail);

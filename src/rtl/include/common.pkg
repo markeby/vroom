@@ -14,6 +14,10 @@ package common;
 
     localparam NUM_SOURCES = 2;
 
+    localparam NUM_DISP_PORTS     = 2;
+    localparam DISP_PORT_EINT     = 0;
+    localparam DISP_PORT_MEM      = 1;
+
     localparam FE_FB_NUM_SETS     = 4;
     localparam FE_FB_NUM_SETS_LG2 = $clog2(FE_FB_NUM_SETS);
     localparam FE_FB_SET_BITS     = FE_FB_NUM_SETS_LG2;

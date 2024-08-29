@@ -7,22 +7,19 @@
 `include "vroom_macros.sv"
 
 module alloc
-    import instr::*, instr_decode::*, common::*;
+   import instr::*, instr_decode::*, common::*;
 (
     input  logic         clk,
     input  logic         reset,
 
     input  t_uinstr      uinstr_de1,
 
+    output logic         stall_ra0,
     input  t_rob_id      next_robid_ra0,
 
-    input  logic         rs_stall_ex_rs0,
-    output logic         disp_valid_ex_rs1,
-    output t_uinstr_disp disp_ex_rs1,
-
-    input  logic         rs_stall_mm_rs0,
-    output logic         disp_valid_mm_rs1,
-    output t_uinstr_disp disp_mm_rs1
+    input  logic         rs_stall_ports_rs0    [common::NUM_DISP_PORTS-1:0],
+    output logic         disp_valid_ports_rs0  [common::NUM_DISP_PORTS-1:0],
+    output t_uinstr_disp disp_ports_rs0        [common::NUM_DISP_PORTS-1:0]
 );
 
 localparam RA0 = 0;
@@ -33,23 +30,40 @@ localparam NUM_RA_STAGES = 1;
 // Nets
 //
 
-t_uinstr_disp disp_rs0;
-t_uinstr_disp disp_rs1;
+t_uinstr_disp disp_ra0;
+t_uinstr_disp disp_ra1;
 
 //
 // Logic
 //
 
 always_comb begin
-   disp_rs0.uinstr       = uinstr_de1;
-   disp_rs0.robid        = next_robid_ra0;
-   disp_rs0.src1_rob_pdg = 1'b0;
-   disp_rs0.src1_robid   = '0;
-   disp_rs0.src2_rob_pdg = 1'b0;
-   disp_rs0.src2_robid   = '0;
+   disp_ra0.uinstr       = uinstr_de1;
+   disp_ra0.robid        = next_robid_ra0;
+   disp_ra0.src1_rob_pdg = 1'b0;
+   disp_ra0.src1_robid   = '0;
+   disp_ra0.src2_rob_pdg = 1'b0;
+   disp_ra0.src2_robid   = '0;
 end
 
-`DFF(disp_rs1, disp_rs0, clk)
+`DFF(disp_ra1, disp_ra0, clk)
+
+// Dispatch port assignments
+
+assign disp_ports_rs0       [DISP_PORT_EINT] = disp_ra1;
+assign disp_valid_ports_rs0 [DISP_PORT_EINT] = disp_ra1.uinstr.valid & ~stall_ra0;
+
+assign disp_ports_rs0       [DISP_PORT_MEM ] = disp_ra1;
+assign disp_valid_ports_rs0 [DISP_PORT_MEM ] = 1'b0; // disp_ra1.uinstr.valid;
+
+// Stall
+
+always_comb begin
+   stall_ra0 = 1'b0;
+   for (int i=0; i<NUM_DISP_PORTS; i++) begin
+      stall_ra0 |= rs_stall_ports_rs0[i];
+   end
+end
 
 //
 // Debug

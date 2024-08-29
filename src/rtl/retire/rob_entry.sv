@@ -11,13 +11,14 @@ module rob_entry
 (
     input  logic                  clk,
     input  logic                  reset,
+    input  t_rob_id               robid,
 
     input  rob_defs::t_rob_ent_static
                                   q_alloc_s_de1,
     input  logic                  e_alloc_de1,
 
-    input  t_uinstr               uinstr_mm1,
-    input  t_rv_reg_data          result_mm1,
+    input  logic                  ro_valid_rb0,
+    input  t_rob_result           ro_result_rb0,
 
     input  logic                  q_flush_now_rb1,
 
@@ -41,12 +42,12 @@ t_rob_ent_fsm fsm, fsm_nxt;
 // Nets
 //
 
-logic         e_value_wr_mm1;
+logic         e_value_wr_rb0;
 t_rv_reg_data e_result;
 
 // Flushes
 logic         e_flush_needed;
-logic         e_flush_needed_mm1;
+logic         e_flush_needed_rb0;
 
 //
 // FSM
@@ -61,7 +62,7 @@ always_comb begin
          RBE_IDLE:    if ( e_alloc_de1     ) fsm_nxt = RBE_PDG;
          RBE_PDG:     if ( q_flush_now_rb1 ) fsm_nxt = RBE_IDLE;
                  else if ( e_flush_needed  ) fsm_nxt = RBE_FLUSH;
-                 else if ( e_value_wr_mm1  ) fsm_nxt = RBE_READY;
+                 else if ( e_value_wr_rb0  ) fsm_nxt = RBE_READY;
          RBE_READY:   if ( q_flush_now_rb1 ) fsm_nxt = RBE_IDLE;
                  else if ( e_retire_rb1    ) fsm_nxt = RBE_IDLE;
          RBE_FLUSH:   if ( q_flush_now_rb1 ) fsm_nxt = RBE_IDLE;
@@ -75,13 +76,12 @@ end
 //
 
 // FIXME -- need to qual with robid
-assign e_value_wr_mm1 = uinstr_mm1.valid;
+assign e_value_wr_rb0 = ro_valid_rb0;
 
-`DFF_EN(e_result, result_mm1, clk, e_value_wr_mm1)
+`DFF_EN(e_result, ro_result_rb0.value, clk, e_value_wr_rb0)
 
 // Flushes
-assign e_flush_needed     = e_flush_needed_mm1;
-assign e_flush_needed_mm1 = e_value_wr_mm1 & uinstr_mm1.mispred;
+assign e_flush_needed = e_value_wr_rb0 & ro_result_rb0.mispred;
 
 //
 // Dynamic state

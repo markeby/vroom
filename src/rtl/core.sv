@@ -6,9 +6,10 @@
 `include "mem_common.pkg"
 `include "common.pkg"
 `include "vroom_macros.sv"
+`include "rob_defs.pkg"
 
 module core
-    import instr::*, instr_decode::*, mem_common::*, common::*;
+    import instr::*, instr_decode::*, mem_common::*, common::*, rob_defs::*;
 (
     input  logic clk,
     input  logic reset
@@ -31,13 +32,11 @@ t_rv_reg_addr rdaddrs_rd0 [1:0];
 t_uinstr      uinstr_rd1;
 t_rv_reg_data rddatas_rd1 [1:0];
 
-t_uinstr      uinstr_ex1;
 t_rv_reg_data result_ex1;
 
 t_paddr       br_tgt_rb1;
 logic         br_mispred_rb1;
 
-t_uinstr      uinstr_mm1;
 t_rv_reg_data result_mm1;
 
 t_uinstr      uinstr_rb1;
@@ -80,17 +79,50 @@ decode decode (
 );
 
 t_rob_id next_robid_ra0;
+
+logic         rs_stall_ports_rs0    [common::NUM_DISP_PORTS-1:0];
+logic         disp_valid_ports_rs0  [common::NUM_DISP_PORTS-1:0];
+t_uinstr_disp disp_ports_rs0        [common::NUM_DISP_PORTS-1:0];
+
+logic         rs_stall_mm_rs0;
+logic         disp_valid_mm_rs0;
+t_uinstr_disp disp_mm_rs0;
+
+logic         rs_stall_ex_rs0;
+logic         disp_valid_ex_rs0;
+t_uinstr_disp disp_ex_rs0;
+
+assign disp_valid_mm_rs0                          = disp_valid_ports_rs0 [common::DISP_PORT_MEM ];
+assign disp_mm_rs0                                = disp_ports_rs0       [common::DISP_PORT_MEM ];
+assign rs_stall_ports_rs0[common::DISP_PORT_MEM ] = rs_stall_mm_rs0;
+
+assign disp_valid_ex_rs0                          = disp_valid_ports_rs0 [common::DISP_PORT_EINT];
+assign disp_ex_rs0                                = disp_ports_rs0       [common::DISP_PORT_EINT];
+assign rs_stall_ports_rs0[common::DISP_PORT_EINT] = rs_stall_ex_rs0;
+
+logic        eint_iss_rs1;
+t_uinstr_iss eint_iss_pkt_rs1;
+
+rs #(.NUM_RS_ENTS(8)) rs_exe (
+    .clk,
+    .reset,
+    .ro_valid_rb0,
+    .ro_result_rb0,
+    .rs_stall_rs0 ( rs_stall_ex_rs0     ) ,
+    .uinstr_rs0   ( disp_ex_rs0         ) ,
+    .rddatas_rs0  ( rddatas_rs0         ) ,
+    .iss_rs1      ( eint_iss_rs1        ) ,
+    .iss_pkt_rs1  ( eint_iss_pkt_rs1    )
+);
+
 alloc alloc (
     .clk,
     .reset,
     .uinstr_de1,
     .next_robid_ra0,
-    .rs_stall_ex_rs0,
+    .rs_stall_ports_rs0,
     .disp_valid_ex_rs1,
-    .disp_ex_rs1,
-    .rs_stall_mm_rs0,
-    .disp_valid_mm_rs1,
-    .disp_mm_rs1
+    .disp_ex_rs1
 );
 
 regrd regrd (
@@ -105,24 +137,28 @@ regrd regrd (
     .uinstr_rd1
 );
 
+logic        ro_valid_rb0;
+t_rob_result ro_result_rb0;
 exe exe (
     .clk,
     .reset,
     .stall,
     .br_mispred_rb1,
-    .uinstr_rd1,
-    .rddatas_rd1,
-    .uinstr_ex1,
-    .result_ex1
+
+    .iss_ex0      ( eint_iss_rs1        ) ,
+    .iss_pkt_ex0  ( eint_iss_pkt_rs1    ) ,
+
+    .ro_valid_ex1 ( ro_valid_rb0 ) ,
+    .ro_result_ex1 (ro_result_rb0 )
 );
 
 mem mem (
     .clk,
     .reset,
-    .br_mispred_rb1,
-    .uinstr_ex1,
-    .result_ex1,
-    .uinstr_mm1,
+
+    .iss_mm0     ( 1'b0             ) ,
+    .iss_pkt_mm0 ( eint_iss_pkt_rs1 ) ,
+
     .result_mm1
 );
 
@@ -131,8 +167,10 @@ retire retire (
     .reset,
     .next_robid_ra0,
     .uinstr_de1,
-    .uinstr_mm1,
-    .result_mm1,
+
+    .ro_valid_rb0,
+    .ro_result_rb0,
+
     .uinstr_rb1,
     .wren_rb1,
     .wraddr_rb1,
@@ -157,14 +195,6 @@ gprs gprs (
 scoreboard scoreboard (
     .clk,
     .reset,
-    .valid_fe1,
-    .uinstr_de0,
-    .uinstr_de1,
-    .uinstr_rd1,
-    .uinstr_ex1,
-    .uinstr_mm1,
-    .uinstr_rb1,
-    .br_mispred_rb1,
     .stall
 );
 
@@ -179,9 +209,6 @@ icache #(.LATENCY(5)) icache (
 
 chk_instr_progress #(.A("FE"), .B("DE")) chk_instr_progress_fe (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(valid_fe1       ), .simid_stgA_nn0(instr_fe1.SIMID ), .valid_stgB_nn0(uinstr_de1.valid), .simid_stgB_nn0(uinstr_de1.SIMID));
 chk_instr_progress #(.A("DE"), .B("RD")) chk_instr_progress_de (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(uinstr_de1.valid), .simid_stgA_nn0(uinstr_de1.SIMID), .valid_stgB_nn0(uinstr_rd1.valid), .simid_stgB_nn0(uinstr_rd1.SIMID));
-chk_instr_progress #(.A("RD"), .B("EX")) chk_instr_progress_rd (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(uinstr_rd1.valid), .simid_stgA_nn0(uinstr_rd1.SIMID), .valid_stgB_nn0(uinstr_ex1.valid), .simid_stgB_nn0(uinstr_ex1.SIMID));
-chk_instr_progress #(.A("EX"), .B("MM")) chk_instr_progress_ex (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(uinstr_ex1.valid), .simid_stgA_nn0(uinstr_ex1.SIMID), .valid_stgB_nn0(uinstr_mm1.valid), .simid_stgB_nn0(uinstr_mm1.SIMID));
-chk_instr_progress #(.A("MM"), .B("RB")) chk_instr_progress_mm (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(uinstr_mm1.valid), .simid_stgA_nn0(uinstr_mm1.SIMID), .valid_stgB_nn0(uinstr_rb1.valid), .simid_stgB_nn0(uinstr_rb1.SIMID));
 
 `endif
 

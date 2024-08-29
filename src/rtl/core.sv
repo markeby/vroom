@@ -79,10 +79,6 @@ decode decode (
 
 t_rob_id next_robid_ra0;
 
-logic         rs_stall_ports_rs0    [common::NUM_DISP_PORTS-1:0];
-logic         disp_valid_ports_rs0  [common::NUM_DISP_PORTS-1:0];
-t_uinstr_disp disp_ports_rs0        [common::NUM_DISP_PORTS-1:0];
-
 logic         rs_stall_mm_rs0;
 logic         disp_valid_mm_rs0;
 t_uinstr_disp disp_mm_rs0;
@@ -90,14 +86,6 @@ t_uinstr_disp disp_mm_rs0;
 logic         rs_stall_ex_rs0;
 logic         disp_valid_ex_rs0;
 t_uinstr_disp disp_ex_rs0;
-
-assign disp_valid_mm_rs0                          = disp_valid_ports_rs0 [common::DISP_PORT_MEM ];
-assign disp_mm_rs0                                = disp_ports_rs0       [common::DISP_PORT_MEM ];
-assign rs_stall_ports_rs0[common::DISP_PORT_MEM ] = rs_stall_mm_rs0;
-
-assign disp_valid_ex_rs0                          = disp_valid_ports_rs0 [common::DISP_PORT_EINT];
-assign disp_ex_rs0                                = disp_ports_rs0       [common::DISP_PORT_EINT];
-assign rs_stall_ports_rs0[common::DISP_PORT_EINT] = rs_stall_ex_rs0;
 
 logic        eint_iss_rs1;
 t_uinstr_iss eint_iss_pkt_rs1;
@@ -119,10 +107,11 @@ alloc alloc (
     .clk,
     .reset,
     .uinstr_de1,
+    .stall_ra0 ( ),
     .next_robid_ra0,
-    .rs_stall_ports_rs0,
-    .disp_valid_ex_rs1,
-    .disp_ex_rs1
+    .rs_stall_ex_rs0,
+    .disp_valid_ex_rs0,
+    .disp_ex_rs0
 );
 
 regrd regrd (

@@ -17,9 +17,9 @@ module alloc
     output logic         stall_ra0,
     input  t_rob_id      next_robid_ra0,
 
-    input  logic         rs_stall_ports_rs0    [common::NUM_DISP_PORTS-1:0],
-    output logic         disp_valid_ports_rs0  [common::NUM_DISP_PORTS-1:0],
-    output t_uinstr_disp disp_ports_rs0        [common::NUM_DISP_PORTS-1:0]
+    input  logic         rs_stall_ex_rs0,
+    output logic         disp_valid_ex_rs0,
+    output t_uinstr_disp disp_ex_rs0
 );
 
 localparam RA0 = 0;
@@ -32,6 +32,10 @@ localparam NUM_RA_STAGES = 1;
 
 t_uinstr_disp disp_ra0;
 t_uinstr_disp disp_ra1;
+
+logic         rs_stall_ports_rs0    [NUM_DISP_PORTS-1:0];
+logic         disp_valid_ports_rs0  [NUM_DISP_PORTS-1:0];
+t_uinstr_disp disp_ports_rs0        [NUM_DISP_PORTS-1:0];
 
 //
 // Logic
@@ -56,6 +60,16 @@ assign disp_valid_ports_rs0 [DISP_PORT_EINT] = disp_ra1.uinstr.valid & ~stall_ra
 assign disp_ports_rs0       [DISP_PORT_MEM ] = disp_ra1;
 assign disp_valid_ports_rs0 [DISP_PORT_MEM ] = 1'b0; // disp_ra1.uinstr.valid;
 
+// Dispatch port demux
+
+assign disp_ex_rs0       = disp_ports_rs0[DISP_PORT_EINT];
+assign disp_valid_ex_rs0 = disp_valid_ports_rs0[DISP_PORT_EINT];
+assign rs_stall_ports_rs0[DISP_PORT_EINT] = rs_stall_ex_rs0;
+
+// assign disp_mm_rs0       = disp_ports_rs0[DISP_PORT_EINT];
+// assign disp_valid_mm_rs0 = disp_valid_ports_rs0[DISP_PORT_EINT];
+assign rs_stall_ports_rs0[DISP_PORT_MEM] = 1'b0; //rs_stall_mm_rs0;
+
 // Stall
 
 always_comb begin
@@ -70,11 +84,11 @@ end
 //
 
 `ifdef SIMULATION
-always @(posedge clk) begin
-    if (uinstr_ra1.valid) begin
-        `INFO(("unit:RA %s", describe_uinstr(uinstr_ra1)))
-    end
-end
+// always @(posedge clk) begin
+//     if (uinstr_ra1.valid) begin
+//         `INFO(("unit:RA %s", describe_uinstr(uinstr_ra1)))
+//     end
+// end
 `endif
 
 `ifdef ASSERT

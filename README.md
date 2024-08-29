@@ -44,6 +44,7 @@ vroom is going out-of-order!  The pipeline looks like this:
 
 * **RETIRE** receives writebacks from the OoO part of the pipe and writes them back.
 
-Presently, renaming is *super* basic.  In **ALLOC**, we scan the ROB for the youngest older instruction that is writing each of our source operands.  If any such instructions exist, the RS will wait for that ROB result to be written; otherwise, reads come out of the GPR RF.  Eventually we'll do full renaming with a PRF, keeping a free list and reclaiming registers, etc...  but not today.
+Presently, renaming is *super* basic.  In **ALLOC**, we scan the ROB for the youngest older instruction that is writing each of our source operands.  If any such instructions exist, the RS will wait for that ROB result to be written; otherwise, reads come out of the GPR RF when a uop is issued.  Eventually we'll do full renaming with a PRF, keeping a free list and reclaiming registers, etc...  but not today.
 
 Branches are resolved in **EXE** but not taken until **RETIRE**.  Branches are currently always predicted NT.
+

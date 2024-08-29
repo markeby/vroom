@@ -73,6 +73,8 @@ assign e_valid = fsm == VALID;
 // Logic
 //
 
+`DFF_EN(e_static, q_alloc_static_rs0, clk, e_alloc_rs0)
+
 // Will eventually need multiple dealloc causes since some uops will need to
 // replay... but for now, just dealloc when we successfully issue
 

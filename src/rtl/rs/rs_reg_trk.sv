@@ -37,6 +37,8 @@ typedef enum logic {
 } t_fsm;
 t_fsm fsm, fsm_nxt;
 
+assign ready_rs1 = fsm == SRC_READY;
+
 //
 // Nets
 //

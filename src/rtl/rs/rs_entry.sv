@@ -24,7 +24,9 @@ module rs_entry
     input  t_uinstr_disp  q_alloc_static_rs0,
     input  t_rv_reg_data  rddatas_rs0 [1:0],
 
-    output logic          e_static,
+    output logic          e_valid,
+    output t_rs_entry_static
+                          e_static,
     output t_uinstr_iss   e_issue_pkt_rs1,
 
     output logic          e_req_issue_rs1,
@@ -63,6 +65,9 @@ always_comb begin
         endcase
     end
 end
+`DFF(fsm, fsm_nxt, clk)
+
+assign e_valid = fsm == VALID;
 
 //
 // Logic

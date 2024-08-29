@@ -15,9 +15,7 @@ module regrd
 
     output logic             rdens_rd0   [1:0],
     output t_rv_reg_addr     rdaddrs_rd0 [1:0],
-    input  t_rv_reg_data     rddatas_rd1 [1:0],
-
-    output t_uinstr          uinstr_rd1
+    input  t_rv_reg_data     rddatas_rd1 [1:0]
 );
 
 localparam RD0 = 0;
@@ -54,11 +52,6 @@ always_comb begin
     uinstr_ql_rd0.valid &= ~stall;
 end
 `DFF(uinstr_nq_rd1, uinstr_ql_rd0, clk);
-
-always_comb begin
-    uinstr_rd1 = uinstr_nq_rd1;
-    uinstr_rd1.valid  &= ~br_mispred_rb1;
-end
 
 //
 // Debug

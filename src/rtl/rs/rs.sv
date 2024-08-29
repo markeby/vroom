@@ -19,6 +19,7 @@ module rs
     input  t_rob_result   ro_result_rb0,
 
     output logic          rs_stall_rs0,
+    input  logic          disp_valid_rs0,
     input  t_uinstr_disp  uinstr_rs0,
     input  t_rv_reg_data  rddatas_rs0 [1:0],
 
@@ -38,6 +39,7 @@ logic                  q_alloc_rs0;
 logic[NUM_RS_ENTS-1:0] e_alloc_rs0;
 t_rs_entry_static      q_alloc_static_rs0;
 t_rs_entry_static      e_static               [NUM_RS_ENTS-1:0];
+logic[NUM_RS_ENTS-1:0] e_valid;
 
 logic                  q_req_issue_rs1;
 logic[NUM_RS_ENTS-1:0] e_req_issue_rs1;
@@ -51,7 +53,8 @@ t_uinstr_iss           e_issue_pkt_rs1        [NUM_RS_ENTS-1:0];
 //
 
 assign rs_stall_rs0 = 1'b0;
-assign q_alloc_rs0 = uinstr_rs0.valid;
+assign q_alloc_rs0 = disp_valid_rs0;
+assign e_alloc_rs0 = gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first0(e_valid);
 
 // Issue arbitration
 
@@ -60,7 +63,7 @@ assign e_sel_issue_rs1 = gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first(e_req_issu
 assign q_gnt_issue_rs1 = q_req_issue_rs1;
 assign e_gnt_issue_rs1 = q_gnt_issue_rs1 ? e_sel_issue_rs1 : '0;
 
-assign iss_rs1     = e_gnt_issue_rs1;
+assign iss_rs1     = q_gnt_issue_rs1;
 assign iss_pkt_rs1 = gen_funcs#(.IWIDTH(NUM_RS_ENTS),.T(t_uinstr_iss))::uaomux(e_issue_pkt_rs1, e_sel_issue_rs1);
 
 //
@@ -79,11 +82,12 @@ for (genvar i=0; i<NUM_RS_ENTS; i++) begin : g_entries
        .ro_valid_rb0,
        .ro_result_rb0,
 
-       .e_alloc_rs0,
+       .e_alloc_rs0 ( e_alloc_rs0[i] ),
        .q_alloc_static_rs0,
        .rddatas_rs0,
 
-       .e_static,
+       .e_valid ( e_valid[i] ),
+       .e_static ( e_static[i] ),
        .e_issue_pkt_rs1 ( e_issue_pkt_rs1[i] ),
 
        .e_req_issue_rs1 ( e_req_issue_rs1[i] ),

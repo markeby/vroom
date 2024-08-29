@@ -29,7 +29,6 @@ t_uinstr      uinstr_de1;
 logic         rdens_rd0   [1:0];
 t_rv_reg_addr rdaddrs_rd0 [1:0];
 
-t_uinstr      uinstr_rd1;
 t_rv_reg_data rddatas_rd1 [1:0];
 
 t_rv_reg_data result_ex1;
@@ -109,8 +108,9 @@ rs #(.NUM_RS_ENTS(8)) rs_exe (
     .ro_valid_rb0,
     .ro_result_rb0,
     .rs_stall_rs0 ( rs_stall_ex_rs0     ) ,
+    .disp_valid_rs0 ( disp_valid_ex_rs0 ) ,
     .uinstr_rs0   ( disp_ex_rs0         ) ,
-    .rddatas_rs0  ( rddatas_rs0         ) ,
+    .rddatas_rs0  ( rddatas_rd1         ) ,
     .iss_rs1      ( eint_iss_rs1        ) ,
     .iss_pkt_rs1  ( eint_iss_pkt_rs1    )
 );
@@ -133,8 +133,7 @@ regrd regrd (
     .rdens_rd0,
     .rdaddrs_rd0,
     .stall,
-    .rddatas_rd1,
-    .uinstr_rd1
+    .rddatas_rd1 ( rddatas_rd1 )
 );
 
 logic        ro_valid_rb0;
@@ -208,7 +207,6 @@ icache #(.LATENCY(5)) icache (
 `ifdef ASSERT
 
 chk_instr_progress #(.A("FE"), .B("DE")) chk_instr_progress_fe (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(valid_fe1       ), .simid_stgA_nn0(instr_fe1.SIMID ), .valid_stgB_nn0(uinstr_de1.valid), .simid_stgB_nn0(uinstr_de1.SIMID));
-chk_instr_progress #(.A("DE"), .B("RD")) chk_instr_progress_de (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(uinstr_de1.valid), .simid_stgA_nn0(uinstr_de1.SIMID), .valid_stgB_nn0(uinstr_rd1.valid), .simid_stgB_nn0(uinstr_rd1.SIMID));
 
 `endif
 

@@ -30,3 +30,5 @@ src/rtl/retire/rob_entry.sv
 src/rtl/rs/rs_reg_trk.sv
 src/rtl/rs/rs_entry.sv
 src/rtl/rs/rs.sv
+
+src/rtl/alloc/alloc.sv

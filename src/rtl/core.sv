@@ -87,8 +87,8 @@ logic         rs_stall_ex_rs0;
 logic         disp_valid_ex_rs0;
 t_uinstr_disp disp_ex_rs0;
 
-logic        eint_iss_rs1;
-t_uinstr_iss eint_iss_pkt_rs1;
+logic        eint_iss_rs2;
+t_uinstr_iss eint_iss_pkt_rs2;
 
 rs #(.NUM_RS_ENTS(8)) rs_exe (
     .clk,
@@ -98,9 +98,11 @@ rs #(.NUM_RS_ENTS(8)) rs_exe (
     .rs_stall_rs0 ( rs_stall_ex_rs0     ) ,
     .disp_valid_rs0 ( disp_valid_ex_rs0 ) ,
     .uinstr_rs0   ( disp_ex_rs0         ) ,
-    .rddatas_rs0  ( rddatas_rd1         ) ,
-    .iss_rs1      ( eint_iss_rs1        ) ,
-    .iss_pkt_rs1  ( eint_iss_pkt_rs1    )
+    .gpr_rdens_rd0 ( rdens_rd0 ) ,
+    .gpr_rdaddrs_rd0 ( rdaddrs_rd0 ) ,
+    .gpr_rddatas_rd1 ( rddatas_rd1 ) ,
+    .iss_rs2      ( eint_iss_rs2        ) ,
+    .iss_pkt_rs2  ( eint_iss_pkt_rs2    )
 );
 
 alloc alloc (
@@ -133,8 +135,8 @@ exe exe (
     .stall,
     .br_mispred_rb1,
 
-    .iss_ex0      ( eint_iss_rs1        ) ,
-    .iss_pkt_ex0  ( eint_iss_pkt_rs1    ) ,
+    .iss_ex0      ( eint_iss_rs2        ) ,
+    .iss_pkt_ex0  ( eint_iss_pkt_rs2    ) ,
 
     .ro_valid_ex1 ( ro_valid_rb0 ) ,
     .ro_result_ex1 (ro_result_rb0 )
@@ -145,7 +147,7 @@ mem mem (
     .reset,
 
     .iss_mm0     ( 1'b0             ) ,
-    .iss_pkt_mm0 ( eint_iss_pkt_rs1 ) ,
+    .iss_pkt_mm0 ( eint_iss_pkt_rs2 ) ,
 
     .result_mm1
 );

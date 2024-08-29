@@ -21,13 +21,13 @@ module rs_reg_trk
 
    input  logic               e_alloc_rs0,
    input  t_rs_reg_trk_static e_alloc_static_rs0,
-   input  t_rv_reg_data       regrd_data_rs0,
    output t_rs_reg_trk_static e_static,
 
    input  logic               ro_valid_rb0,
    input  t_rob_result        ro_result_rb0,
 
    output logic               ready_rs1,
+   output logic               from_grf_rs1,
    output t_rv_reg_data       src_data
 );
 
@@ -38,6 +38,7 @@ typedef enum logic {
 t_fsm fsm, fsm_nxt;
 
 assign ready_rs1 = fsm == SRC_READY;
+assign from_grf_rs1 = ~e_static.from_rob;
 
 //
 // Nets
@@ -53,12 +54,12 @@ logic wb_valid_match_rb0;
 
 assign wb_valid_match_rb0 = ro_valid_rb0 & ro_result_rb0.robid == e_static.robid;
 
-// capture source data, either at dispatch or rob writeback
+// capture source data when written into rob
 if(1) begin : g_src_data
    t_rv_reg_data src_data_nxt;
    logic src_data_wren;
-   assign src_data_nxt  = e_alloc_rs0 ? regrd_data_rs0 : ro_result_rb0.value;
-   assign src_data_wren = e_alloc_rs0 | wb_valid_match_rb0;
+   assign src_data_nxt  = ro_result_rb0.value;
+   assign src_data_wren = wb_valid_match_rb0;
    `DFF_EN(src_data, src_data_nxt, clk, src_data_wren)
 end
 

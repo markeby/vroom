@@ -13,6 +13,10 @@ module retire
     input  logic             reset,
     input  t_uinstr          uinstr_de1,
 
+    input  t_rv_reg_addr     src_addr_ra0          [NUM_SOURCES-1:0],
+    output logic             rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0],
+    output t_rob_id          rob_src_reg_robid_ra0 [NUM_SOURCES-1:0],
+
     input  logic             ro_valid_rb0,
     input  rob_defs::t_rob_result
                              ro_result_rb0,
@@ -40,6 +44,10 @@ rob rob (
     .clk,
     .reset,
     .uinstr_de1,
+
+    .src_addr_ra0,
+    .rob_src_reg_pdg_ra0,
+    .rob_src_reg_robid_ra0,
 
     .ro_valid_rb0,
     .ro_result_rb0,

@@ -21,6 +21,7 @@ int main(int argc, char** argv, char** env) {
     Vtop *dut = new Vtop;
 
     Verilated::traceEverOn(true);
+    Verilated::commandArgs(argc, argv);
 #ifdef FST
     VerilatedFstC* m_trace = new VerilatedFstC;
     dut->trace(m_trace, 5);

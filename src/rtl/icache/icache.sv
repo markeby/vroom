@@ -55,36 +55,37 @@ initial begin
 
     a=0;
 
-    `define TEST_ALL_DEPS
-    `define TEST_NO_DEPS
-    `define TEST_ARITH
-    `define TEST_LOGICAL
-    `define TEST_SLT
-    //define TEST_BR_NT
-    //define TEST_BR_T
-    `define TEST_BEEF
+    // `define TEST_ALL_DEPS
+    // `define TEST_NO_DEPS
+    // `define TEST_ARITH
+    //`define TEST_LOGICAL
+    //`define TEST_SLT
+    ////define TEST_BR_NT
+    ////define TEST_BR_T
+    //`define TEST_BEEF
 
-    IROM[a++] = rvXOR(1,1,1);
+    // IROM[a++] = rvXOR(1,1,1);
     IROM[a++] = rvADDI(1,1,32);
-    IROM[a++] = rvBNE(0,1,8);
-    IROM[a++] = rvADDI(0,0,12'h42);
-    IROM[a++] = rvADDI(1,1,32);
+    IROM[a++] = rvADDI(2,1,32);
+    // IROM[a++] = rvBNE(0,1,8);
+    // IROM[a++] = rvADDI(0,0,12'h42);
+    // IROM[a++] = rvADDI(1,1,32);
 
-    IROM[a++] = rvXOR(1,1,1);
-    IROM[a++] = rvXOR(2,2,2);
-    IROM[a++] = rvXOR(3,3,3);
-    IROM[a++] = rvXOR(4,4,4);
-    IROM[a++] = rvXOR(5,5,5);
+    // IROM[a++] = rvXOR(1,1,1);
+    // IROM[a++] = rvXOR(2,2,2);
+    // IROM[a++] = rvXOR(3,3,3);
+    // IROM[a++] = rvXOR(4,4,4);
+    // IROM[a++] = rvXOR(5,5,5);
 
-    IROM[a++] = rvXOR(1,1,1);
-    IROM[a++] = rvXOR(2,1,1);
-    IROM[a++] = rvXOR(3,2,2);
-    IROM[a++] = rvXOR(4,3,3);
-    IROM[a++] = rvXOR(5,4,4);
-    IROM[a++] = rvXOR(6,5,5);
-    IROM[a++] = rvXOR(7,6,6);
-    IROM[a++] = rvXOR(8,7,7);
-    IROM[a++] = rvXOR(9,8,8);
+    // IROM[a++] = rvXOR(1,1,1);
+    // IROM[a++] = rvXOR(2,1,1);
+    // IROM[a++] = rvXOR(3,2,2);
+    // IROM[a++] = rvXOR(4,3,3);
+    // IROM[a++] = rvXOR(5,4,4);
+    // IROM[a++] = rvXOR(6,5,5);
+    // IROM[a++] = rvXOR(7,6,6);
+    // IROM[a++] = rvXOR(8,7,7);
+    // IROM[a++] = rvXOR(9,8,8);
 
     `ifdef TEST_BR_NT
         IROM[a++] = rvXOR(1,1,1);

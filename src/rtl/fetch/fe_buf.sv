@@ -117,7 +117,7 @@ end
 
 always_comb c_push_fb0 = fe_req_mis_fb0
                        | pf_fb_req_rq_ql_pf0;
-always_comb e_push_fb0 = c_push_fb0 ? gen_funcs#(FE_FB_NUM_ENTS)::find_first(~e_valid_nnn) : '0;
+always_comb e_push_fb0 = c_push_fb0 ? gen_funcs#(FE_FB_NUM_ENTS)::find_first0(e_valid_nnn) : '0;
 always_comb begin
     c_push_static_fb0 = '0;
     c_push_static_fb0.req = fe_req_mis_fb0 ? fe_fb_req_fb0 : pf_fb_req_pkt_pf0;
@@ -150,7 +150,7 @@ end
 
 // FE rsp
 
-always_comb e_fe_rsp_gn_nnn = gen_funcs#(FE_FB_NUM_ENTS)::find_first(e_fe_rsp_rq_nnn);
+always_comb e_fe_rsp_gn_nnn = gen_funcs#(FE_FB_NUM_ENTS)::find_first1(e_fe_rsp_rq_nnn);
 always_comb c_fe_rsp_sl_nnn = gen_funcs#(FE_FB_NUM_ENTS)::oh_encode(e_fe_rsp_gn_nnn);
 
 t_fb_fe_rsp fb_fe_rsp_nxt_nnn;
@@ -181,7 +181,7 @@ assign f__fb_fe_rsp_nnn_data = fb_fe_rsp_nnn.instr;
 
 // IC req
 
-always_comb e_ic_req_gn_nnn = gen_funcs#(FE_FB_NUM_ENTS)::find_first(e_ic_req_rq_nnn);
+always_comb e_ic_req_gn_nnn = gen_funcs#(FE_FB_NUM_ENTS)::find_first1(e_ic_req_rq_nnn);
 always_comb c_ic_req_sl_nnn = gen_funcs#(FE_FB_NUM_ENTS)::oh_encode(e_ic_req_gn_nnn);
 
 always_comb begin

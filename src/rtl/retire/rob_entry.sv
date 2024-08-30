@@ -22,6 +22,7 @@ module rob_entry
 
     input  logic                  q_flush_now_rb1,
 
+    output logic                  e_valid,
     output rob_defs::t_rob_ent    rob_entry,
     input  logic                  e_retire_rb1
 );
@@ -71,12 +72,14 @@ always_comb begin
 end
 `DFF(fsm, fsm_nxt, clk)
 
+assign e_valid = (fsm != RBE_IDLE);
+
 //
 // Logic
 //
 
 // FIXME -- need to qual with robid
-assign e_value_wr_rb0 = ro_valid_rb0;
+assign e_value_wr_rb0 = ro_valid_rb0 & ro_result_rb0.robid == robid;
 
 `DFF_EN(e_result, ro_result_rb0.value, clk, e_value_wr_rb0)
 

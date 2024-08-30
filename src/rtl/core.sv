@@ -44,6 +44,10 @@ logic             wren_rb1;
 t_rv_reg_addr     wraddr_rb1;
 t_rv_reg_data     wrdata_rb1;
 
+t_rv_reg_addr     src_addr_ra0          [NUM_SOURCES-1:0];
+logic             rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0];
+t_rob_id          rob_src_reg_robid_ra0 [NUM_SOURCES-1:0];
+
 // icache
 
 t_mem_req fb_ic_req_nnn;
@@ -90,7 +94,7 @@ t_uinstr_disp disp_ex_rs0;
 logic        eint_iss_rs2;
 t_uinstr_iss eint_iss_pkt_rs2;
 
-rs #(.NUM_RS_ENTS(8)) rs_exe (
+rs #(.NUM_RS_ENTS(8)) rs_eint (
     .clk,
     .reset,
     .ro_valid_rb0,
@@ -112,6 +116,9 @@ alloc alloc (
     .stall_ra0 ( ),
     .next_robid_ra0,
     .rs_stall_ex_rs0,
+    .src_addr_ra0,
+    .rob_src_reg_pdg_ra0,
+    .rob_src_reg_robid_ra0,
     .disp_valid_ex_rs0,
     .disp_ex_rs0
 );
@@ -157,6 +164,10 @@ retire retire (
     .reset,
     .next_robid_ra0,
     .uinstr_de1,
+
+    .src_addr_ra0,
+    .rob_src_reg_pdg_ra0,
+    .rob_src_reg_robid_ra0,
 
     .ro_valid_rb0,
     .ro_result_rb0,

@@ -111,6 +111,25 @@ end
 
 // Outputs to decode
 
+`ifdef SIMULATION
+logic stall_after_n_instr_en;
+int   stall_after_n_instr;
+logic fake_stall_now;
+initial begin
+    stall_after_n_instr = '0;
+    if ($value$plusargs("stall_after_n_instr:%d", stall_after_n_instr)) begin
+        $display("Saw +stall_after_n_instr");
+    end else begin
+        $display("Did NOT see +stall_after_n_instr");
+    end
+
+    stall_after_n_instr_en = (stall_after_n_instr > 0);
+end
+
+`DFF_EN(stall_after_n_instr, (stall_after_n_instr - 1), clk, (valid_fe1 & (stall_after_n_instr > 0)))
+assign fake_stall_now = stall_after_n_instr_en & (stall_after_n_instr == 0);
+`endif
+
 always_comb begin
     automatic t_fb_fe_rsp ic_rsp;
     ic_rsp = (state == FE_PDG_IC) ? fb_fe_rsp_nnn : fb_fe_capture_nnn;
@@ -118,7 +137,7 @@ always_comb begin
     valid_fe1           = ( state == FE_PDG_IC & fb_fe_rsp_nnn.valid
                           | state == FE_PDG_STALL
                           | state == FE_DRAIN
-                          ) & ~br_mispred_rb1 & ~halt;
+                          ) & ~br_mispred_rb1 & ~halt & ~fake_stall_now;
     instr_fe1       = t_instr_pkt'('0);
     instr_fe1.instr = ic_rsp.instr;
     instr_fe1.pc    = ic_rsp.pc;

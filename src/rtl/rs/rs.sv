@@ -67,12 +67,12 @@ logic[NUM_SOURCES-1:0] src_from_grf_rs2;
 
 assign rs_stall_rs0 = 1'b0;
 assign q_alloc_rs0 = disp_valid_rs0;
-assign e_alloc_rs0 = gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first0(e_valid);
+assign e_alloc_rs0 = q_alloc_rs0 ? gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first0(e_valid) : '0;
 
 // Issue arbitration
 
 assign q_req_issue_rs1 = |e_req_issue_rs1;
-assign e_sel_issue_rs1 = gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first(e_req_issue_rs1);
+assign e_sel_issue_rs1 = gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first1(e_req_issue_rs1);
 assign q_gnt_issue_rs1 = q_req_issue_rs1;
 assign e_gnt_issue_rs1 = q_gnt_issue_rs1 ? e_sel_issue_rs1 : '0;
 

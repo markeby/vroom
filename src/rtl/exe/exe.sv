@@ -19,6 +19,9 @@ module exe
 
     input  logic         br_mispred_rb1,
 
+    output logic         iprf_wr_en_ex1,
+    output t_prf_wr_pkt  iprf_wr_pkt_ex1,
+
     output logic         ro_valid_ex1,
     output t_rob_result  ro_result_ex1
 );
@@ -46,6 +49,7 @@ logic         ibr_mispred_ex0;
 
 `MKPIPE_INIT(t_uinstr,       uinstr_exx, uinstr_ql_ex0,      EX0, NUM_EX_STAGES)
 `MKPIPE_INIT(t_rob_id,       robid_exx,  iss_pkt_ex0.robid,  EX0, NUM_EX_STAGES)
+`MKPIPE_INIT(t_prf_id,       pdst_exx,   iss_pkt_ex0.pdst,   EX0, NUM_EX_STAGES)
 `MKPIPE_INIT(logic,          ibr_mispred_exx, ibr_mispred_ex0, EX0, NUM_EX_STAGES)
 `MKPIPE     (t_rv_reg_data,  result_exx,                     EX0, NUM_EX_STAGES)
 
@@ -123,6 +127,10 @@ always_comb begin
     ro_valid_ex1 = uinstr_exx[EX1].valid;
     ro_result_ex1.mispred = ibr_mispred_exx[EX1];
     ro_result_ex1.robid = robid_exx[EX1];
+
+    iprf_wr_en_ex1 = ro_valid_ex1;
+    iprf_wr_pkt_ex1.pdst = pdst_exx[EX1];
+    iprf_wr_pkt_ex1.data = result_exx[EX1];
 end
 
 //

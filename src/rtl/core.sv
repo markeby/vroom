@@ -37,6 +37,9 @@ t_rv_reg_data rddatas_rd1 [1:0];
 
 t_rv_reg_data result_ex1;
 
+logic        iprf_wr_en_ex1;
+t_prf_wr_pkt iprf_wr_pkt_ex1;
+
 t_paddr       br_tgt_rb1;
 logic         br_mispred_rb1;
 
@@ -93,6 +96,9 @@ rename rename (
     .uinstr_rn0 ( uinstr_de1 ) ,
 
     .stall_rn0 ( ),
+
+    .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1} ),
+    .iprf_wr_pkt_ro0  ( '{iprf_wr_pkt_ex1} ),
 
     .iprf_rd_en_rd0   ( rdens_rd0 ),
     .iprf_rd_psrc_rd0 ( rdaddrs_rd0 ),

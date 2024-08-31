@@ -14,13 +14,12 @@ module prf #(parameter int NUM_ENTRIES=8, parameter int NUM_REG_READS=2, paramet
     input  logic         reset,
     input  t_prf_type    prf_type,
 
-    input  logic         wren_nq_ro0 [NUM_REG_WRITES-1:0],
-    input  t_prf_id      wr_pdst_ro0 [NUM_REG_WRITES-1:0],
-    input  t_rv_reg_data wr_data_ro0 [NUM_REG_WRITES-1:0],
+    input  logic         wr_en_nq_ro0 [NUM_REG_WRITES-1:0],
+    input  t_prf_wr_pkt  wr_pkt_ro0   [NUM_REG_WRITES-1:0],
 
-    input  logic         rden_nq_rd0 [NUM_REG_READS-1:0],
-    input  t_prf_id      rd_psrc_rd0 [NUM_REG_READS-1:0],
-    output t_rv_reg_data rd_data_rd1 [NUM_REG_READS-1:0],
+    input  logic         rd_en_nq_rd0 [NUM_REG_READS-1:0],
+    input  t_prf_id      rd_psrc_rd0  [NUM_REG_READS-1:0],
+    output t_rv_reg_data rd_data_rd1  [NUM_REG_READS-1:0],
 
     input  logic         rdmap_nq_rd0   [NUM_MAP_READS-1:0],
     input  t_gpr_id      rdmap_gpr_rd0  [NUM_MAP_READS-1:0],
@@ -82,7 +81,7 @@ logic[NUM_ENTRIES-1:0] prf_wrs_dec_ro0;
 always_comb begin
     prf_wrs_dec_ro0 = '0;
     for (int w=0; w<NUM_REG_WRITES; w++) begin
-        prf_wrs_dec_ro0[wr_pdst_ro0[w].idx] |= wren_nq_ro0[w] & wr_pdst_ro0[w].ptype == prf_type;
+        prf_wrs_dec_ro0[wr_pkt_ro0[w].pdst.idx] |= wr_en_nq_ro0[w] & wr_pkt_ro0[w].pdst.ptype == prf_type;
     end
 end
 
@@ -122,8 +121,8 @@ always_ff @(posedge clk) begin
         PRF <= {>>{'0}};
     end else begin
         for (int w=0; w<NUM_REG_WRITES; w++) begin
-            if (wren_nq_ro0[w] & wr_pdst_ro0[w].ptype == prf_type) begin
-                PRF[wr_pdst_ro0[w].pidx] <= wr_data_ro0[w];
+            if (wr_en_nq_ro0[w] & wr_pkt_ro0[w].pdst.ptype == prf_type) begin
+                PRF[wr_pkt_ro0[w].pdst.pidx] <= wr_pkt_ro0[w].data;
             end
         end
     end

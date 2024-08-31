@@ -18,7 +18,8 @@ module rename
 
     output logic         stall_rn0,
 
-    input  logic         iprf_wr_en_ro0,
+    input  logic         iprf_wr_en_ro0   [IPRF_NUM_WRITES-1:0],
+    input  t_prf_wr_pkt  iprf_wr_pkt_ro0  [IPRF_NUM_WRITES-1:0],
 
     input  logic         iprf_rd_en_rd0   [IPRF_NUM_READS-1:0],
     input  t_prf_id      iprf_rd_psrc_rd0 [IPRF_NUM_READS-1:0],
@@ -53,11 +54,10 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_READS(IPRF_NUM_READS), .NUM_WRITES(IPRF_
     .reset,
     .prf_type       ( IPRF                                                ) ,
 
-    .wren_nq_ro0    ( iprf_wren_ro0                                       ) ,
-    .wr_pdst_ro0    ( iprf_wr_pdst_ro0                                    ) ,
-    .wr_data_ro0    ( iprf_wr_data_ro0                                    ) ,
+    .wr_en_nq_ro0   ( iprf_wr_en_ro0                                      ) ,
+    .wr_pkt_ro0     ( iprf_wr_pkt_ro0                                     ) ,
 
-    .rden_nq_rd0    ( iprf_rd_en_rd0                                      ) ,
+    .rd_en_nq_rd0   ( iprf_rd_en_rd0                                      ) ,
     .rd_psrc_rd0    ( iprf_rd_psrc_rd0                                    ) ,
     .rd_data_rd1    ( iprf_rd_data_rd1                                    ) ,
 

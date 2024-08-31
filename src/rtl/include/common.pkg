@@ -65,6 +65,11 @@ package common;
 
     typedef logic[RV_REG_ADDR_BITS-1:0] t_gpr_id;
 
+    typedef struct packed {
+        t_prf_id      pdst;
+        t_rv_reg_data data;
+    } t_prf_wr_pkt;
+
     //////////////////////////////
     // Miscellanea ///////////////
     //////////////////////////////

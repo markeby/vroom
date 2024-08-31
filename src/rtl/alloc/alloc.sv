@@ -12,7 +12,8 @@ module alloc
     input  logic         clk,
     input  logic         reset,
 
-    input  t_uinstr      uinstr_de1,
+    input  t_uinstr      uinstr_ra0,
+    input  t_rename_pkt  rename_ra0,
 
     output logic         stall_ra0,
     input  t_rob_id      next_robid_ra0,
@@ -30,9 +31,6 @@ localparam RA0 = 0;
 localparam RA1 = 1;
 localparam NUM_RA_STAGES = 1;
 
-localparam SRC1 = 0;
-localparam SRC2 = 0;
-
 //
 // Nets
 //
@@ -48,16 +46,13 @@ t_uinstr_disp disp_ports_rs0        [NUM_DISP_PORTS-1:0];
 // Logic
 //
 
-assign src_addr_ra0[SRC1] = uinstr_de1.src1.opreg;
-assign src_addr_ra0[SRC2] = uinstr_de1.src2.opreg;
+assign src_addr_ra0[SRC1] = uinstr_ra0.src1.opreg;
+assign src_addr_ra0[SRC2] = uinstr_ra0.src2.opreg;
 
 always_comb begin
-   disp_ra0.uinstr       = uinstr_de1;
+   disp_ra0.uinstr       = uinstr_ra0;
    disp_ra0.robid        = next_robid_ra0;
-   disp_ra0.src1_rob_pdg = rob_src_reg_pdg_ra0[SRC1];
-   disp_ra0.src1_robid   = rob_src_reg_robid_ra0[SRC1];
-   disp_ra0.src2_rob_pdg = rob_src_reg_pdg_ra0[SRC2];
-   disp_ra0.src2_robid   = rob_src_reg_robid_ra0[SRC2];
+   disp_ra0.rename       = rename_ra0;
 end
 
 `DFF(disp_ra1, disp_ra0, clk)

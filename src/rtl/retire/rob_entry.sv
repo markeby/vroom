@@ -78,11 +78,6 @@ assign e_valid = (fsm != RBE_IDLE);
 // Logic
 //
 
-// FIXME -- need to qual with robid
-assign e_value_wr_rb0 = ro_valid_rb0 & ro_result_rb0.robid == robid;
-
-`DFF_EN(e_result, ro_result_rb0.value, clk, e_value_wr_rb0)
-
 // Flushes
 assign e_flush_needed = e_value_wr_rb0 & ro_result_rb0.mispred;
 

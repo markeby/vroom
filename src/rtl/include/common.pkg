@@ -14,6 +14,9 @@ package common;
 
     localparam NUM_SOURCES = 2;
 
+    localparam SRC1 = 0;
+    localparam SRC2 = 1;
+
     localparam NUM_DISP_PORTS     = 2;
     localparam DISP_PORT_EINT     = 0;
     localparam DISP_PORT_MEM      = 1;
@@ -27,6 +30,10 @@ package common;
     localparam FE_FB_NUM_ENTS     = 4;
     localparam FE_FB_NUM_ENTS_LG2 = $clog2(FE_FB_NUM_ENTS);
 
+    //////////////////////////////
+    // ROB Defines ///////////////
+    //////////////////////////////
+
     localparam RB_NUM_ENTS = 8;
     localparam RB_NUM_ENTS_LG2 = $clog2(RB_NUM_ENTS);
     typedef logic[RB_NUM_ENTS_LG2-1:0] t_rob_ptr;
@@ -34,6 +41,33 @@ package common;
        logic     wrap;
        t_rob_ptr idx;
     } t_rob_id;
+
+    //////////////////////////////
+    // PRF Defines ///////////////
+    //////////////////////////////
+
+    localparam IPRF_NUM_ENTS = 32;
+    localparam IPRF_NUM_ENTS_LG2 = $clog2(IPRF_NUM_ENTS);
+
+    // MAX of IPRF, VPRF, etc...
+    localparam PRF_NUM_ENTS = IPRF_NUM_ENTS;
+    localparam PRF_NUM_ENTS_LG2 = $clog2(PRF_NUM_ENTS);
+
+    typedef logic[PRF_NUM_ENTS_LG2-1:0] t_prf_addr;
+    typedef logic enum {
+        IPRF=0,
+        VPRF=1
+    } t_prf_type;
+    typedef struct packed {
+        t_prf_type ptype;
+        t_prf_addr pidx;
+    } t_prf_id;
+
+    typedef logic[RV_REG_ADDR_BITS-1:0] t_gpr_id;
+
+    //////////////////////////////
+    // Miscellanea ///////////////
+    //////////////////////////////
 
     typedef logic[PA_SZ-1:0]    t_paddr;
 

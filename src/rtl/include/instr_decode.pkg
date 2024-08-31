@@ -54,17 +54,15 @@ package instr_decode;
     } t_uinstr;
 
     typedef struct packed {
-       t_uinstr uinstr;
-       t_rob_id robid;
-       logic    src1_rob_pdg;
-       t_rob_id src1_robid;
-       logic    src2_rob_pdg;
-       t_rob_id src2_robid;
+       t_uinstr     uinstr;
+       t_rob_id     robid;
+       t_rename_pkt rename;
     } t_uinstr_disp;
 
     typedef struct packed {
        t_uinstr      uinstr;
        t_rob_id      robid;
+       t_prf_id      pdst;
        t_rv_reg_data src1_val;
        t_rv_reg_data src2_val;
     } t_uinstr_iss;

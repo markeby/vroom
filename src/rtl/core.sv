@@ -25,6 +25,10 @@ logic         valid_fe1;
 t_instr_pkt   instr_fe1;
 t_uinstr      uinstr_de0;
 
+logic         valid_rn1;
+t_uinstr      uinstr_rn1;
+t_rename_pkt  rename_rn1;
+
 t_uinstr      uinstr_de1;
 logic         rdens_rd0   [1:0];
 t_rv_reg_addr rdaddrs_rd0 [1:0];
@@ -81,6 +85,24 @@ decode decode (
     .uinstr_de1
 );
 
+rename rename (
+    .clk,
+    .reset,
+
+    .valid_rn0 ( uinstr_de1.valid ) ,
+    .uinstr_rn0 ( uinstr_de1 ) ,
+
+    .stall_rn0 ( ),
+
+    .iprf_rd_en_rd0   ( rdens_rd0 ),
+    .iprf_rd_psrc_rd0 ( rdaddrs_rd0 ),
+    .iprf_rd_data_rd1 ( rddatas_rd1 ),
+
+    .valid_rn1,
+    .uinstr_rn1,
+    .rename_rn1
+);
+
 t_rob_id next_robid_ra0;
 
 logic         rs_stall_mm_rs0;
@@ -93,6 +115,21 @@ t_uinstr_disp disp_ex_rs0;
 
 logic        eint_iss_rs2;
 t_uinstr_iss eint_iss_pkt_rs2;
+
+alloc alloc (
+    .clk,
+    .reset,
+    .uinstr_ra0 ( uinstr_rn1 ),
+    .rename_ra0 ( rename_rn1 ),
+    .stall_ra0 ( ),
+    .next_robid_ra0,
+    .rs_stall_ex_rs0,
+    .src_addr_ra0,
+    .rob_src_reg_pdg_ra0,
+    .rob_src_reg_robid_ra0,
+    .disp_valid_ex_rs0,
+    .disp_ex_rs0
+);
 
 rs #(.NUM_RS_ENTS(8)) rs_eint (
     .clk,
@@ -107,20 +144,6 @@ rs #(.NUM_RS_ENTS(8)) rs_eint (
     .gpr_rddatas_rd1 ( rddatas_rd1 ) ,
     .iss_rs2      ( eint_iss_rs2        ) ,
     .iss_pkt_rs2  ( eint_iss_pkt_rs2    )
-);
-
-alloc alloc (
-    .clk,
-    .reset,
-    .uinstr_de1,
-    .stall_ra0 ( ),
-    .next_robid_ra0,
-    .rs_stall_ex_rs0,
-    .src_addr_ra0,
-    .rob_src_reg_pdg_ra0,
-    .rob_src_reg_robid_ra0,
-    .disp_valid_ex_rs0,
-    .disp_ex_rs0
 );
 
 regrd regrd (
@@ -180,18 +203,18 @@ retire retire (
     .br_tgt_rb1
 );
 
-gprs gprs (
-    .clk,
-    .reset,
+// gprs gprs (
+//     .clk,
+//     .reset,
 
-    .rden   ( rdens_rd0   ),
-    .rdaddr ( rdaddrs_rd0 ),
-    .rddata ( rddatas_rd1 ),
+//     .rden   ( rdens_rd0   ),
+//     .rdaddr ( rdaddrs_rd0 ),
+//     .rddata ( rddatas_rd1 ),
 
-    .wren   ( '{wren_rb1  } ),
-    .wraddr ( '{wraddr_rb1} ),
-    .wrdata ( '{wrdata_rb1} )
-);
+//     .wren   ( '{wren_rb1  } ),
+//     .wraddr ( '{wraddr_rb1} ),
+//     .wrdata ( '{wrdata_rb1} )
+// );
 
 scoreboard scoreboard (
     .clk,

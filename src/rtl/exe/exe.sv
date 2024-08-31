@@ -123,7 +123,6 @@ always_comb begin
     ro_valid_ex1 = uinstr_exx[EX1].valid;
     ro_result_ex1.mispred = ibr_mispred_exx[EX1];
     ro_result_ex1.robid = robid_exx[EX1];
-    ro_result_ex1.value = result_exx[EX1];
 end
 
 //

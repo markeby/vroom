@@ -19,10 +19,14 @@
     always_comb sigx[fr]=sig0;
 
 `define PMSG(tag, msg) \
-    $display("@[%-d] %-d tag: %s", $time(), top.cclk_count, $sformatf msg);
+    $display("@[%-d] %-d %s: %s", $time(), top.cclk_count, `"tag`", $sformatf msg);
+
+`define PMSG_SIMID(tag, simid, msg) \
+    $display("@[%-d] %-d %s: simid:%s %s", $time(), top.cclk_count, `"tag`", format_simid(simid), $sformatf msg);
 
 `define RETLOG(msg)   `PMSG(RET,  msg)
 `define INFO(msg)     `PMSG(INFO, msg)
+`define UINFO(simid,msg)    `PMSG_SIMID(INFO, simid, msg)
 `define MEMLOG(msg)   `PMSG(MEM,  msg)
 `define GENLOG(pfx, msg)   `PMSG(pfx,  msg)
 

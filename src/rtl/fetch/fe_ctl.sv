@@ -153,7 +153,7 @@ end
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (valid_fe1 & ~stall & ~reset) begin
-        `INFO(("unit:FE pc:%h %s", PC, describe_instr(instr_fe1)))
+        `UINFO(instr_fe1.SIMID, ("unit:FE pc:%h %s", PC, describe_instr(instr_fe1)))
     end
 end
 `endif

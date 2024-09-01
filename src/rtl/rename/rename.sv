@@ -52,6 +52,10 @@ assign alloc_pdst_rn0 = valid_rn0 & uinstr_rn0.dst.optype == OP_REG;
 
 // PRFs
 
+logic rdmap_nq_rd0 [IPRF_NUM_MAP_READS-1:0];
+assign rdmap_nq_rd0[SRC1] = valid_rn0 & uinstr_rn0.src1.optype == OP_REG;
+assign rdmap_nq_rd0[SRC2] = valid_rn0 & uinstr_rn0.src2.optype == OP_REG;
+
 prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRITES(IPRF_NUM_WRITES), .NUM_MAP_READS(IPRF_NUM_MAP_READS)) iprf
 (
     .clk,
@@ -65,11 +69,15 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
     .rd_psrc_rd0    ( iprf_rd_psrc_rd0                                    ) ,
     .rd_data_rd1    ( iprf_rd_data_rd1                                    ) ,
 
-    .rdmap_nq_rd0   ( {                 1'b1,                       1'b1} ) ,
+    .rdmap_nq_rd0   ( {   rdmap_nq_rd0[SRC2],         rdmap_nq_rd0[SRC1]} ) ,
     .rdmap_gpr_rd0  ( {uinstr_rn0.src2.opreg,      uinstr_rn0.src1.opreg} ) ,
     .rdmap_psrc_rd0 ( {     rename_rn1.psrc2,           rename_rn1.psrc1} ) ,
     .rdmap_pend_rd0 ( {rename_rn1.psrc2_pend,      rename_rn1.psrc1_pend} ) ,
 
+    `ifdef SIMULATION
+    .simid_rn0_inst ( uinstr_rn0.SIMID ) ,
+    .simid_rd0_inst ( uinstr_rn0.SIMID ) ,
+    `endif
     .stall_rn0,
 
     .alloc_pdst_rn0,

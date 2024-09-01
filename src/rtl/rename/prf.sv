@@ -7,9 +7,10 @@
 `include "vroom_macros.sv"
 `include "rename_defs.pkg"
 `include "gen_funcs.pkg"
+`include "verif.pkg"
 
 module prf
-   import instr::*, instr_decode::*, common::*, rename_defs::*, gen_funcs::*;
+   import instr::*, instr_decode::*, common::*, rename_defs::*, gen_funcs::*, verif::*;
 #(parameter int NUM_ENTRIES=8, parameter int NUM_REG_READS=2, parameter int NUM_REG_WRITES=1, parameter int NUM_MAP_READS=2)
 (
     input  logic         clk,
@@ -32,6 +33,10 @@ module prf
 
     input  logic         alloc_pdst_rn0,
     input  t_gpr_id      gpr_id_rn0,
+    `ifdef SIMULATION
+    input  t_simid       simid_rn0_inst,
+    input  t_simid       simid_rd0_inst,
+    `endif
     output t_prf_id      pdst_rn0
 );
 
@@ -125,7 +130,7 @@ end
 
 for (genvar r=0; r<NUM_MAP_READS; r++) begin : g_map_read
     assign rdmap_psrc_rd0[r].ptype = prf_type;
-    assign rdmap_psrc_rd0[r].idx  = MAP[rdmap_gpr_rd0[r]];
+    assign rdmap_psrc_rd0[r].idx   = MAP[rdmap_gpr_rd0[r]];
     assign rdmap_pend_rd0[r]       = pend_list_nxt[r];
 end
 
@@ -156,11 +161,17 @@ end
 //
 
 `ifdef SIMULATION
-// always @(posedge clk) begin
-//     if (uinstr_ra1.valid) begin
-//         `INFO(("unit:RA %s", describe_uinstr(uinstr_ra1)))
-//     end
-// end
+always @(posedge clk) begin
+    if (alloc_pdst_rn0) begin
+        `UINFO(simid_rn0_inst, ("unit:RN func:pdst_alloc gpr_id:0x%0x pdst:0x%0x", gpr_id_rn0, pdst_rn0))
+    end
+
+    for (int r=0; r<NUM_MAP_READS; r++) begin
+        if (rdmap_nq_rd0[r]) begin
+            `UINFO(simid_rd0_inst, ("unit:RN func:rat_read gpr_id:0x%0x psrc:0x%0x psrc_pend:%0d", rdmap_gpr_rd0[r], rdmap_psrc_rd0[r], rdmap_pend_rd0[r]))
+        end
+    end
+end
 
 localparam FAIL_DLY = 10;
 logic[FAIL_DLY:0] boom_pipe;

@@ -7,10 +7,11 @@
 `include "vroom_macros.sv"
 `include "rob_defs.pkg"
 `include "gen_funcs.pkg"
+`include "verif.pkg"
 
 module rs
-    import instr::*, instr_decode::*, common::*, rob_defs::*, gen_funcs::*;
-    #( parameter int NUM_RS_ENTS = 8 )
+    import instr::*, instr_decode::*, common::*, rob_defs::*, gen_funcs::*, verif::*;
+    #( parameter int NUM_RS_ENTS = 8, parameter string RS_NAME = "" )
 (
     input  logic          clk,
     input  logic          reset,
@@ -100,10 +101,28 @@ end
 t_uinstr_iss   iss_pkt_nq_rs2;
 `DFF(iss_pkt_nq_rs2, iss_pkt_rs1, clk)
 
+function automatic t_rv_reg_data f_opsel(t_optype optype, logic from_prf, t_rv_reg_data imm_data, t_rv_reg_data rs_data, t_rv_reg_data prf_data);
+    f_opsel = '0;
+    unique casez(optype)
+        OP_INVD: f_opsel = '0;
+        OP_ZERO: f_opsel = '0;
+        OP_IMM:  f_opsel = imm_data;
+        OP_MEM:  f_opsel = '0; // ???
+        OP_REG:  begin
+            if (from_prf) begin
+                f_opsel = prf_data;
+            end else begin
+                f_opsel = rs_data;
+            end
+        end
+    endcase
+endfunction
+
 always_comb begin
     iss_pkt_rs2 = iss_pkt_nq_rs2;
-    iss_pkt_rs2.src1_val = src_from_prf_rs2[SRC1] ? prf_rddatas_rd1[SRC1] : '0;
-    iss_pkt_rs2.src2_val = src_from_prf_rs2[SRC2] ? prf_rddatas_rd1[SRC2] : '0;
+ // VVV HEY YOU, you need to pipe the RS data into here for forwarding
+    iss_pkt_rs2.src1_val = f_opsel(iss_pkt_nq_rs2.uinstr.src1.optype, src_from_prf_rs2[SRC1], iss_pkt_nq_rs2.uinstr.imm64, t_rv_reg_data'('0), prf_rddatas_rd1[SRC1]);
+    iss_pkt_rs2.src2_val = f_opsel(iss_pkt_nq_rs2.uinstr.src2.optype, src_from_prf_rs2[SRC2], iss_pkt_nq_rs2.uinstr.imm64, t_rv_reg_data'('0), prf_rddatas_rd1[SRC2]);
 end
 
 //
@@ -141,9 +160,11 @@ end
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    // if (uinstr_rd1.valid) begin
-    //     `INFO(("unit:EX %s result:%08h", describe_uinstr(uinstr_rd1), result_exx[RS0]))
-    // end
+    if (iss_rs2) begin
+        `UINFO(iss_pkt_rs2.uinstr.SIMID, ("unit:%s func:issue robid:0x%0x pdst:0x%0x src1:0x%0x src2:0x%0x %s",
+            RS_NAME, iss_pkt_rs2.robid, iss_pkt_rs2.pdst, iss_pkt_rs2.src1_val, iss_pkt_rs2.src2_val,
+            describe_uinstr(iss_pkt_rs2.uinstr)))
+    end
 end
 `endif
 

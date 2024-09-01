@@ -131,7 +131,7 @@ alloc alloc (
     .disp_ex_rs0
 );
 
-rs #(.NUM_RS_ENTS(8)) rs_eint (
+rs #(.NUM_RS_ENTS(8), .RS_NAME("RS_EINT")) rs_eint (
     .clk,
     .reset,
     .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1} ),

@@ -5,9 +5,10 @@
 `include "instr_decode.pkg"
 `include "common.pkg"
 `include "vroom_macros.sv"
+`include "verif.pkg"
 
 module alloc
-   import instr::*, instr_decode::*, common::*;
+   import instr::*, instr_decode::*, common::*, verif::*;
 (
     input  logic         clk,
     input  logic         reset,
@@ -89,11 +90,15 @@ end
 //
 
 `ifdef SIMULATION
-// always @(posedge clk) begin
-//     if (uinstr_ra1.valid) begin
-//         `INFO(("unit:RA %s", describe_uinstr(uinstr_ra1)))
-//     end
-// end
+    always @(posedge clk) begin
+        for (int p=0; p<NUM_DISP_PORTS; p++) begin
+            if (disp_valid_ports_rs0[p]) begin
+                `UINFO(disp_ports_rs0[p].uinstr.SIMID, ("unit:RA robid:0x%0x pdst:0x%0x psrc1:0x%0x psrc2:0x%0x %s", 
+                    disp_ports_rs0[p].robid, disp_ports_rs0[p].rename.pdst, disp_ports_rs0[p].rename.psrc1, disp_ports_rs0[p].rename.psrc2, 
+                    describe_uinstr(disp_ports_rs0[p].uinstr)))
+            end
+        end
+    end
 `endif
 
 `ifdef ASSERT

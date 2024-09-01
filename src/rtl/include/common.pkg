@@ -50,7 +50,7 @@ package common;
     localparam IPRF_NUM_READS      = 2;
     localparam IPRF_NUM_MAP_READS  = 2;
 
-    localparam IPRF_NUM_ENTS = 32;
+    localparam IPRF_NUM_ENTS = 64;
     localparam IPRF_NUM_ENTS_LG2 = $clog2(IPRF_NUM_ENTS);
 
     // MAX of IPRF, VPRF, etc...

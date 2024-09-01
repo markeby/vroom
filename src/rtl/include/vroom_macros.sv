@@ -22,13 +22,14 @@
     $display("@[%-d] %-d %s: %s", $time(), top.cclk_count, `"tag`", $sformatf msg);
 
 `define PMSG_SIMID(tag, simid, msg) \
-    $display("@[%-d] %-d %s: %s %s", $time(), top.cclk_count, `"tag`", format_simid(simid), $sformatf msg);
+    $display("@[%-d] %-d %s: %s %s", $time(), top.cclk_count, `"tag`", $sformatf msg, format_simid(simid));
 
 `define RETLOG(msg)   `PMSG(RET,  msg)
 `define INFO(msg)     `PMSG(INFO, msg)
 `define UINFO(simid,msg)    `PMSG_SIMID(INFO, simid, msg)
 `define MEMLOG(msg)   `PMSG(MEM,  msg)
 `define GENLOG(pfx, msg)   `PMSG(pfx,  msg)
+`define UGENLOG(pfx, simid, msg)   `PMSG_SIMID(pfx,  simid, msg)
 
 `ifdef DEBUGON
     `define DEBUG(msg) \

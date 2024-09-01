@@ -24,7 +24,7 @@ run: Vtop
 	scripts/split_log -f run.log
 
 Vtop: verilated
-	make -C obj_dir -f Vtop.mk Vtop 
+	make -C obj_dir -f Vtop.mk Vtop  -j 8
 
 .PHONY: verilated
 verilated: $(SRC_FILES) $(LIB_FILES) 

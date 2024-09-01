@@ -65,11 +65,22 @@ assign free_list_reclaim_ro0 = '0; // FIXME
 logic reclaim_ro0;
 assign reclaim_ro0 = 1'b0;  // FIXME
 
-logic[NUM_ENTRIES-1:0] free_list_nxt = (  free_list
-                                       & ~(alloc_pdst_rn0 ? free_list_first_free_rn0 : '0)
-                                       )
-                                     | (reclaim_ro0 ? free_list_reclaim_ro0    : '0);
-`DFF(free_list, free_list_nxt, clk)
+logic[NUM_ENTRIES-1:0] free_list_rst;
+logic[NUM_ENTRIES-1:0] free_list_nxt;
+
+assign free_list_nxt = (  free_list
+                       & ~(alloc_pdst_rn0 ? free_list_first_free_rn0 : '0)
+                       )
+                     | (reclaim_ro0 ? free_list_reclaim_ro0    : '0);
+
+always_comb begin
+    free_list_rst = '1;
+    for (int i=0; i<RV_NUM_REGS; i++) begin
+        free_list_rst[i] = 1'b0;
+    end
+end
+
+`DFF(free_list, reset ? free_list_rst : free_list_nxt, clk)
 
 assign stall_rn0 = ~|free_list;
 always_comb begin

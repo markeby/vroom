@@ -217,7 +217,7 @@ package instr_decode;
 
     `ifdef SIMULATION
     function string describe_uinstr(t_uinstr uinstr);
-        describe_uinstr = $sformatf("%s opcode:%s uop:%s ifmt:%s", format_simid(uinstr.SIMID), uinstr.opcode.name(), uinstr.uop.name(), uinstr.ifmt.name());
+        describe_uinstr = $sformatf("opcode:%s uop:%s ifmt:%s", uinstr.opcode.name(), uinstr.uop.name(), uinstr.ifmt.name());
         case (uinstr.ifmt)
             RV_FMT_I: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d imm64:0x%h funct3:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.imm64, uinstr.funct3);
             RV_FMT_R: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d rs2:x%-d funct3:%-d funct7:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.src2.opreg, uinstr.funct3, uinstr.funct7);

@@ -6,9 +6,10 @@
 `include "common.pkg"
 `include "vroom_macros.sv"
 `include "rename_defs.pkg"
+`include "verif.pkg"
 
 module rename
-   import instr::*, instr_decode::*, common::*, rename_defs::*;
+   import instr::*, instr_decode::*, common::*, rename_defs::*, verif::*;
 (
     input  logic         clk,
     input  logic         reset,
@@ -81,11 +82,14 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
 //
 
 `ifdef SIMULATION
-// always @(posedge clk) begin
-//     if (uinstr_ra1.valid) begin
-//         `INFO(("unit:RA %s", describe_uinstr(uinstr_ra1)))
-//     end
-// end
+always @(posedge clk) begin
+    if (uinstr_rn1.valid) begin
+        `UINFO(uinstr_rn1.SIMID, ("unit:RN dst_type:%s dst_reg:%0d pdst:0x%0h src1_type:%s src1_reg:%0d psrc1:0x%0h psrc1_pend:%0d src2_type:%s src2_reg:%0d psrc2:0x%0h psrc2_pend:%d",
+            uinstr_rn1.dst.optype.name, uinstr_rn1.dst.opreg, rename_rn1.pdst,
+            uinstr_rn1.src1.optype.name, uinstr_rn1.src1.opreg, rename_rn1.psrc1, rename_rn1.psrc1_pend,
+            uinstr_rn1.src2.optype.name, uinstr_rn1.src2.opreg, rename_rn1.psrc2, rename_rn1.psrc2_pend))
+    end
+end
 `endif
 
 `ifdef ASSERT

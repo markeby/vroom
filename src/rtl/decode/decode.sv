@@ -6,9 +6,10 @@
 `include "vroom_macros.sv"
 `include "gen_funcs.pkg"
 `include "common.pkg"
+`include "verif.pkg"
 
 module decode
-    import instr::*, instr_decode::*, gen_funcs::*, common::*;
+    import instr::*, instr_decode::*, gen_funcs::*, common::*, verif::*;
 (
     input  logic             clk,
     input  logic             reset,
@@ -147,8 +148,8 @@ end
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (uinstr_de0.valid & ~stall) begin
-        `INFO(("unit:DE %s", describe_uinstr(uinstr_de0)))
+    if (uinstr_de1.valid & ~stall) begin
+        `UINFO(uinstr_de1.SIMID, ("unit:DE %s", describe_uinstr(uinstr_de1)))
     end
 end
 `endif

@@ -62,11 +62,6 @@ assign uinstr_ex0 = iss_pkt_ex0.uinstr;
 always_comb begin
     uinstr_ql_ex0 = uinstr_ex0;
     uinstr_ql_ex0.mispred = ibr_mispred_ex0;
-    `ifdef SIMULATION
-    uinstr_ql_ex0.SIMID.src1_val   = src1val_ex0;
-    uinstr_ql_ex0.SIMID.src2_val   = src2val_ex0;
-    uinstr_ql_ex0.SIMID.result_val = result_exx[EX0];
-    `endif
 end
 
 //

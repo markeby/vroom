@@ -142,8 +142,7 @@ always_comb begin
     instr_fe1.instr = ic_rsp.instr;
     instr_fe1.pc    = ic_rsp.pc;
     `ifdef SIMULATION
-    instr_fe1.SIMID.fid = instr_cnt_inst;
-    instr_fe1.SIMID.pc  = ic_rsp.pc;
+    instr_fe1.SIMID = `SIMID_CREATE_RHS(FETCH,instr_cnt_inst,instr_cnt_inst,ic_rsp.pc);
     `endif //SIMULATION
 end
 

@@ -7,19 +7,35 @@ package verif;
 
     `ifdef SIMULATION
 
+        typedef enum logic[2:0] {
+            FETCH,
+            UOP
+        } t_simid_spawn_point;
+
+        typedef struct packed {
+            t_simid_spawn_point spawn;
+            int                 record;
+        } t_simid_key;
+
         typedef struct packed {
             int         fid;
             logic[63:0] pc;
-            logic[63:0] src1_val;
-            logic[63:0] src2_val;
-            logic[63:0] result_val;
-            //int did;
+            t_simid_key tid;
+            t_simid_key pid;
+            t_simid_key lid;
         } t_simid;
+
         `define SIMID_STRUCT t_simid SIMID;
 
         function string format_simid(t_simid simid);
-            return $sformatf("%h,%h", simid.fid, simid.pc);
+            return $sformatf("%1h,%1h,%1h,%1h", simid.pc, simid.tid, simid.pid, simid.lid);
         endfunction
+
+        `define SIMID_CREATE_RHS(SPAWN,RECORD,FID,PC) \
+            '{fid:FID, pc:PC, tid: '{spawn:SPAWN, record:RECORD}, pid: t_simid_key'('0), lid: t_simid_key'('0)}
+
+        `define SIMID_SPAWN_RHS(PARENT,SPAWN,RECORD) \
+            '{fid:PARENT.fid, pc:PARENT.pc, tid: PARENT.tid, pid: PARENT.lid, lid: '{spawn_point:SPAWN, record:RECORD}}
 
     `else // SIMULATION
 

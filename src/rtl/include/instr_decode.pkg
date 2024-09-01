@@ -236,9 +236,6 @@ package instr_decode;
     function void print_retire_info(t_uinstr uinstr_rb0);
         `RETLOG(("-------------------------------------"))
         `RETLOG(("PC:%08h %s -> %s", uinstr_rb0.SIMID.pc, uinstr_rb0.opcode.name(), uinstr_rb0.uop.name()))
-        `RETLOG(("src1: %s", describe_opnd(uinstr_rb0.src1, uinstr_rb0.SIMID.src1_val)))
-        `RETLOG(("src2: %s", describe_opnd(uinstr_rb0.src2, uinstr_rb0.SIMID.src2_val)))
-        `RETLOG(("rslt: %s", describe_opnd(uinstr_rb0.dst,  uinstr_rb0.SIMID.result_val)))
     endfunction
     `endif
 

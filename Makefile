@@ -17,7 +17,7 @@ VL_WAIVER_OUT := --waiver-output new_waivers.txt
 
 .PHONY: run
 run: Vtop
-	obj_dir/Vtop +stall_after_n_instr:3 | tee run.log
+	obj_dir/Vtop +stall_after_n_instr:1 | tee run.log
 	@echo
 	@echo "Splitting run.log"
 	@echo

@@ -53,6 +53,16 @@ package instr_decode;
         logic             valid;
     } t_uinstr;
 
+    typedef logic[RV_REG_ADDR_BITS-1:0] t_gpr_id;
+
+    typedef struct packed {
+        t_prf_id psrc1;
+        logic    psrc1_pend;
+        t_prf_id psrc2;
+        logic    psrc2_pend;
+        t_prf_id pdst;
+    } t_rename_pkt;
+
     typedef struct packed {
        t_uinstr     uinstr;
        t_rob_id     robid;
@@ -66,6 +76,11 @@ package instr_decode;
        t_rv_reg_data src1_val;
        t_rv_reg_data src2_val;
     } t_uinstr_iss;
+
+    typedef struct packed {
+        t_prf_id      pdst;
+        instr::t_rv_reg_data data;
+    } t_prf_wr_pkt;
 
     function logic rv_opcode_is_alu(t_rv_opcode opcode);
         return opcode inside {RV_OP_ALU0_I, RV_OP_ALU1_I, RV_OP_ALU0_R, RV_OP_ALU0_I};

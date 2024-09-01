@@ -46,9 +46,12 @@ logic         alloc_pdst_rn0;
 
 assign alloc_pdst_rn0 = valid_rn0 & uinstr_rn0.dst.optype == OP_REG;
 
+`DFF(valid_rn1,  valid_rn0,  clk)
+`DFF(uinstr_rn1, uinstr_rn0, clk)
+
 // PRFs
 
-prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_READS(IPRF_NUM_READS), .NUM_WRITES(IPRF_NUM_WRITES)) iprf
+prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRITES(IPRF_NUM_WRITES), .NUM_MAP_READS(IPRF_NUM_MAP_READS)) iprf
 (
     .clk,
     .reset,

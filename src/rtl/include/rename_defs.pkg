@@ -6,14 +6,6 @@
 
 package rename_defs;
 
-    typedef struct packed {
-        t_prf_id psrc1;
-        logic    psrc1_pend;
-        t_prf_id psrc2;
-        logic    psrc2_pend;
-        t_prf_id pdst;
-    } t_rename_pkt;
-
 endpackage
 
 `endif // __RENAME_DEFS

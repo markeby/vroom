@@ -32,3 +32,8 @@ src/rtl/rs/rs_entry.sv
 src/rtl/rs/rs.sv
 
 src/rtl/alloc/alloc.sv
+
+src/rtl/rename/rename.sv
+src/rtl/rename/prf.sv
+
+

@@ -46,6 +46,10 @@ package common;
     // PRF Defines ///////////////
     //////////////////////////////
 
+    localparam IPRF_NUM_WRITES     = 1;
+    localparam IPRF_NUM_READS      = 2;
+    localparam IPRF_NUM_MAP_READS  = 2;
+
     localparam IPRF_NUM_ENTS = 32;
     localparam IPRF_NUM_ENTS_LG2 = $clog2(IPRF_NUM_ENTS);
 
@@ -54,21 +58,14 @@ package common;
     localparam PRF_NUM_ENTS_LG2 = $clog2(PRF_NUM_ENTS);
 
     typedef logic[PRF_NUM_ENTS_LG2-1:0] t_prf_addr;
-    typedef logic enum {
+    typedef enum logic {
         IPRF=0,
         VPRF=1
     } t_prf_type;
     typedef struct packed {
         t_prf_type ptype;
-        t_prf_addr pidx;
+        t_prf_addr idx;
     } t_prf_id;
-
-    typedef logic[RV_REG_ADDR_BITS-1:0] t_gpr_id;
-
-    typedef struct packed {
-        t_prf_id      pdst;
-        t_rv_reg_data data;
-    } t_prf_wr_pkt;
 
     //////////////////////////////
     // Miscellanea ///////////////

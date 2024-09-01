@@ -24,9 +24,6 @@ module rob
     output t_rob_id          rob_src_reg_robid_ra0 [NUM_SOURCES-1:0],
 
     output t_uinstr          uinstr_rb1,
-    output logic             wren_rb1,
-    output t_rv_reg_addr     wraddr_rb1,
-    output t_rv_reg_data     wrdata_rb1,
 
     output logic             br_mispred_rb1,
     output t_paddr           br_tgt_rb1
@@ -89,11 +86,7 @@ assign q_retire_rb1 = ~rob_empty_de1 & head_entry.d.ready;
 assign e_retire_rb1 = q_retire_rb1 ? (1 << head_id.idx) : '0;
 
 assign uinstr_rb1 = head_entry.s.uinstr;
-assign result_rb1 = head_entry.d.result;
-
-assign wren_rb1   = q_retire_rb1 & uinstr_rb1.dst.optype == OP_REG;
-assign wraddr_rb1 = uinstr_rb1.dst.opreg;
-assign wrdata_rb1 = result_rb1;
+assign result_rb1 = '0; //head_entry.d.result;
 
 assign q_flush_now_rb1 = ~rob_empty_de1 & head_entry.d.flush_needed;
 

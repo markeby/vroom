@@ -43,8 +43,7 @@ t_rob_ent_fsm fsm, fsm_nxt;
 // Nets
 //
 
-logic         e_value_wr_rb0;
-t_rv_reg_data e_result;
+logic         e_wb_valid_rb0;
 
 // Flushes
 logic         e_flush_needed;
@@ -63,7 +62,7 @@ always_comb begin
          RBE_IDLE:    if ( e_alloc_de1     ) fsm_nxt = RBE_PDG;
          RBE_PDG:     if ( q_flush_now_rb1 ) fsm_nxt = RBE_IDLE;
                  else if ( e_flush_needed  ) fsm_nxt = RBE_FLUSH;
-                 else if ( e_value_wr_rb0  ) fsm_nxt = RBE_READY;
+                 else if ( e_wb_valid_rb0  ) fsm_nxt = RBE_READY;
          RBE_READY:   if ( q_flush_now_rb1 ) fsm_nxt = RBE_IDLE;
                  else if ( e_retire_rb1    ) fsm_nxt = RBE_IDLE;
          RBE_FLUSH:   if ( q_flush_now_rb1 ) fsm_nxt = RBE_IDLE;
@@ -78,8 +77,10 @@ assign e_valid = (fsm != RBE_IDLE);
 // Logic
 //
 
+assign e_wb_valid_rb0 = ro_valid_rb0 & ro_result_rb0.robid == robid;
+
 // Flushes
-assign e_flush_needed = e_value_wr_rb0 & ro_result_rb0.mispred;
+assign e_flush_needed = e_wb_valid_rb0 & ro_result_rb0.mispred;
 
 //
 // Dynamic state
@@ -87,7 +88,6 @@ assign e_flush_needed = e_value_wr_rb0 & ro_result_rb0.mispred;
 
 assign rob_entry.d.ready        = fsm == RBE_READY;
 assign rob_entry.d.flush_needed = fsm == RBE_FLUSH;
-assign rob_entry.d.result       = e_result;
 
 //
 // Static state

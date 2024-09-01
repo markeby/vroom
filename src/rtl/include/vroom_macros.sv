@@ -22,7 +22,7 @@
     $display("@[%-d] %-d %s: %s", $time(), top.cclk_count, `"tag`", $sformatf msg);
 
 `define PMSG_SIMID(tag, simid, msg) \
-    $display("@[%-d] %-d %s: simid:%s %s", $time(), top.cclk_count, `"tag`", format_simid(simid), $sformatf msg);
+    $display("@[%-d] %-d %s: %s %s", $time(), top.cclk_count, `"tag`", format_simid(simid), $sformatf msg);
 
 `define RETLOG(msg)   `PMSG(RET,  msg)
 `define INFO(msg)     `PMSG(INFO, msg)

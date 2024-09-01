@@ -169,7 +169,7 @@ package instr;
 
     `ifdef SIMULATION
     function string describe_instr(t_instr_pkt inst);
-        describe_instr = $sformatf("SIMID:%s opcode:%s", format_simid(inst.SIMID), inst.instr.opcode.name());
+        describe_instr = $sformatf("opcode:%s", inst.instr.opcode.name());
     endfunction
     `endif
 

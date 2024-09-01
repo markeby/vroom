@@ -31,7 +31,7 @@ package verif;
         `define SIMID_STRUCT t_simid SIMID;
 
         function string format_simid(t_simid simid);
-            return $sformatf("%h,%h,%h", simid.txid, simid.pid, simid.lid);
+            return $sformatf("txid:%h pid:%1h lid:%1h", simid.txid, simid.pid, simid.lid);
         endfunction
 
         `define SIMID_CREATE_RHS(SPAWN,FID,PC) \

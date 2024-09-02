@@ -74,19 +74,35 @@ typedef struct packed {
 
 t_cd_inst  INSTQ[$];
 
+function automatic string f_describe_src_dst(t_optype optype, t_rv_reg_addr opreg, t_prf_id psrc, t_rv_reg_data value);
+    unique casez(optype)
+        OP_REG:  f_describe_src_dst = $sformatf("reg %3s value:0x%08h prf:0x%02h", $sformatf("x%0d",opreg), value, psrc);
+        OP_IMM:  f_describe_src_dst = $sformatf("imm     value:0x%08h",            value);
+        OP_ZERO: f_describe_src_dst = $sformatf("zero    value:0x%08h",            0);
+        OP_INVD: f_describe_src_dst = $sformatf("invalid",                      );
+        OP_MEM:  f_describe_src_dst = $sformatf("mem",                          );
+    endcase
+endfunction
+
 task cd_show_retire(t_cd_inst rec);
     `PMSG(CDBG, ("---------------------[ %4d @%-4t ]---------------------", top.cclk_count, $time()));
     `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
     `PMSG(CDBG, ("ROBID 0x%0h -- %s", rec.ALLOC.disp_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
-    `PMSG(CDBG, ("  psrc1:0x%02h src1:0x%08h", rec.RENAME.rename_rn1.psrc1, rec.RS.iss_pkt_rs2.src1_val))
-    `PMSG(CDBG, ("  psrc2:0x%02h src2:0x%08h", rec.RENAME.rename_rn1.psrc2, rec.RS.iss_pkt_rs2.src2_val))
-    `PMSG(CDBG, ("   pdst:0x%02h  dst:0x%08h", rec.RENAME.rename_rn1.pdst,  rec.RESULT.iprf_wr_pkt_ro0.data))
-    `PMSG(CDBG, ("Fetch  -> Decode @ %-d", rec.FETCH.clk))
-    `PMSG(CDBG, ("Decode -> Rename @ %-d", rec.DECODE.clk))
-    `PMSG(CDBG, ("Rename -> Alloc  @ %-d", rec.RENAME.clk))
-    `PMSG(CDBG, ("Alloc  -> RS.%0d   @ %-d", rec.ALLOC.port, rec.ALLOC.clk))
-    `PMSG(CDBG, ("          Result @ %-d", rec.RESULT.clk))
-    `PMSG(CDBG, ("          Retire @ %-d", rec.RETIRE.clk))
+    `PMSG(CDBG, ($sformatf(" src1 %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.src1.optype, rec.RS.iss_pkt_rs2.uinstr.src1.opreg, rec.RENAME.rename_rn1.psrc1, rec.RS.iss_pkt_rs2.src1_val))))
+    `PMSG(CDBG, ($sformatf(" src2 %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.src2.optype, rec.RS.iss_pkt_rs2.uinstr.src2.opreg, rec.RENAME.rename_rn1.psrc2, rec.RS.iss_pkt_rs2.src2_val))))
+    `PMSG(CDBG, ($sformatf("  dst %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.dst .optype, rec.RS.iss_pkt_rs2.uinstr.dst .opreg, rec.RENAME.rename_rn1.pdst , rec.RESULT.iprf_wr_pkt_ro0.data))))
+    `PMSG(CDBG, (""))
+    `PMSG(CDBG, ("    Fetch  -> Decode @ %-d", rec.FETCH.clk))
+    `PMSG(CDBG, ("    Decode -> Rename @ %-d", rec.DECODE.clk))
+    `PMSG(CDBG, ("    Rename -> Alloc  @ %-d", rec.RENAME.clk))
+    `PMSG(CDBG, ("    Alloc  -> RS.%0d   @ %-d", rec.ALLOC.port, rec.ALLOC.clk))
+    `PMSG(CDBG, ("              Result @ %-d", rec.RESULT.clk))
+    `PMSG(CDBG, ("              Retire @ %-d", rec.RETIRE.clk))
+    `PMSG(CDBG, (""))
+    if (rec.DECODE.uinstr_de1.dst.optype == OP_REG) begin
+        `PMSG(CDBG, ("Register Updates"))
+        `PMSG(CDBG, ("  GPR %3s := 0x%08h", $sformatf("x%0d", rec.DECODE.uinstr_de1.dst.opreg), rec.RESULT.iprf_wr_pkt_ro0.data))
+    end
 endtask
 
 task cd_fetch();

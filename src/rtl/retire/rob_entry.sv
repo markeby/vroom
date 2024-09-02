@@ -14,8 +14,8 @@ module rob_entry
     input  t_rob_id               robid,
 
     input  rob_defs::t_rob_ent_static
-                                  q_alloc_s_de1,
-    input  logic                  e_alloc_de1,
+                                  q_alloc_s_ra0,
+    input  logic                  e_alloc_ra0,
 
     input  logic                  ro_valid_rb0,
     input  t_rob_result           ro_result_rb0,
@@ -59,7 +59,7 @@ always_comb begin
       fsm_nxt = RBE_IDLE;
    end else begin
       unique casez (fsm)
-         RBE_IDLE:    if ( e_alloc_de1     ) fsm_nxt = RBE_PDG;
+         RBE_IDLE:    if ( e_alloc_ra0     ) fsm_nxt = RBE_PDG;
          RBE_PDG:     if ( q_flush_now_rb1 ) fsm_nxt = RBE_IDLE;
                  else if ( e_flush_needed  ) fsm_nxt = RBE_FLUSH;
                  else if ( e_wb_valid_rb0  ) fsm_nxt = RBE_READY;
@@ -77,7 +77,7 @@ assign e_valid = (fsm != RBE_IDLE);
 // Logic
 //
 
-assign e_wb_valid_rb0 = ro_valid_rb0 & ro_result_rb0.robid == robid;
+assign e_wb_valid_rb0 = ro_valid_rb0 & ro_result_rb0.robid.idx == robid.idx;
 
 // Flushes
 assign e_flush_needed = e_wb_valid_rb0 & ro_result_rb0.mispred;
@@ -94,7 +94,7 @@ assign rob_entry.d.flush_needed = fsm == RBE_FLUSH;
 //
 
 t_rob_ent_static s;
-`DFF_EN(s, q_alloc_s_de1, clk, e_alloc_de1)
+`DFF_EN(s, q_alloc_s_ra0, clk, e_alloc_ra0)
 assign rob_entry.s = s;
 
 //

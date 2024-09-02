@@ -6,9 +6,10 @@
 `include "common.pkg"
 `include "vroom_macros.sv"
 `include "rob_defs.pkg"
+`include "verif.pkg"
 
 module exe
-    import instr::*, instr_decode::*, common::*, rob_defs::*;
+    import instr::*, instr_decode::*, common::*, rob_defs::*, verif::*;
 (
     input  logic         clk,
     input  logic         reset,
@@ -123,7 +124,7 @@ always_comb begin
     ro_result_ex1.mispred = ibr_mispred_exx[EX1];
     ro_result_ex1.robid = robid_exx[EX1];
 
-    iprf_wr_en_ex1 = ro_valid_ex1;
+    iprf_wr_en_ex1 = uinstr_exx[EX1].valid & uinstr_exx[EX1].dst.optype == OP_REG;
     iprf_wr_pkt_ex1.pdst = pdst_exx[EX1];
     iprf_wr_pkt_ex1.data = result_exx[EX1];
 end
@@ -134,8 +135,8 @@ end
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (uinstr_ex0.valid) begin
-        `INFO(("unit:EX %s result:%08h", describe_uinstr(uinstr_ex0), result_exx[EX0]))
+    if (uinstr_exx[EX1].valid) begin
+        `UINFO(uinstr_exx[EX1].SIMID, ("unit:EX pdst:%08h result:%08h %s", pdst_exx[EX1], result_exx[EX1], describe_uinstr(uinstr_exx[EX1])))
     end
 end
 `endif

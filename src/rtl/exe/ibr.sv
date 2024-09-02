@@ -70,11 +70,11 @@ always_comb br_tgt_ex0     = tru_tgt_ex0;
 //
 
 `ifdef SIMULATION
-always @(posedge clk) begin
-    if (resvld_ex0) begin
-        `INFO(("unit:EX.IBR %s mispred:%-d tkn:%-d tru_tgt:%h pcnxt:%h ", describe_uinstr(uinstr_ex0), br_mispred_ex0, tkn_ex0, tru_tgt_ex0, pcnxt_ex0))
-    end
-end
+// always @(posedge clk) begin
+//     if (resvld_ex0) begin
+//         `INFO(("unit:EX.IBR %s mispred:%-d tkn:%-d tru_tgt:%h pcnxt:%h ", describe_uinstr(uinstr_ex0), br_mispred_ex0, tkn_ex0, tru_tgt_ex0, pcnxt_ex0))
+//     end
+// end
 `endif
 
 /*

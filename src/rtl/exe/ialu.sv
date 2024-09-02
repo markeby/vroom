@@ -63,11 +63,11 @@ end
 //
 
 `ifdef SIMULATION
-always @(posedge clk) begin
-    if (resvld_ex0) begin
-        `INFO(("unit:EX.IALU %s result:%08h", describe_uinstr(uinstr_ex0), result_ex0))
-    end
-end
+// always @(posedge clk) begin
+//     if (resvld_ex0) begin
+//         `INFO(("unit:EX.IALU %s result:%08h", describe_uinstr(uinstr_ex0), result_ex0))
+//     end
+// end
 `endif
 
 /*

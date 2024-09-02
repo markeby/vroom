@@ -190,7 +190,7 @@ retire retire (
     .clk,
     .reset,
     .next_robid_ra0,
-    .uinstr_de1,
+    .uinstr_ra0 ( uinstr_rn1 ),
 
     .src_addr_ra0,
     .rob_src_reg_pdg_ra0,

@@ -11,7 +11,7 @@ module retire
 (
     input  logic             clk,
     input  logic             reset,
-    input  t_uinstr          uinstr_de1,
+    input  t_uinstr          uinstr_ra0,
 
     input  t_rv_reg_addr     src_addr_ra0          [NUM_SOURCES-1:0],
     output logic             rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0],
@@ -38,7 +38,7 @@ module retire
 rob rob (
     .clk,
     .reset,
-    .uinstr_de1,
+    .uinstr_ra0,
 
     .src_addr_ra0,
     .rob_src_reg_pdg_ra0,

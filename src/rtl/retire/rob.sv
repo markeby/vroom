@@ -13,7 +13,7 @@ module rob
     input  logic             clk,
     input  logic             reset,
 
-    input  t_uinstr          uinstr_de1,
+    input  t_uinstr          uinstr_ra0,
     output t_rob_id          next_robid_ra0,
 
     input  logic             ro_valid_rb0,
@@ -43,10 +43,10 @@ logic[RB_NUM_ENTS-1:0] e_retire_rb1;
 t_rv_reg_data          result_rb1;
 
 logic[RB_NUM_ENTS-1:0] e_valid;
-logic                  q_alloc_de1;
-logic[RB_NUM_ENTS-1:0] e_alloc_de1;
-logic                  rob_full_de1;
-logic                  rob_empty_de1;
+logic                  q_alloc_ra0;
+logic[RB_NUM_ENTS-1:0] e_alloc_ra0;
+logic                  rob_full_ra0;
+logic                  rob_empty_ra0;
 
 logic                  q_flush_now_rb1;
 
@@ -67,28 +67,28 @@ end : g_rob_head_ptr
 if(1) begin : g_rob_tail_ptr
    t_rob_id tail_id_nxt;
    assign tail_id_nxt = reset       ? '0                    :
-                        q_alloc_de1 ? f_incr_robid(tail_id) :
+                        q_alloc_ra0 ? f_incr_robid(tail_id) :
                                       tail_id;
    `DFF(tail_id, tail_id_nxt, clk)
 end : g_rob_tail_ptr
 
 assign next_robid_ra0 = tail_id;
 
-assign rob_empty_de1 = f_rob_empty(head_id, tail_id);
-assign rob_full_de1  = f_rob_full(head_id, tail_id);
+assign rob_empty_ra0 = f_rob_empty(head_id, tail_id);
+assign rob_full_ra0  = f_rob_full(head_id, tail_id);
 
 // Retire
 
 t_rob_ent head_entry;
 assign head_entry = entries[head_id.idx];
 
-assign q_retire_rb1 = ~rob_empty_de1 & head_entry.d.ready;
+assign q_retire_rb1 = ~rob_empty_ra0 & head_entry.d.ready;
 assign e_retire_rb1 = q_retire_rb1 ? (1 << head_id.idx) : '0;
 
 assign uinstr_rb1 = head_entry.s.uinstr;
 assign result_rb1 = '0; //head_entry.d.result;
 
-assign q_flush_now_rb1 = ~rob_empty_de1 & head_entry.d.flush_needed;
+assign q_flush_now_rb1 = ~rob_empty_ra0 & head_entry.d.flush_needed;
 
 assign br_mispred_rb1 = q_flush_now_rb1 & uinstr_rb1.mispred;
 assign br_tgt_rb1     = result_rb1;
@@ -97,16 +97,16 @@ assign br_tgt_rb1     = result_rb1;
 // Alloc
 //
 
-assign q_alloc_de1 = uinstr_de1.valid;
-assign e_alloc_de1 = q_alloc_de1 ? (1<<tail_id) : '0;
+assign q_alloc_ra0 = uinstr_ra0.valid;
+assign e_alloc_ra0 = q_alloc_ra0 ? (1<<tail_id) : '0;
 
 //
 // ROB Entries
 //
 
-t_rob_ent_static rob_st_new_de1;
+t_rob_ent_static rob_st_new_ra0;
 always_comb begin
-   rob_st_new_de1.uinstr = uinstr_de1;
+   rob_st_new_ra0.uinstr = uinstr_ra0;
 end
 
 for (genvar i=0; i<RB_NUM_ENTS; i++) begin : g_rob_ents
@@ -115,8 +115,8 @@ for (genvar i=0; i<RB_NUM_ENTS; i++) begin : g_rob_ents
       .reset,
       .e_valid       ( e_valid[i]      ),
       .robid         ( t_rob_id'(i)    ),
-      .q_alloc_s_de1 ( rob_st_new_de1  ),
-      .e_alloc_de1   ( e_alloc_de1[i]  ),
+      .q_alloc_s_ra0 ( rob_st_new_ra0  ),
+      .e_alloc_ra0   ( e_alloc_ra0[i]  ),
       .ro_valid_rb0,
       .ro_result_rb0,
       .q_flush_now_rb1,
@@ -149,6 +149,14 @@ end
 //
 
 `ifdef SIMULATION
+
+always @(posedge clk) begin
+    if (q_retire_rb1) begin
+        `UINFO(head_entry.s.uinstr.SIMID, ("unit:ROB func:retire robid:0x%0x %s",
+            head_id,
+            describe_uinstr(head_entry.s.uinstr)))
+    end
+end
 
 `endif
 

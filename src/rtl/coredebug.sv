@@ -74,9 +74,13 @@ typedef struct packed {
 
 t_cd_inst  INSTQ[$];
 
+function automatic string f_describe_prf(t_prf_id prf_id);
+    f_describe_prf = $sformatf("%s.0x%02h", prf_id.ptype.name, prf_id.idx);
+endfunction
+
 function automatic string f_describe_src_dst(t_optype optype, t_rv_reg_addr opreg, t_prf_id psrc, t_rv_reg_data value);
     unique casez(optype)
-        OP_REG:  f_describe_src_dst = $sformatf("reg %3s value:0x%08h prf:0x%02h", $sformatf("x%0d",opreg), value, psrc);
+        OP_REG:  f_describe_src_dst = $sformatf("reg %3s value:0x%08h prf:%s", $sformatf("x%0d",opreg), value, f_describe_prf(psrc));
         OP_IMM:  f_describe_src_dst = $sformatf("imm     value:0x%08h",            value);
         OP_ZERO: f_describe_src_dst = $sformatf("zero    value:0x%08h",            0);
         OP_INVD: f_describe_src_dst = $sformatf("invalid",                      );
@@ -102,7 +106,7 @@ task cd_show_retire(t_cd_inst rec);
     `PMSG(CDBG, (""))
     if (rec.DECODE.uinstr_de1.dst.optype == OP_REG) begin
         `PMSG(CDBG, ("Register Updates"))
-        `PMSG(CDBG, ("  GPR %3s := 0x%08h", $sformatf("x%0d", rec.DECODE.uinstr_de1.dst.opreg), rec.RESULT.iprf_wr_pkt_ro0.data))
+        `PMSG(CDBG, ("  GPR %3s := 0x%08h (prf %s -> %s)", $sformatf("x%0d", rec.DECODE.uinstr_de1.dst.opreg), rec.RESULT.iprf_wr_pkt_ro0.data, f_describe_prf(rec.RENAME.rename_rn1.pdst_old), f_describe_prf(rec.RENAME.rename_rn1.pdst)))
         `PMSG(CDBG, (""))
     end
 endtask

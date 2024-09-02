@@ -26,8 +26,8 @@ module prf
 
     input  logic         rdmap_nq_rd0   [NUM_MAP_READS-1:0],
     input  t_gpr_id      rdmap_gpr_rd0  [NUM_MAP_READS-1:0],
-    output t_prf_id      rdmap_psrc_rd0 [NUM_MAP_READS-1:0],
-    output logic         rdmap_pend_rd0 [NUM_MAP_READS-1:0],
+    output t_prf_id      rdmap_psrc_rd1 [NUM_MAP_READS-1:0],
+    output logic         rdmap_pend_rd1 [NUM_MAP_READS-1:0],
 
     output logic         stall_rn0,
 
@@ -37,7 +37,8 @@ module prf
     input  t_simid       simid_rn0_inst,
     input  t_simid       simid_rd0_inst,
     `endif
-    output t_prf_id      pdst_rn0
+    output t_prf_id      pdst_rn1,
+    output t_prf_id      pdst_old_rn1
 );
 
 localparam RN0 = 0;
@@ -88,10 +89,19 @@ end
 `DFF(free_list, reset ? free_list_rst : free_list_nxt, clk)
 
 assign stall_rn0 = ~|free_list;
+
+t_prf_id      pdst_rn0;
+t_prf_id      pdst_old_rn0;
 always_comb begin
     pdst_rn0.ptype = prf_type;
     pdst_rn0.idx  = gen_funcs#(.IWIDTH(NUM_ENTRIES))::oh_encode(free_list_first_free_rn0);
+
+    pdst_old_rn0.ptype = prf_type;
+    pdst_old_rn0.idx   = MAP[gpr_id_rn0];
 end
+
+`DFF(pdst_rn1, pdst_rn0, clk);
+`DFF(pdst_old_rn1, pdst_old_rn0, clk);
 
 //
 // Pend list
@@ -128,11 +138,16 @@ always_ff @(posedge clk) begin
     end
 end
 
+t_prf_id      rdmap_psrc_rd0 [NUM_MAP_READS-1:0];
+logic         rdmap_pend_rd0 [NUM_MAP_READS-1:0];
 for (genvar r=0; r<NUM_MAP_READS; r++) begin : g_map_read
     assign rdmap_psrc_rd0[r].ptype = prf_type;
     assign rdmap_psrc_rd0[r].idx   = MAP[rdmap_gpr_rd0[r]];
     assign rdmap_pend_rd0[r]       = pend_list_nxt[r];
 end
+
+`DFF(rdmap_psrc_rd1, rdmap_psrc_rd0, clk);
+`DFF(rdmap_pend_rd1, rdmap_pend_rd0, clk);
 
 //
 // PRF data

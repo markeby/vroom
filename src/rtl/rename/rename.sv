@@ -71,8 +71,8 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
 
     .rdmap_nq_rd0   ( {   rdmap_nq_rd0[SRC2],         rdmap_nq_rd0[SRC1]} ) ,
     .rdmap_gpr_rd0  ( {uinstr_rn0.src2.opreg,      uinstr_rn0.src1.opreg} ) ,
-    .rdmap_psrc_rd0 ( {     rename_rn1.psrc2,           rename_rn1.psrc1} ) ,
-    .rdmap_pend_rd0 ( {rename_rn1.psrc2_pend,      rename_rn1.psrc1_pend} ) ,
+    .rdmap_psrc_rd1 ( {     rename_rn1.psrc2,           rename_rn1.psrc1} ) ,
+    .rdmap_pend_rd1 ( {rename_rn1.psrc2_pend,      rename_rn1.psrc1_pend} ) ,
 
     `ifdef SIMULATION
     .simid_rn0_inst ( uinstr_rn0.SIMID ) ,
@@ -82,7 +82,8 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
 
     .alloc_pdst_rn0,
     .gpr_id_rn0     ( uinstr_rn0.dst.opreg                           ) ,
-    .pdst_rn0       ( rename_rn1.pdst                                )
+    .pdst_rn1       ( rename_rn1.pdst                                ) ,
+    .pdst_old_rn1   ( rename_rn1.pdst_old                            )
 );
 
 //
@@ -92,8 +93,8 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (uinstr_rn1.valid) begin
-        `UINFO(uinstr_rn1.SIMID, ("unit:RN dst_type:%s dst_reg:%0d pdst:0x%0h src1_type:%s src1_reg:%0d psrc1:0x%0h psrc1_pend:%0d src2_type:%s src2_reg:%0d psrc2:0x%0h psrc2_pend:%d",
-            uinstr_rn1.dst.optype.name, uinstr_rn1.dst.opreg, rename_rn1.pdst,
+        `UINFO(uinstr_rn1.SIMID, ("unit:RN dst_type:%s dst_reg:%0d pdst:0x%0h pdst_old:0x%0h, src1_type:%s src1_reg:%0d psrc1:0x%0h psrc1_pend:%0d src2_type:%s src2_reg:%0d psrc2:0x%0h psrc2_pend:%d",
+            uinstr_rn1.dst.optype.name, uinstr_rn1.dst.opreg, rename_rn1.pdst, rename_rn1.pdst_old,
             uinstr_rn1.src1.optype.name, uinstr_rn1.src1.opreg, rename_rn1.psrc1, rename_rn1.psrc1_pend,
             uinstr_rn1.src2.optype.name, uinstr_rn1.src2.opreg, rename_rn1.psrc2, rename_rn1.psrc2_pend))
     end

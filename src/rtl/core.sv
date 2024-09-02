@@ -29,6 +29,7 @@ logic         valid_rn1;
 t_uinstr      uinstr_rn1;
 t_rename_pkt  rename_rn1;
 
+logic         valid_de1;
 t_uinstr      uinstr_de1;
 logic         rdens_rd0   [1:0];
 t_prf_id      rdaddrs_rd0 [1:0];
@@ -79,6 +80,7 @@ decode decode (
     .stall,
     .instr_fe1,
     .uinstr_de0,
+    .valid_de1,
     .uinstr_de1
 );
 
@@ -147,17 +149,6 @@ rs #(.NUM_RS_ENTS(8), .RS_NAME("RS_EINT")) rs_eint (
     .iss_pkt_rs2  ( eint_iss_pkt_rs2    )
 );
 
-// regrd regrd (
-//     .clk,
-//     .reset,
-//     .br_mispred_rb1,
-//     .uinstr_de1,
-//     .rdens_rd0,
-//     .rdaddrs_rd0,
-//     .stall,
-//     .rddatas_rd1 ( rddatas_rd1 )
-// );
-
 logic        ro_valid_rb0;
 t_rob_result ro_result_rb0;
 exe exe (
@@ -203,19 +194,6 @@ retire retire (
     .br_tgt_rb1
 );
 
-// gprs gprs (
-//     .clk,
-//     .reset,
-
-//     .rden   ( rdens_rd0   ),
-//     .rdaddr ( rdaddrs_rd0 ),
-//     .rddata ( rddatas_rd1 ),
-
-//     .wren   ( '{wren_rb1  } ),
-//     .wraddr ( '{wraddr_rb1} ),
-//     .wrdata ( '{wrdata_rb1} )
-// );
-
 scoreboard scoreboard (
     .clk,
     .reset,
@@ -232,6 +210,8 @@ icache #(.LATENCY(5)) icache (
 `ifdef ASSERT
 
 chk_instr_progress #(.A("FE"), .B("DE")) chk_instr_progress_fe (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(valid_fe1       ), .simid_stgA_nn0(instr_fe1.SIMID ), .valid_stgB_nn0(uinstr_de1.valid), .simid_stgB_nn0(uinstr_de1.SIMID));
+
+coredebug coredebug (.clk, .reset);
 
 `endif
 

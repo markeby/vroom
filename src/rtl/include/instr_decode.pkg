@@ -235,7 +235,7 @@ package instr_decode;
 
     function void print_retire_info(t_uinstr uinstr_rb0);
         `RETLOG(("-------------------------------------"))
-        `RETLOG(("PC:%08h %s -> %s", uinstr_rb0.SIMID.txid.pc, uinstr_rb0.opcode.name(), uinstr_rb0.uop.name()))
+        `RETLOG(("PC:%08h %s -> %s", uinstr_rb0.SIMID.pc, uinstr_rb0.opcode.name(), uinstr_rb0.uop.name()))
     endfunction
     `endif
 

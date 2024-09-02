@@ -20,6 +20,7 @@ module decode
 
     output t_uinstr          uinstr_de0,
 
+    output logic             valid_de1,
     output t_uinstr          uinstr_de1
 );
 
@@ -137,6 +138,7 @@ end
 t_uinstr uinstr_nq_de1;
 `DFF_EN(uinstr_nq_de1, uinstr_de0, clk, ~stall)
 
+assign valid_de1 = uinstr_de1.valid;
 always_comb begin
     uinstr_de1 = uinstr_nq_de1;
     uinstr_de1.valid  &= ~br_mispred_rb1;

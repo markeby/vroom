@@ -121,8 +121,8 @@ endfunction
 always_comb begin
     iss_pkt_rs2 = iss_pkt_nq_rs2;
  // VVV HEY YOU, you need to pipe the RS data into here for forwarding
-    iss_pkt_rs2.src1_val = f_opsel(iss_pkt_nq_rs2.uinstr.src1.optype, src_from_prf_rs2[SRC1], iss_pkt_nq_rs2.uinstr.imm64, t_rv_reg_data'('0), prf_rddatas_rd1[SRC1]);
-    iss_pkt_rs2.src2_val = f_opsel(iss_pkt_nq_rs2.uinstr.src2.optype, src_from_prf_rs2[SRC2], iss_pkt_nq_rs2.uinstr.imm64, t_rv_reg_data'('0), prf_rddatas_rd1[SRC2]);
+    iss_pkt_rs2.src1_val = f_opsel(iss_pkt_nq_rs2.uinstr.src1.optype, src_from_prf_rs2[SRC1], iss_pkt_nq_rs2.uinstr.imm64, iss_pkt_nq_rs2.src1_val, prf_rddatas_rd1[SRC1]);
+    iss_pkt_rs2.src2_val = f_opsel(iss_pkt_nq_rs2.uinstr.src2.optype, src_from_prf_rs2[SRC2], iss_pkt_nq_rs2.uinstr.imm64, iss_pkt_nq_rs2.src2_val, prf_rddatas_rd1[SRC2]);
 end
 
 //

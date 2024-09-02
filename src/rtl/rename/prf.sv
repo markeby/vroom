@@ -122,7 +122,7 @@ end
 assign pend_list_nxt = ( pend_list
                        | (alloc_pdst_rn0 ? free_list_first_free_rn0 : '0))
                      & ~prf_wrs_dec_ro0;
-`DFF(pend_list, pend_list_nxt, clk)
+`DFF(pend_list, reset ? '0 : pend_list_nxt, clk)
 
 //
 // Mapping table
@@ -146,7 +146,7 @@ logic         rdmap_pend_rd0 [NUM_MAP_READS-1:0];
 for (genvar r=0; r<NUM_MAP_READS; r++) begin : g_map_read
     assign rdmap_psrc_rd0[r].ptype = prf_type;
     assign rdmap_psrc_rd0[r].idx   = MAP[rdmap_gpr_rd0[r]];
-    assign rdmap_pend_rd0[r]       = pend_list_nxt[r];
+    assign rdmap_pend_rd0[r]       = pend_list_nxt[rdmap_psrc_rd0[r].idx];
 end
 
 `DFF(rdmap_psrc_rd1, rdmap_psrc_rd0, clk);

@@ -124,6 +124,9 @@ always_comb begin
         end
     endcase
 
+    if (uinstr_de0.src1.optype == OP_REG & uinstr_de0.src1.opreg == '0) uinstr_de0.src1.optype = OP_ZERO;
+    if (uinstr_de0.src2.optype == OP_REG & uinstr_de0.src2.opreg == '0) uinstr_de0.src2.optype = OP_ZERO;
+
     `ifdef SIMULATION
     uinstr_de0.SIMID     = instr_fe1.SIMID;
     `endif

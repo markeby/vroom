@@ -44,6 +44,9 @@ t_prf_wr_pkt iprf_wr_pkt_ex1;
 t_paddr       br_tgt_rb1;
 logic         br_mispred_rb1;
 
+logic         reclaim_prf_rb1;
+t_prf_id      reclaim_prf_id_rb1;
+
 t_rv_reg_data result_mm1;
 
 t_rv_reg_addr     src_addr_ra0          [NUM_SOURCES-1:0];
@@ -99,6 +102,9 @@ rename rename (
     .iprf_rd_en_rd0   ( rdens_rd0 ),
     .iprf_rd_psrc_rd0 ( rdaddrs_rd0 ),
     .iprf_rd_data_rd1 ( rddatas_rd1 ),
+
+    .reclaim_prf_rb1,
+    .reclaim_prf_id_rb1,
 
     .valid_rn1,
     .uinstr_rn1,
@@ -182,6 +188,7 @@ retire retire (
     .reset,
     .next_robid_ra0,
     .uinstr_ra0 ( uinstr_rn1 ),
+    .rename_ra0 ( rename_rn1 ),
 
     .src_addr_ra0,
     .rob_src_reg_pdg_ra0,
@@ -189,6 +196,9 @@ retire retire (
 
     .ro_valid_rb0,
     .ro_result_rb0,
+
+    .reclaim_prf_rb1,
+    .reclaim_prf_id_rb1,
 
     .br_mispred_rb1,
     .br_tgt_rb1

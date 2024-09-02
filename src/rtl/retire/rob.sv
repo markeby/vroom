@@ -14,6 +14,7 @@ module rob
     input  logic             reset,
 
     input  t_uinstr          uinstr_ra0,
+    input  t_rename_pkt      rename_ra0,
     output t_rob_id          next_robid_ra0,
 
     input  logic             ro_valid_rb0,
@@ -22,6 +23,9 @@ module rob
     input  t_rv_reg_addr     src_addr_ra0          [NUM_SOURCES-1:0],
     output logic             rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0],
     output t_rob_id          rob_src_reg_robid_ra0 [NUM_SOURCES-1:0],
+
+    output logic             reclaim_prf_rb1,
+    output t_prf_id          reclaim_prf_id_rb1,
 
     output t_uinstr          uinstr_rb1,
 
@@ -93,6 +97,9 @@ assign q_flush_now_rb1 = ~rob_empty_ra0 & head_entry.d.flush_needed;
 assign br_mispred_rb1 = q_flush_now_rb1 & uinstr_rb1.mispred;
 assign br_tgt_rb1     = result_rb1;
 
+assign reclaim_prf_rb1    = q_retire_rb1 & uinstr_rb1.dst.optype == OP_REG;
+assign reclaim_prf_id_rb1 = head_entry.s.pdst_old;
+
 //
 // Alloc
 //
@@ -106,7 +113,8 @@ assign e_alloc_ra0 = q_alloc_ra0 ? (1<<tail_id) : '0;
 
 t_rob_ent_static rob_st_new_ra0;
 always_comb begin
-   rob_st_new_ra0.uinstr = uinstr_ra0;
+   rob_st_new_ra0.uinstr   = uinstr_ra0;
+   rob_st_new_ra0.pdst_old = rename_ra0.pdst_old;
 end
 
 for (genvar i=0; i<RB_NUM_ENTS; i++) begin : g_rob_ents
@@ -155,6 +163,10 @@ always @(posedge clk) begin
         `UINFO(head_entry.s.uinstr.SIMID, ("unit:ROB func:retire robid:0x%0x %s",
             head_id,
             describe_uinstr(head_entry.s.uinstr)))
+    end
+
+    if (reclaim_prf_rb1) begin
+        `UINFO(head_entry.s.uinstr.SIMID, ("unit:ROB func:reclaim %s", f_describe_prf(reclaim_prf_id_rb1)))
     end
 end
 

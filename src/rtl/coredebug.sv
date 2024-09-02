@@ -74,10 +74,6 @@ typedef struct packed {
 
 t_cd_inst  INSTQ[$];
 
-function automatic string f_describe_prf(t_prf_id prf_id);
-    f_describe_prf = $sformatf("%s.0x%02h", prf_id.ptype.name, prf_id.idx);
-endfunction
-
 function automatic string f_describe_src_dst(t_optype optype, t_rv_reg_addr opreg, t_prf_id psrc, t_rv_reg_data value);
     unique casez(optype)
         OP_REG:  f_describe_src_dst = $sformatf("reg %3s value:0x%08h prf:%s", $sformatf("x%0d",opreg), value, f_describe_prf(psrc));

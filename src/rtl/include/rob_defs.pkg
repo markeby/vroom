@@ -8,6 +8,7 @@ package rob_defs;
 
     typedef struct packed {
         instr_decode::t_uinstr uinstr;
+        common::t_prf_id       pdst_old;
     } t_rob_ent_static;
 
     typedef struct packed {

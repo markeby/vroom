@@ -29,6 +29,9 @@ module prf
     output t_prf_id      rdmap_psrc_rd1 [NUM_MAP_READS-1:0],
     output logic         rdmap_pend_rd1 [NUM_MAP_READS-1:0],
 
+    input  logic         reclaim_prf_rb1,
+    input  t_prf_id      reclaim_prf_id_rb1,
+
     output logic         stall_rn0,
 
     input  logic         alloc_pdst_rn0,
@@ -65,8 +68,8 @@ logic[NUM_ENTRIES-1:0] pend_list;
 logic[NUM_ENTRIES-1:0] free_list_first_free_rn0;
 assign free_list_first_free_rn0 = gen_funcs#(.IWIDTH(NUM_ENTRIES))::find_first1(free_list);
 
-logic[NUM_ENTRIES-1:0] free_list_reclaim_ro0;
-assign free_list_reclaim_ro0 = '0; // FIXME
+logic[NUM_ENTRIES-1:0] free_list_reclaim_rb1;
+assign free_list_reclaim_rb1 = (reclaim_prf_rb1 & reclaim_prf_id_rb1.ptype == prf_type) ? (1 << reclaim_prf_id_rb1.idx) : '0;
 
 logic reclaim_ro0;
 assign reclaim_ro0 = 1'b0;  // FIXME
@@ -77,7 +80,7 @@ logic[NUM_ENTRIES-1:0] free_list_nxt;
 assign free_list_nxt = (  free_list
                        & ~(alloc_pdst_rn0 ? free_list_first_free_rn0 : '0)
                        )
-                     | (reclaim_ro0 ? free_list_reclaim_ro0    : '0);
+                     | free_list_reclaim_rb1;
 
 always_comb begin
     free_list_rst = '1;

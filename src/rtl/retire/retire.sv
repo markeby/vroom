@@ -12,6 +12,7 @@ module retire
     input  logic             clk,
     input  logic             reset,
     input  t_uinstr          uinstr_ra0,
+    input  t_rename_pkt      rename_ra0,
 
     input  t_rv_reg_addr     src_addr_ra0          [NUM_SOURCES-1:0],
     output logic             rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0],
@@ -22,6 +23,9 @@ module retire
                              ro_result_rb0,
 
     output t_rob_id          next_robid_ra0,
+
+    output logic             reclaim_prf_rb1,
+    output t_prf_id          reclaim_prf_id_rb1,
 
     output logic             br_mispred_rb1,
     output t_paddr           br_tgt_rb1
@@ -39,6 +43,7 @@ rob rob (
     .clk,
     .reset,
     .uinstr_ra0,
+    .rename_ra0,
 
     .src_addr_ra0,
     .rob_src_reg_pdg_ra0,
@@ -46,6 +51,9 @@ rob rob (
 
     .ro_valid_rb0,
     .ro_result_rb0,
+
+    .reclaim_prf_rb1,
+    .reclaim_prf_id_rb1,
 
     .next_robid_ra0,
 

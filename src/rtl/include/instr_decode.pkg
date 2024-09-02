@@ -78,6 +78,7 @@ package instr_decode;
     } t_uinstr_iss;
 
     typedef struct packed {
+        `SIMID_STRUCT
         t_prf_id      pdst;
         instr::t_rv_reg_data data;
     } t_prf_wr_pkt;

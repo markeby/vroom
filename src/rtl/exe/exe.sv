@@ -127,6 +127,9 @@ always_comb begin
     iprf_wr_en_ex1 = uinstr_exx[EX1].valid & uinstr_exx[EX1].dst.optype == OP_REG;
     iprf_wr_pkt_ex1.pdst = pdst_exx[EX1];
     iprf_wr_pkt_ex1.data = result_exx[EX1];
+    `ifdef SIMULATION
+    iprf_wr_pkt_ex1.SIMID = uinstr_exx[EX1].SIMID;
+    `endif
 end
 
 //

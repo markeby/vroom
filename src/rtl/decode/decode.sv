@@ -13,9 +13,10 @@ module decode
 (
     input  logic             clk,
     input  logic             reset,
+    input  logic             rename_ready_rn0,
+
     input  logic             valid_fe1,
     input  t_instr_pkt       instr_fe1,
-    input  logic             stall,
     input  logic             br_mispred_rb1,
 
     output t_uinstr          uinstr_de0,
@@ -139,9 +140,9 @@ end
 //
 
 t_uinstr uinstr_nq_de1;
-`DFF_EN(uinstr_nq_de1, uinstr_de0, clk, ~stall)
+`DFF_EN(uinstr_nq_de1, uinstr_de0, clk, rename_ready_rn0)
 
-assign valid_de1 = uinstr_de1.valid;
+assign valid_de1 = uinstr_de1.valid & rename_ready_rn0;
 always_comb begin
     uinstr_de1 = uinstr_nq_de1;
     uinstr_de1.valid  &= ~br_mispred_rb1;
@@ -153,7 +154,7 @@ end
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (uinstr_de1.valid & ~stall) begin
+    if (valid_de1) begin
         `UINFO(uinstr_de1.SIMID, ("unit:DE %s", describe_uinstr(uinstr_de1)))
     end
 end

@@ -13,10 +13,12 @@ module alloc
     input  logic         clk,
     input  logic         reset,
 
+    input  logic         rob_ready_ra0,
     input  t_uinstr      uinstr_ra0,
     input  t_rename_pkt  rename_ra0,
 
-    output logic         stall_ra0,
+    output logic         alloc_ready_ra0,
+    output logic         alloc_ra0,
     input  t_rob_id      next_robid_ra0,
 
     output t_rv_reg_addr src_addr_ra0          [NUM_SOURCES-1:0],
@@ -60,8 +62,10 @@ end
 
 // Dispatch port assignments
 
+logic stall_ra1;
+
 assign disp_ports_rs0       [DISP_PORT_EINT] = disp_ra1;
-assign disp_valid_ports_rs0 [DISP_PORT_EINT] = disp_ra1.uinstr.valid & ~stall_ra0;
+assign disp_valid_ports_rs0 [DISP_PORT_EINT] = disp_ra1.uinstr.valid & ~stall_ra1;
 
 assign disp_ports_rs0       [DISP_PORT_MEM ] = disp_ra1;
 assign disp_valid_ports_rs0 [DISP_PORT_MEM ] = 1'b0; // disp_ra1.uinstr.valid;
@@ -79,11 +83,15 @@ assign rs_stall_ports_rs0[DISP_PORT_MEM] = 1'b0; //rs_stall_mm_rs0;
 // Stall
 
 always_comb begin
-   stall_ra0 = 1'b0;
+   stall_ra1 = 1'b0;
    for (int i=0; i<NUM_DISP_PORTS; i++) begin
-      stall_ra0 |= rs_stall_ports_rs0[i];
+      stall_ra1 |= rs_stall_ports_rs0[i];
    end
+   stall_ra1 |= ~rob_ready_ra0;
 end
+
+assign alloc_ready_ra0 = rob_ready_ra0 & ~stall_ra1;
+assign alloc_ra0 = uinstr_ra0.valid & alloc_ready_ra0;
 
 //
 // Debug

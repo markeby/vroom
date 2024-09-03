@@ -104,6 +104,11 @@ task cd_show_retire(t_cd_inst rec);
         `PMSG(CDBG, ("Register Updates"))
         `PMSG(CDBG, ("  GPR %3s := 0x%08h (prf %s -> %s)", $sformatf("x%0d", rec.DECODE.uinstr_de1.dst.opreg), rec.RESULT.iprf_wr_pkt_ro0.data, f_describe_prf(rec.RENAME.rename_rn1.pdst_old), f_describe_prf(rec.RENAME.rename_rn1.pdst)))
         `PMSG(CDBG, (""))
+
+        if(rec.DECODE.uinstr_de1.dst.opreg == 0 && rec.RESULT.iprf_wr_pkt_ro0.data == 64'h666) begin
+            `INFO(("Saw write of 666 to register %d... goodbye, folks!", rec.DECODE.uinstr_de1.dst.opreg))
+            $finish();
+        end
     end
 endtask
 
@@ -121,13 +126,18 @@ task cd_fetch();
 endtask
 
 function automatic int f_instq_find_match(t_simid THIS_SIMID);
+    f_instq_find_match = -1;
     for (int i=0; i<INSTQ.size(); i++) begin
         if (INSTQ[i].SIMID == THIS_SIMID) begin
-            return i;
+            if (f_instq_find_match != -1) begin
+                $error("Found multiple instq matches!");
+            end
+            f_instq_find_match = i;
         end
     end
-    $error("Could not find simid!");
-    return -1;
+    if (f_instq_find_match == -1) begin
+        $error("Found no instq matches!");
+    end
 endfunction
 
 task cd_decode();
@@ -183,10 +193,19 @@ task cd_result_eint();
     INSTQ[i].RESULT.iprf_wr_pkt_ro0 = top.core.iprf_wr_pkt_ex1;
 endtask
 
+task croak_instq(int instq_index);
+    `PMSG(CDBG, ("ERROR INSTQ[%d] %s", instq_index, format_simid(INSTQ[instq_index].SIMID)))
+endtask
+
 task cd_retire();
     int i; i = f_instq_find_match(top.core.retire.rob.head_entry.s.uinstr.SIMID);
     if (INSTQ[i].RETIRE.valid) begin
         $error("Trying to retire a record that is already retired!");
+    end
+    if (!INSTQ[i].RESULT.valid) begin
+        croak_instq(i);
+        `PMSG(CDBG, ("ERROR ROB %0h %s", top.core.retire.rob.head_id, format_simid(top.core.retire.rob.head_entry.s.uinstr.SIMID)))
+        $error("Trying to retire a record with no result!");
     end
     INSTQ[i].RETIRE.valid = 1'b1;
     INSTQ[i].RETIRE.clk = top.cclk_count;

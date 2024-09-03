@@ -21,9 +21,15 @@ module core
 
 logic         stall;
 
+logic         rename_ready_rn0;
+logic         alloc_ready_ra0;
+logic         rob_ready_ra0;
+
 logic         valid_fe1;
 t_instr_pkt   instr_fe1;
 t_uinstr      uinstr_de0;
+
+logic         alloc_ra0;
 
 logic         valid_rn1;
 t_uinstr      uinstr_rn1;
@@ -80,7 +86,7 @@ decode decode (
     .br_mispred_rb1,
 
     .valid_fe1,
-    .stall,
+    .rename_ready_rn0,
     .instr_fe1,
     .uinstr_de0,
     .valid_de1,
@@ -91,10 +97,11 @@ rename rename (
     .clk,
     .reset,
 
+    .alloc_ready_ra0,
+    .rename_ready_rn0,
+
     .valid_rn0 ( uinstr_de1.valid ) ,
     .uinstr_rn0 ( uinstr_de1 ) ,
-
-    .stall_rn0 ( ),
 
     .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1} ),
     .iprf_wr_pkt_ro0  ( '{iprf_wr_pkt_ex1} ),
@@ -127,9 +134,11 @@ t_uinstr_iss eint_iss_pkt_rs2;
 alloc alloc (
     .clk,
     .reset,
+    .alloc_ready_ra0,
+    .alloc_ra0,
     .uinstr_ra0 ( uinstr_rn1 ),
     .rename_ra0 ( rename_rn1 ),
-    .stall_ra0 ( ),
+    .rob_ready_ra0,
     .next_robid_ra0,
     .rs_stall_ex_rs0,
     .src_addr_ra0,
@@ -187,6 +196,8 @@ retire retire (
     .clk,
     .reset,
     .next_robid_ra0,
+    .rob_ready_ra0,
+    .alloc_ra0  ( alloc_ra0  ),
     .uinstr_ra0 ( uinstr_rn1 ),
     .rename_ra0 ( rename_rn1 ),
 

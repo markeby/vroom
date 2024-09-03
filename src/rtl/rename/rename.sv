@@ -17,7 +17,8 @@ module rename
     input  logic         valid_rn0,
     input  t_uinstr      uinstr_rn0,
 
-    output logic         stall_rn0,
+    output logic         rename_ready_rn0,
+    input  logic         alloc_ready_ra0,
 
     input  logic         iprf_wr_en_ro0   [IPRF_NUM_WRITES-1:0],
     input  t_prf_wr_pkt  iprf_wr_pkt_ro0  [IPRF_NUM_WRITES-1:0],
@@ -81,7 +82,7 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
     .simid_rn0_inst ( uinstr_rn0.SIMID ) ,
     .simid_rd0_inst ( uinstr_rn0.SIMID ) ,
     `endif
-    .stall_rn0,
+    .rename_ready_rn0,
 
     .reclaim_prf_rb1,
     .reclaim_prf_id_rb1,

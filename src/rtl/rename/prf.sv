@@ -32,7 +32,7 @@ module prf
     input  logic         reclaim_prf_rb1,
     input  t_prf_id      reclaim_prf_id_rb1,
 
-    output logic         stall_rn0,
+    output logic         rename_ready_rn0,
 
     input  logic         alloc_pdst_rn0,
     input  t_gpr_id      gpr_id_rn0,
@@ -91,7 +91,7 @@ end
 
 `DFF(free_list, reset ? free_list_rst : free_list_nxt, clk)
 
-assign stall_rn0 = ~|free_list;
+assign rename_ready_rn0 = |free_list;
 
 t_prf_id      pdst_rn0;
 t_prf_id      pdst_old_rn0;
@@ -202,12 +202,12 @@ always @(posedge clk) begin
     //     print_retire_info(uinstr_mm1);
     // end
 
-    for (int w=0; w<NUM_REG_WRITES; w++) begin
-        if (wr_en_nq_ro0[w] & /*wraddr_rb1 == 0 &*/ wr_pkt_ro0[w].data == 64'h666) begin
-            `INFO(("Saw write of 666 to SOME register... goodbye, folks!"))
-            boom_pipe[0] <= 1'b1;
-        end
-    end
+    // for (int w=0; w<NUM_REG_WRITES; w++) begin
+    //     if (wr_en_nq_ro0[w] & /*wraddr_rb1 == 0 &*/ wr_pkt_ro0[w].data == 64'h666) begin
+    //         `INFO(("Saw write of 666 to SOME register... goodbye, folks!"))
+    //         boom_pipe[0] <= 1'b1;
+    //     end
+    // end
 
     if (boom_pipe[FAIL_DLY]) begin
         $finish();

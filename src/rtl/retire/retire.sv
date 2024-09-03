@@ -11,6 +11,9 @@ module retire
 (
     input  logic             clk,
     input  logic             reset,
+
+    output logic             rob_ready_ra0,
+    input  logic             alloc_ra0,
     input  t_uinstr          uinstr_ra0,
     input  t_rename_pkt      rename_ra0,
 
@@ -42,8 +45,10 @@ module retire
 rob rob (
     .clk,
     .reset,
+    .rob_ready_ra0,
     .uinstr_ra0,
     .rename_ra0,
+    .alloc_ra0,
 
     .src_addr_ra0,
     .rob_src_reg_pdg_ra0,

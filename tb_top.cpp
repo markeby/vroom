@@ -34,7 +34,7 @@ int main(int argc, char** argv, char** env) {
 
     dut->reset = 1;
 
-    while (sim_time < MAX_SIM_TIME) {
+    while (sim_time < MAX_SIM_TIME && !Verilated::gotFinish()) {
         dut->clk ^= 1;
         if (sim_time == 20) {
             dut->reset = 0;

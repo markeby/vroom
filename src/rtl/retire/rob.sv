@@ -13,6 +13,9 @@ module rob
     input  logic             clk,
     input  logic             reset,
 
+    output logic             rob_ready_ra0,
+
+    input  logic             alloc_ra0,
     input  t_uinstr          uinstr_ra0,
     input  t_rename_pkt      rename_ra0,
     output t_rob_id          next_robid_ra0,
@@ -80,6 +83,7 @@ assign next_robid_ra0 = tail_id;
 
 assign rob_empty_ra0 = f_rob_empty(head_id, tail_id);
 assign rob_full_ra0  = f_rob_full(head_id, tail_id);
+assign rob_ready_ra0 = ~rob_full_ra0;
 
 // Retire
 
@@ -104,8 +108,8 @@ assign reclaim_prf_id_rb1 = head_entry.s.pdst_old;
 // Alloc
 //
 
-assign q_alloc_ra0 = uinstr_ra0.valid;
-assign e_alloc_ra0 = q_alloc_ra0 ? (1<<tail_id) : '0;
+assign q_alloc_ra0 = alloc_ra0;
+assign e_alloc_ra0 = q_alloc_ra0 ? (1<<tail_id.idx) : '0;
 
 //
 // ROB Entries
@@ -173,6 +177,14 @@ end
 `endif
 
 `ifdef ASSERT
+t_rob_id last_retire_robid;
+logic    last_retire_robid_valid;
+`DFF_EN(last_retire_robid, head_id, clk, q_retire_rb1)
+`DFF(last_retire_robid_valid, ~reset & (last_retire_robid_valid | q_retire_rb1), clk)
+
+`VASSERT(chk_robid_adv, q_retire_rb1 & last_retire_robid_valid, head_id == f_incr_robid(last_retire_robid), $sformatf("ROB advanced from 0x%0h -> 0x%0h", last_retire_robid, head_id))
+
+`VASSERT(alloc_when_full, q_alloc_ra0, rob_ready_ra0, "ROB allocated when not ready!")
 
 `endif
 

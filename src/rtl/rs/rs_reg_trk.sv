@@ -54,10 +54,12 @@ t_rv_reg_data              wb_valid_data_ro0;
 // Logic
 //
 
-`DFF_EN(e_static, e_alloc_static_rs0, clk, e_alloc_rs0)
+t_rs_reg_trk_static e_static_nxt;
+assign e_static_nxt = e_alloc_rs0 ? e_alloc_static_rs0 : e_static;
+`DFF_EN(e_static, e_static_nxt, clk, e_alloc_rs0)
 
 for (genvar p=0; p<IPRF_NUM_WRITES; p++) begin : g_wb_mat
-    assign wb_valid_matches_ro0[p] = iprf_wr_en_ro0[p] & iprf_wr_pkt_ro0[p].pdst == e_static.psrc;
+    assign wb_valid_matches_ro0[p] = iprf_wr_en_ro0[p] & iprf_wr_pkt_ro0[p].pdst == e_static_nxt.psrc;
     assign wb_valid_datas_ro0[p] = iprf_wr_pkt_ro0[p].data;
 end
 assign wb_valid_match_any_ro0 = |wb_valid_matches_ro0;
@@ -82,8 +84,9 @@ always_comb begin
       fsm_nxt = SRC_READY;
    end else begin
       unique casez (fsm)
-         SRC_READY:    if ( e_alloc_rs0 & ~e_alloc_static_rs0.psrc_pend ) fsm_nxt = SRC_READY;
-                  else if ( e_alloc_rs0 &  e_alloc_static_rs0.psrc_pend ) fsm_nxt = SRC_PDG_RSLT;
+         SRC_READY:    if ( e_alloc_rs0 & ~e_alloc_static_rs0.psrc_pend                           ) fsm_nxt = SRC_READY;
+                  else if ( e_alloc_rs0 &  e_alloc_static_rs0.psrc_pend &  wb_valid_match_any_ro0 ) fsm_nxt = SRC_READY;
+                  else if ( e_alloc_rs0 &  e_alloc_static_rs0.psrc_pend & ~wb_valid_match_any_ro0 ) fsm_nxt = SRC_PDG_RSLT;
          SRC_PDG_RSLT: if ( wb_valid_match_any_ro0                      ) fsm_nxt = SRC_READY;
       endcase
    end

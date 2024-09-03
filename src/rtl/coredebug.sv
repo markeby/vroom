@@ -227,6 +227,24 @@ always_ff @(posedge clk) begin
     if (core.retire.rob.q_retire_rb1) cd_retire();
 end
 
+///////////////////
+// Hang debug /////
+///////////////////
+
+localparam MAX_ROB_TIMEOUT = 40;
+task hang_detected();
+    $error("HANG detected!");
+    $finish();
+endtask
+
+int last_cclk_retire = 0;
+always_ff @(posedge clk) begin
+    if ((top.cclk_count - last_cclk_retire) == MAX_ROB_TIMEOUT) begin
+        hang_detected();
+    end
+    if (reset | core.retire.rob.q_retire_rb1) last_cclk_retire <= top.cclk_count;
+end
+
 endmodule
 /* verilator lint_on BLKSEQ */
 

@@ -27,9 +27,7 @@ module rs_reg_trk
    input  logic               iprf_wr_en_ro0   [IPRF_NUM_WRITES-1:0],
    input  t_prf_wr_pkt        iprf_wr_pkt_ro0  [IPRF_NUM_WRITES-1:0],
 
-   output logic               ready_rs1,
-   output logic               from_prf_rs1,
-   output t_rv_reg_data       src_data
+   output logic               ready_rs1
 );
 
 typedef enum logic {
@@ -39,7 +37,6 @@ typedef enum logic {
 t_fsm fsm, fsm_nxt;
 
 assign ready_rs1 = fsm == SRC_READY;
-assign from_prf_rs1 = ~e_static.psrc_pend;
 
 //
 // Nets
@@ -64,15 +61,6 @@ for (genvar p=0; p<IPRF_NUM_WRITES; p++) begin : g_wb_mat
 end
 assign wb_valid_match_any_ro0 = |wb_valid_matches_ro0;
 assign wb_valid_data_ro0 = wb_valid_datas_ro0[0]; //gen_funcs#(.IWIDTH(IPRF_NUM_WRITES),.T(t_rv_reg_data))::uaomux(wb_valid_datas_ro0, wb_valid_matches_ro0);
-
-// capture source data when written into rob
-if(1) begin : g_src_data
-   t_rv_reg_data src_data_nxt;
-   logic src_data_wren;
-   assign src_data_nxt  = wb_valid_data_ro0;
-   assign src_data_wren = wb_valid_match_any_ro0;
-   `DFF_EN(src_data, src_data_nxt, clk, src_data_wren)
-end
 
 //
 // FSM

@@ -28,8 +28,6 @@ module rs_entry
                           e_static,
     output t_uinstr_iss   e_issue_pkt_rs1,
 
-    output logic[NUM_SOURCES-1:0] e_src_from_prf_rs1,
-
     output logic          e_req_issue_rs1,
     input  logic          e_gnt_issue_rs1
 );
@@ -86,7 +84,6 @@ assign e_dealloc_any = e_gnt_issue_rs1;
 //
 
 t_rs_reg_trk_static    e_alloc_static_rs0[NUM_SOURCES-1:0];
-t_rv_reg_data          src_data_rs1      [NUM_SOURCES-1:0];
 logic[NUM_SOURCES-1:0] src_ready_rs1;
 
 assign e_alloc_static_rs0[SRC1].psrc_pend = q_alloc_static_rs0.uinstr_disp.rename.psrc1_pend;
@@ -106,9 +103,7 @@ for (genvar srcx=0; srcx<NUM_SOURCES; srcx++) begin : g_src_trk
       .e_static           (                          ) ,
       .iprf_wr_en_ro0,
       .iprf_wr_pkt_ro0,
-      .from_prf_rs1       ( e_src_from_prf_rs1[srcx] ) ,
-      .ready_rs1          ( src_ready_rs1[srcx]      ) ,
-      .src_data           ( src_data_rs1[srcx]       )
+      .ready_rs1          ( src_ready_rs1[srcx]      )
    );
 end
 
@@ -117,8 +112,8 @@ always_comb begin
     e_issue_pkt_rs1.uinstr   = e_static.uinstr_disp.uinstr;
     e_issue_pkt_rs1.robid    = e_static.uinstr_disp.robid;
     e_issue_pkt_rs1.pdst     = e_static.uinstr_disp.rename.pdst;
-    e_issue_pkt_rs1.src1_val = src_data_rs1[SRC1];
-    e_issue_pkt_rs1.src2_val = src_data_rs1[SRC2];
+    e_issue_pkt_rs1.src1_val = '0;
+    e_issue_pkt_rs1.src2_val = '0;
 end
 
 //

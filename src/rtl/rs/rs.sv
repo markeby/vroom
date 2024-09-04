@@ -53,13 +53,10 @@ logic[NUM_RS_ENTS-1:0] e_sel_issue_rs1;
 logic                  q_gnt_issue_rs1;
 logic[NUM_RS_ENTS-1:0] e_gnt_issue_rs1;
 t_uinstr_iss           e_issue_pkt_rs1        [NUM_RS_ENTS-1:0];
-logic[NUM_SOURCES-1:0] e_src_from_prf_rs1     [NUM_RS_ENTS-1:0];
 
 logic                  iss_rs1;
 t_uinstr_iss           iss_pkt_rs1;
 logic[NUM_SOURCES-1:0] src_from_prf_rs1;
-
-logic[NUM_SOURCES-1:0] src_from_prf_rs2;
 
 //
 // Logic
@@ -81,9 +78,9 @@ assign q_sel_rename_rs1 = q_sel_static_rs1.uinstr_disp.rename;
 
 assign iss_rs1     = q_gnt_issue_rs1;
 assign iss_pkt_rs1 = gen_funcs#(.IWIDTH(NUM_RS_ENTS),.T(t_uinstr_iss))::uaomux(e_issue_pkt_rs1, e_sel_issue_rs1);
-assign src_from_prf_rs1 = gen_funcs#(.IWIDTH(NUM_RS_ENTS),.T(logic[1:0]))::uaomux(e_src_from_prf_rs1, e_sel_issue_rs1);
 
-`DFF(src_from_prf_rs2, src_from_prf_rs1, clk)
+assign src_from_prf_rs1[SRC1] = q_sel_static_rs1.uinstr_disp.uinstr.src1.optype == OP_REG;
+assign src_from_prf_rs1[SRC2] = q_sel_static_rs1.uinstr_disp.uinstr.src2.optype == OP_REG;
 
 // GPR Read
 
@@ -101,28 +98,21 @@ end
 t_uinstr_iss   iss_pkt_nq_rs2;
 `DFF(iss_pkt_nq_rs2, iss_pkt_rs1, clk)
 
-function automatic t_rv_reg_data f_opsel(t_optype optype, logic from_prf, t_rv_reg_data imm_data, t_rv_reg_data rs_data, t_rv_reg_data prf_data);
+function automatic t_rv_reg_data f_opsel(t_optype optype, t_rv_reg_data imm_data, t_rv_reg_data prf_data);
     f_opsel = '0;
     unique casez(optype)
         OP_INVD: f_opsel = '0;
         OP_ZERO: f_opsel = '0;
         OP_IMM:  f_opsel = imm_data;
         OP_MEM:  f_opsel = '0; // ???
-        OP_REG:  begin
-            if (from_prf) begin
-                f_opsel = prf_data;
-            end else begin
-                f_opsel = rs_data;
-            end
-        end
+        OP_REG:  f_opsel = prf_data;
     endcase
 endfunction
 
 always_comb begin
     iss_pkt_rs2 = iss_pkt_nq_rs2;
- // VVV HEY YOU, you need to pipe the RS data into here for forwarding
-    iss_pkt_rs2.src1_val = f_opsel(iss_pkt_nq_rs2.uinstr.src1.optype, src_from_prf_rs2[SRC1], iss_pkt_nq_rs2.uinstr.imm64, iss_pkt_nq_rs2.src1_val, prf_rddatas_rd1[SRC1]);
-    iss_pkt_rs2.src2_val = f_opsel(iss_pkt_nq_rs2.uinstr.src2.optype, src_from_prf_rs2[SRC2], iss_pkt_nq_rs2.uinstr.imm64, iss_pkt_nq_rs2.src2_val, prf_rddatas_rd1[SRC2]);
+    iss_pkt_rs2.src1_val = f_opsel(iss_pkt_nq_rs2.uinstr.src1.optype, iss_pkt_nq_rs2.uinstr.imm64, prf_rddatas_rd1[SRC1]);
+    iss_pkt_rs2.src2_val = f_opsel(iss_pkt_nq_rs2.uinstr.src2.optype, iss_pkt_nq_rs2.uinstr.imm64, prf_rddatas_rd1[SRC2]);
 end
 
 //
@@ -148,7 +138,6 @@ for (genvar i=0; i<NUM_RS_ENTS; i++) begin : g_entries
        .e_static ( e_static[i] ),
        .e_issue_pkt_rs1 ( e_issue_pkt_rs1[i] ),
 
-       .e_src_from_prf_rs1 ( e_src_from_prf_rs1[i] ),
        .e_req_issue_rs1 ( e_req_issue_rs1[i] ),
        .e_gnt_issue_rs1 ( e_gnt_issue_rs1[i] )
    );

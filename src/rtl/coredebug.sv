@@ -244,6 +244,9 @@ endfunction
 function automatic string f_describe_gpr_full(t_rv_reg_addr gpr, logic hide_zeros);
     t_prf_id prf_id = f_get_gpr_prfid(gpr);
     t_rv_reg_data data = f_get_gpr_data(gpr);
+
+    if (gpr == 0)
+        return "";
     return $sformatf("%s:%s (%9s)", f_describe_gpr_addr(gpr), f_describe_gpr_data(data, hide_zeros), f_describe_prf(prf_id));
 endfunction
 
@@ -251,7 +254,7 @@ function automatic void dump_gprs();
     `PMSG(CDBG, ("GPR State"))
     `PMSG(CDBG, ("---------"))
     for (int g=0; g<(RV_NUM_REGS/4); g++) begin
-        `PMSG(CDBG, ("%s   %s   %s   %s",
+        `PMSG(CDBG, ("%28s  %28s  %28s  %28s",
             f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*0), 1'b1),
             f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*1), 1'b1),
             f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*2), 1'b1),

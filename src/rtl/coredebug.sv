@@ -84,7 +84,7 @@ function automatic string f_describe_src_dst(t_optype optype, t_rv_reg_addr opre
     endcase
 endfunction
 
-task cd_show_retire(t_cd_inst rec);
+task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ("---------------------[ %4d @%-4t ]---------------------", top.cclk_count, $time()));
     `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
     `PMSG(CDBG, ("ROBID 0x%0h -- %s", rec.ALLOC.disp_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
@@ -105,11 +105,12 @@ task cd_show_retire(t_cd_inst rec);
         `PMSG(CDBG, ("  GPR %3s := 0x%08h (prf %s -> %s)", $sformatf("x%0d", rec.DECODE.uinstr_de1.dst.opreg), rec.RESULT.iprf_wr_pkt_ro0.data, f_describe_prf(rec.RENAME.rename_rn1.pdst_old), f_describe_prf(rec.RENAME.rename_rn1.pdst)))
         `PMSG(CDBG, (""))
 
-        if(rec.DECODE.uinstr_de1.dst.opreg == 6 && rec.RESULT.iprf_wr_pkt_ro0.data == 64'h666) begin
-            `INFO(("Saw write of 666 to register %d... goodbye, folks!", rec.DECODE.uinstr_de1.dst.opreg))
-            eot();
-            $finish();
-        end
+        //if(rec.DECODE.uinstr_de1.dst.opreg == 6 && rec.RESULT.iprf_wr_pkt_ro0.data == 64'h666) begin
+    end
+    if(rec.DECODE.uinstr_de1.uop == U_EBREAK) begin
+        `INFO(("Saw EBREAK... goodbye, folks!"))
+        eot();
+        $finish();
     end
 endtask
 
@@ -210,7 +211,7 @@ task cd_retire();
     end
     INSTQ[i].RETIRE.valid = 1'b1;
     INSTQ[i].RETIRE.clk = top.cclk_count;
-    cd_show_retire(INSTQ[i]);
+    cd_print_rec(INSTQ[i]);
 endtask
 
 always_ff @(posedge clk) begin

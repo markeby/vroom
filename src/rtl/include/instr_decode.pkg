@@ -28,7 +28,9 @@ package instr_decode;
         U_OR,
         U_AND,
         U_BR,
-        U_LD_BYTE
+        U_LD_BYTE,
+        U_EBREAK,
+        U_ECALL
     } t_uop;
 
     typedef struct packed {
@@ -113,8 +115,8 @@ package instr_decode;
             RV_OP_ALU1_I : get_instr_format = RV_FMT_I;
             RV_OP_ALU0_R : get_instr_format = RV_FMT_R;
             RV_OP_ALU1_R : get_instr_format = RV_FMT_R;
-            RV_OP_FENCE : get_instr_format = RV_FMT_I;
-            RV_OP_MISC  : get_instr_format = RV_FMT_I;
+            RV_OP_FENCE  : get_instr_format = RV_FMT_I;
+            RV_OP_SYSTEM : get_instr_format = RV_FMT_I;
         endcase
     endfunction
 
@@ -179,7 +181,13 @@ package instr_decode;
                         endcase
                     end
                     RV_OP_FENCE : rv_instr_to_uop = U_INVALID;
-                    RV_OP_MISC  : rv_instr_to_uop = U_INVALID;
+                    RV_OP_SYSTEM: begin
+                        t_rv_sys_op_funct3 sys_op = t_rv_sys_op_funct3'(instr.d.I.funct3);
+                        unique casez(sys_op)
+                            RV_SYS_ECALL_EBREAK: rv_instr_to_uop = instr.d.I.imm_11_0[0] ? U_EBREAK : U_ECALL;
+                            default:             rv_instr_to_uop = U_INVALID;
+                        endcase
+                    end
                     default  : rv_instr_to_uop = U_INVALID;
                 endcase
             end

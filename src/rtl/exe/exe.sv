@@ -110,7 +110,7 @@ end
 
 `ifdef ASSERT
 logic LOL;
-always_comb LOL = uinstr_ex0.uop == U_INVALID;
+always_comb LOL = uinstr_ex0.uop inside {U_INVALID, U_EBREAK, U_ECALL};
 
 `CHK_ONEHOT(exe_rslt_valid, uinstr_ex0.valid, {LOL,ialu_resvld_ex0,ibr_resvld_ex0})
 `endif

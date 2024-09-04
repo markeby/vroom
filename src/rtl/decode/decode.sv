@@ -143,7 +143,13 @@ end
 logic uopq_empty;
 logic uopq_full;
 logic uopq_pop_de1;
+logic uopq_push_de0;
 t_uinstr uinstr_nq_de1;
+
+assign uopq_push_de0 = uinstr_de0.valid;
+
+logic ebreak_detected_de0;
+assign ebreak_detected_de0 = uopq_push_de0 & uinstr_de0.uop == U_EBREAK;
 
 gen_fifo #(
     .DEPTH(2), .T(t_uinstr), .NAME("UOP_QUEUE")
@@ -152,7 +158,7 @@ gen_fifo #(
     .reset,
     .full           ( uopq_full         ) ,
     .empty          ( uopq_empty        ) ,
-    .push_front_xw0 ( uinstr_de0.valid  ) ,
+    .push_front_xw0 ( uopq_push_de0     ) ,
     .din_xw0        ( uinstr_de0        ) ,
     .pop_back_xr0   ( uopq_pop_de1      ) ,
     .dout_xr0       ( uinstr_nq_de1     )

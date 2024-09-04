@@ -29,7 +29,7 @@ package instr;
         RV_OP_ALU0_R = 7'b0110011,
         RV_OP_ALU1_R = 7'b0111011,
         RV_OP_FENCE  = 7'b0001111,
-        RV_OP_MISC   = 7'b1110011
+        RV_OP_SYSTEM = 7'b1110011
     } t_rv_opcode;
 
     typedef enum logic[2:0] {
@@ -60,10 +60,21 @@ package instr;
         RV_BR_BGEU = 3'b111
     } t_rv_br_op_funct3;
 
+    typedef enum logic[2:0] {
+        RV_SYS_ECALL_EBREAK = 3'b000,
+        RV_SYS_CSRRW        = 3'b001,
+        RV_SYS_CSRRS        = 3'b010,
+        RV_SYS_CSRRC        = 3'b011,
+        RV_SYS_CSRRWI       = 3'b101,
+        RV_SYS_CSRRSI       = 3'b110,
+        RV_SYS_CSRRCI       = 3'b111
+    } t_rv_sys_op_funct3;
+
     typedef union packed {
         t_rv_alu_op_funct3 alu;
         t_rv_ld_op_funct3  ld;
         t_rv_br_op_funct3  br;
+        t_rv_sys_op_funct3 sys;
         logic[2:0]         flat;
     } t_rv_funct3;
 

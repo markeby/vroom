@@ -183,11 +183,11 @@ initial begin
         IROM[a++] = rvSLTU(18,1,8);
     `endif //TEST_SLT
 
-    IROM[a++] = rvADDI(6,0,12'h666); // magic to end test
-    IROM[a++] = rvXOR(0,0,0);
-    IROM[a++] = rvXOR(0,0,0);
-    IROM[a++] = rvXOR(0,0,0);
-    IROM[a++] = rvHALT();
+    // IROM[a++] = rvADDI(6,0,12'h666); // magic to end test
+    // IROM[a++] = rvXOR(0,0,0);
+    // IROM[a++] = rvXOR(0,0,0);
+    // IROM[a++] = rvXOR(0,0,0);
+    IROM[a++] = rvEBREAK();
 
 end
 

@@ -63,7 +63,7 @@ t_fsm_fe state_nxt;
 logic halt;
 t_rv_instr fb_fe_rsp_nnn_instr;
 always_comb fb_fe_rsp_nnn_instr = fb_fe_rsp_nnn.instr;
-always_comb halt = fb_fe_rsp_nnn.valid & fb_fe_rsp_nnn_instr.opcode == RV_OP_MISC;
+always_comb halt = fb_fe_rsp_nnn.valid & fb_fe_rsp_nnn_instr.opcode == RV_OP_SYSTEM;
 
 always_comb begin
     state_nxt = state;

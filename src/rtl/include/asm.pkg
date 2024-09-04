@@ -30,6 +30,10 @@ package asm;
     function t_word rvSLLIW(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[4:0]  shamt   ); return __rvI(RV_OP_ALU1_I, rd, rs1, {7'b0000000, shamt[4:0]}, ALU_SHL ); endfunction
     function t_word rvSRLIW(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[4:0]  shamt   ); return __rvI(RV_OP_ALU1_I, rd, rs1, {7'b0000000, shamt[4:0]}, ALU_SHR ); endfunction
 
+    function t_word rvECALL(                                                         ); return __rvI(RV_OP_SYSTEM, '0, '0 , 12'b000000000000,         '0      ); endfunction
+    function t_word rvEBREAK(                                                        ); return __rvI(RV_OP_SYSTEM, '0, '0 , 12'b000000000001,         '0      ); endfunction
+
+
     // R-format instructions
 
     function t_word __rvR(t_rv_opcode op, t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2, logic[2:0] funct3, logic[6:0] funct7);
@@ -56,8 +60,6 @@ package asm;
     function t_word rvSLLW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_SHL,  7'b0000000); endfunction
     function t_word rvSRLW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_SHR,  7'b0000000); endfunction
     function t_word rvSRAW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_SHR,  7'b0100000); endfunction
-
-    function t_word rvHALT(                                                      ); return __rvR(RV_OP_MISC , '0, '0,  '0,  3'b000,   7'b0000000); endfunction
 
     // B-format instructions
 

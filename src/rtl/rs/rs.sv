@@ -150,8 +150,8 @@ end
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (iss_rs2) begin
-        `UINFO(iss_pkt_rs2.uinstr.SIMID, ("unit:%s func:issue robid:0x%0x pdst:0x%0x src1:0x%0x src2:0x%0x %s",
-            RS_NAME, iss_pkt_rs2.robid, iss_pkt_rs2.pdst, iss_pkt_rs2.src1_val, iss_pkt_rs2.src2_val,
+        `UINFO(iss_pkt_rs2.uinstr.SIMID, ("unit:%s func:issue robid:0x%0x pdst:%s src1:0x%0x src2:0x%0x %s",
+            RS_NAME, iss_pkt_rs2.robid, f_describe_prf(iss_pkt_rs2.pdst), iss_pkt_rs2.src1_val, iss_pkt_rs2.src2_val,
             describe_uinstr(iss_pkt_rs2.uinstr)))
     end
 end

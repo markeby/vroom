@@ -139,7 +139,7 @@ end
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (uinstr_exx[EX1].valid) begin
-        `UINFO(uinstr_exx[EX1].SIMID, ("unit:EX pdst:%08h result:%08h %s", pdst_exx[EX1], result_exx[EX1], describe_uinstr(uinstr_exx[EX1])))
+        `UINFO(uinstr_exx[EX1].SIMID, ("unit:EX pdst:%s result:%08h %s", f_describe_prf(pdst_exx[EX1]), result_exx[EX1], describe_uinstr(uinstr_exx[EX1])))
     end
 end
 `endif

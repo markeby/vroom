@@ -105,8 +105,9 @@ task cd_show_retire(t_cd_inst rec);
         `PMSG(CDBG, ("  GPR %3s := 0x%08h (prf %s -> %s)", $sformatf("x%0d", rec.DECODE.uinstr_de1.dst.opreg), rec.RESULT.iprf_wr_pkt_ro0.data, f_describe_prf(rec.RENAME.rename_rn1.pdst_old), f_describe_prf(rec.RENAME.rename_rn1.pdst)))
         `PMSG(CDBG, (""))
 
-        if(rec.DECODE.uinstr_de1.dst.opreg == 0 && rec.RESULT.iprf_wr_pkt_ro0.data == 64'h666) begin
+        if(rec.DECODE.uinstr_de1.dst.opreg == 6 && rec.RESULT.iprf_wr_pkt_ro0.data == 64'h666) begin
             `INFO(("Saw write of 666 to register %d... goodbye, folks!", rec.DECODE.uinstr_de1.dst.opreg))
+            eot();
             $finish();
         end
     end
@@ -222,10 +223,51 @@ always_ff @(posedge clk) begin
     end
 
     if (core.eint_iss_rs2  ) cd_rs_eint();
-    if (core.iprf_wr_en_ex1) cd_result_eint();
+    if (core.exe.ro_valid_ex1) cd_result_eint();
 
     if (core.retire.rob.q_retire_rb1) cd_retire();
 end
+
+///////////////////
+// Regdump ////////
+///////////////////
+
+function automatic t_prf_id f_get_gpr_prfid(t_rv_reg_addr gpr);
+    return {core.rename.iprf.prf_type, core.rename.iprf.MAP[gpr]};
+endfunction
+
+function automatic t_rv_reg_data f_get_gpr_data(t_rv_reg_addr gpr);
+    t_prf_id prfid = f_get_gpr_prfid(gpr);
+    return core.rename.iprf.PRF[prfid.idx];
+endfunction
+
+function automatic string f_describe_gpr_full(t_rv_reg_addr gpr, logic hide_zeros);
+    t_prf_id prf_id = f_get_gpr_prfid(gpr);
+    t_rv_reg_data data = f_get_gpr_data(gpr);
+    return $sformatf("%s:%s (%9s)", f_describe_gpr_addr(gpr), f_describe_gpr_data(data, hide_zeros), f_describe_prf(prf_id));
+endfunction
+
+function automatic void dump_gprs();
+    `PMSG(CDBG, ("GPR State"))
+    `PMSG(CDBG, ("---------"))
+    for (int g=0; g<(RV_NUM_REGS/4); g++) begin
+        `PMSG(CDBG, ("%s   %s   %s   %s",
+            f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*0), 1'b1),
+            f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*1), 1'b1),
+            f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*2), 1'b1),
+            f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*3), 1'b1)))
+    end
+endfunction
+
+///////////////////
+// EOT stuff //////
+///////////////////
+
+task eot();
+    `PMSG(CDBG, ("Starting EOT dumps"))
+    `PMSG(CDBG, (""))
+    dump_gprs();
+endtask
 
 ///////////////////
 // Hang debug /////

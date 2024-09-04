@@ -145,13 +145,12 @@ logic uopq_pop_de1;
 logic uopq_push_de0;
 t_uinstr uinstr_nq_de1;
 
-assign uopq_push_de0 = uinstr_de0.valid;
+logic ebreak_seen;
+`DFF(ebreak_seen, ~reset & (ebreak_seen | uopq_push_de0 & uinstr_de0.uop == U_EBREAK), clk)
 
-logic ebreak_detected_de0;
-assign ebreak_detected_de0 = uopq_push_de0 & uinstr_de0.uop == U_EBREAK;
+assign uopq_push_de0 = uinstr_de0.valid & ~ebreak_seen;
 
 logic uopq_valid_de1;
-
 gen_fifo #(
     .NPUSH(1), .NPOP(1), .DEPTH(2), .T(t_uinstr), .NAME("UOP_QUEUE")
 ) uop_queue (

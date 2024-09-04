@@ -92,6 +92,7 @@ package gen_funcs;
                 uaomux |= (sels[i] ? inps[i] : '0);
             end
         endfunction
+
     endclass
 
     virtual class sext_funcs #(parameter IWIDTH=8, OWIDTH=32);
@@ -100,6 +101,21 @@ package gen_funcs;
             sext[IWIDTH-1:0] = inp[IWIDTH-1:0];
         endfunction
     endclass
+
+    virtual class counter_funcs #(parameter IWIDTH=8);
+        //
+        // CountOnes
+        //
+
+        static function logic[$clog2(IWIDTH):0] ucountones (logic inp[IWIDTH-1:0]);
+            ucountones = '0;
+            for (int i=0; i<IWIDTH; i++) begin
+                ucountones += ($clog2(IWIDTH)+1)'(inp[i]);
+            end
+        endfunction
+    endclass
+
+
 endpackage
 /* verilator lint_on DECLFILENAME */
 

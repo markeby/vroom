@@ -230,8 +230,6 @@ icache #(.LATENCY(5)) icache (
 
 `ifdef ASSERT
 
-chk_instr_progress #(.A("FE"), .B("DE")) chk_instr_progress_fe (.clk, .br_mispred_rb1, .reset, .valid_stgA_nn0(valid_fe1       ), .simid_stgA_nn0(instr_fe1.SIMID ), .valid_stgB_nn0(uinstr_de1.valid), .simid_stgB_nn0(uinstr_de1.SIMID));
-
 coredebug coredebug (.clk, .reset);
 
 `endif

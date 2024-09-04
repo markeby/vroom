@@ -139,13 +139,30 @@ end
 // DE1/RD0
 //
 
+logic uopq_empty;
+logic uopq_full;
+logic uopq_pop_de1;
 t_uinstr uinstr_nq_de1;
-`DFF_EN(uinstr_nq_de1, uinstr_de0, clk, rename_ready_rn0)
 
-assign valid_de1 = uinstr_de1.valid & rename_ready_rn0;
+gen_fifo #(
+    .DEPTH(2), .T(t_uinstr), .NAME("UOP_QUEUE")
+) uop_queue (
+    .clk,
+    .reset,
+    .full           ( uopq_full         ) ,
+    .empty          ( uopq_empty        ) ,
+    .push_front_xw0 ( uinstr_de0.valid  ) ,
+    .din_xw0        ( uinstr_de0        ) ,
+    .pop_back_xr0   ( uopq_pop_de1      ) ,
+    .dout_xr0       ( uinstr_nq_de1     )
+);
+
+assign uopq_pop_de1 = ~uopq_empty & rename_ready_rn0;
+assign valid_de1 = uopq_pop_de1;
+
 always_comb begin
     uinstr_de1 = uinstr_nq_de1;
-    uinstr_de1.valid  &= ~br_mispred_rb1;
+    uinstr_de1.valid = valid_de1;
 end
 
 //
@@ -154,8 +171,14 @@ end
 
 `ifdef SIMULATION
 always @(posedge clk) begin
+    if (uinstr_de0.valid) begin
+        `UINFO(uinstr_de0.SIMID, ("unit:DE func:uopq_push %s", describe_uinstr(uinstr_de1)))
+    end
+    if (~uopq_empty & ~valid_de1) begin
+        `UINFO(uinstr_nq_de1.SIMID, ("unit:DE func:uopq_stalled %s", describe_uinstr(uinstr_de1)))
+    end
     if (valid_de1) begin
-        `UINFO(uinstr_de1.SIMID, ("unit:DE %s", describe_uinstr(uinstr_de1)))
+        `UINFO(uinstr_de1.SIMID, ("unit:DE func:uopq_pop %s", describe_uinstr(uinstr_de1)))
     end
 end
 `endif

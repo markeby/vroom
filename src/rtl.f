@@ -36,4 +36,6 @@ src/rtl/alloc/alloc.sv
 src/rtl/rename/rename.sv
 src/rtl/rename/prf.sv
 
+src/rtl/gen/gen_fifo.sv
+
 src/rtl/coredebug.sv

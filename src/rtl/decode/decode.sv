@@ -140,7 +140,6 @@ end
 // DE1/RD0
 //
 
-logic uopq_empty;
 logic uopq_full;
 logic uopq_pop_de1;
 logic uopq_push_de0;
@@ -151,20 +150,24 @@ assign uopq_push_de0 = uinstr_de0.valid;
 logic ebreak_detected_de0;
 assign ebreak_detected_de0 = uopq_push_de0 & uinstr_de0.uop == U_EBREAK;
 
+logic uopq_valid_de1;
+
 gen_fifo #(
-    .DEPTH(2), .T(t_uinstr), .NAME("UOP_QUEUE")
+    .NPUSH(1), .NPOP(1), .DEPTH(2), .T(t_uinstr), .NAME("UOP_QUEUE")
 ) uop_queue (
     .clk,
     .reset,
     .full           ( uopq_full         ) ,
-    .empty          ( uopq_empty        ) ,
-    .push_front_xw0 ( uopq_push_de0     ) ,
-    .din_xw0        ( uinstr_de0        ) ,
-    .pop_back_xr0   ( uopq_pop_de1      ) ,
-    .dout_xr0       ( uinstr_nq_de1     )
+    .empty          (                   ) ,
+    .push_front_xw0 ( '{uopq_push_de0}  ) ,
+    .num_push_ok    (                   ) ,
+    .din_xw0        ( '{uinstr_de0}     ) ,
+    .pop_back_xr0   ( '{uopq_pop_de1}   ) ,
+    .valid_xr0      ( '{uopq_valid_de1} ) ,
+    .dout_xr0       ( '{uinstr_nq_de1}  )
 );
 
-assign uopq_pop_de1 = ~uopq_empty & rename_ready_rn0;
+assign uopq_pop_de1 = uopq_valid_de1 & rename_ready_rn0;
 assign valid_de1 = uopq_pop_de1;
 
 always_comb begin
@@ -181,7 +184,7 @@ always @(posedge clk) begin
     if (uinstr_de0.valid) begin
         `UINFO(uinstr_de0.SIMID, ("unit:DE func:uopq_push %s", describe_uinstr(uinstr_de1)))
     end
-    if (~uopq_empty & ~valid_de1) begin
+    if (uopq_valid_de1  & ~valid_de1) begin
         `UINFO(uinstr_nq_de1.SIMID, ("unit:DE func:uopq_stalled %s", describe_uinstr(uinstr_de1)))
     end
     if (valid_de1) begin

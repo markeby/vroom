@@ -104,8 +104,6 @@ task cd_print_rec(t_cd_inst rec);
         `PMSG(CDBG, ("Register Updates"))
         `PMSG(CDBG, ("  GPR %3s := 0x%08h (prf %s -> %s)", $sformatf("x%0d", rec.DECODE.uinstr_de1.dst.opreg), rec.RESULT.iprf_wr_pkt_ro0.data, f_describe_prf(rec.RENAME.rename_rn1.pdst_old), f_describe_prf(rec.RENAME.rename_rn1.pdst)))
         `PMSG(CDBG, (""))
-
-        //if(rec.DECODE.uinstr_de1.dst.opreg == 6 && rec.RESULT.iprf_wr_pkt_ro0.data == 64'h666) begin
     end
     if(rec.DECODE.uinstr_de1.uop == U_EBREAK) begin
         `INFO(("Saw EBREAK... goodbye, folks!"))

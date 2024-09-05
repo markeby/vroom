@@ -50,7 +50,7 @@ end
 initial begin
     automatic int a=0;
     for (int i=0; i<IROM_SZ; i++) begin
-        IROM[i] = rvSUB(0,0,0);
+        IROM[i] = rvADDI(30,0,12'h666);
     end
 
     a=0;
@@ -60,26 +60,25 @@ initial begin
     // `define TEST_ARITH
     //`define TEST_LOGICAL
     //`define TEST_SLT
-    ////define TEST_BR_NT
-    ////define TEST_BR_T
+    //`define TEST_BR_NT
+    `define TEST_BR_T
     //`define TEST_BEEF
 
-    // IROM[a++] = rvXOR(1,1,1);
-    IROM[a++] = rvADDI(1,1,12'h1);
-    IROM[a++] = rvADDI(8,8,12'h1);
-    IROM[a++] = rvADDI(8,8,12'h1);
-    IROM[a++] = rvADDI(4,4,12'h1);
-    IROM[a++] = rvADDI(2,2,12'h1);
-    IROM[a++] = rvADDI(8,8,12'h1);
-    IROM[a++] = rvADDI(4,4,12'h1);
-    IROM[a++] = rvADDI(4,4,12'h1);
-    IROM[a++] = rvADDI(8,8,12'h1);
-    IROM[a++] = rvADDI(8,8,12'h1);
-    IROM[a++] = rvADDI(8,8,12'h1);
-    IROM[a++] = rvADDI(4,4,12'h1);
-    IROM[a++] = rvADDI(8,8,12'h1);
-    IROM[a++] = rvADDI(2,2,12'h1);
-    IROM[a++] = rvADDI(8,8,12'h1);
+    // IROM[a++] = rvADDI(1,1,12'h1);
+    // IROM[a++] = rvADDI(8,8,12'h1);
+    // IROM[a++] = rvADDI(8,8,12'h1);
+    // IROM[a++] = rvADDI(4,4,12'h1);
+    // IROM[a++] = rvADDI(2,2,12'h1);
+    // IROM[a++] = rvADDI(8,8,12'h1);
+    // IROM[a++] = rvADDI(4,4,12'h1);
+    // IROM[a++] = rvADDI(4,4,12'h1);
+    // IROM[a++] = rvADDI(8,8,12'h1);
+    // IROM[a++] = rvADDI(8,8,12'h1);
+    // IROM[a++] = rvADDI(8,8,12'h1);
+    // IROM[a++] = rvADDI(4,4,12'h1);
+    // IROM[a++] = rvADDI(8,8,12'h1);
+    // IROM[a++] = rvADDI(2,2,12'h1);
+    // IROM[a++] = rvADDI(8,8,12'h1);
     // IROM[a++] = rvBNE(0,1,8);
     // IROM[a++] = rvADDI(0,0,12'h42);
     // IROM[a++] = rvADDI(1,1,32);
@@ -111,7 +110,7 @@ initial begin
         IROM[a++] = rvXOR(1,1,1);
         IROM[a++] = rvADDI(1,1,32);
         IROM[a++] = rvBNE(0,1,8);
-        IROM[a++] = rvADDI(0,0,12'h42);
+        IROM[a++] = rvADDI(31,0,12'h666);
         IROM[a++] = rvADDI(1,1,32);
     `endif
     `ifdef TEST_BEEF
@@ -187,6 +186,10 @@ initial begin
     // IROM[a++] = rvXOR(0,0,0);
     // IROM[a++] = rvXOR(0,0,0);
     // IROM[a++] = rvXOR(0,0,0);
+    IROM[a++] = rvEBREAK();
+    IROM[a++] = rvEBREAK();
+    IROM[a++] = rvEBREAK();
+    IROM[a++] = rvEBREAK();
     IROM[a++] = rvEBREAK();
 
 end

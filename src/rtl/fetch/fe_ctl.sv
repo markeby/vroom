@@ -82,7 +82,7 @@ always_comb begin
         FE_PDG_NUKE:  if (nuke_rb1.valid                         ) state_nxt = FE_PDG_STALL; // after a nuke, head to FE_PDG_STALL state; we can request from thre
         default:                                                   state_nxt = state;
     endcase
-    if (halt ) state_nxt = FE_DRAIN;
+    //if (halt ) state_nxt = FE_DRAIN;
     if (reset) state_nxt = FE_IDLE;
 end
 `DFF(state, state_nxt, clk)
@@ -164,7 +164,7 @@ end
 `endif
 
 `ifdef ASSERT
-`VASSERT(fetch_while_pdg_nuke, nuke_pdg, -fe_fb_req_nnn.valid, "FE fetched while waiting for nuke")
+`VASSERT(fetch_while_pdg_nuke, nuke_pdg, ~fe_fb_req_nnn.valid, "FE fetched while waiting for nuke")
 
     /*
 logic valid_fe2_inst;

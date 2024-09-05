@@ -87,7 +87,7 @@ endfunction
 task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ("---------------------[ %4d @%-4t ]---------------------", top.cclk_count, $time()));
     `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
-    `PMSG(CDBG, ("ROBID 0x%0h -- %s", rec.ALLOC.disp_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
+    `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.ALLOC.disp_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
     `PMSG(CDBG, (""))
     `PMSG(CDBG, ($sformatf(" src1 %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.src1.optype, rec.RS.iss_pkt_rs2.uinstr.src1.opreg, rec.RENAME.rename_rn1.psrc1, rec.RS.iss_pkt_rs2.src1_val))))
     `PMSG(CDBG, ($sformatf(" src2 %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.src2.optype, rec.RS.iss_pkt_rs2.uinstr.src2.opreg, rec.RENAME.rename_rn1.psrc2, rec.RS.iss_pkt_rs2.src2_val))))
@@ -104,6 +104,11 @@ task cd_print_rec(t_cd_inst rec);
         `PMSG(CDBG, ("Register Updates"))
         `PMSG(CDBG, ("  GPR %3s := 0x%08h (prf %s -> %s)", $sformatf("x%0d", rec.DECODE.uinstr_de1.dst.opreg), rec.RESULT.iprf_wr_pkt_ro0.data, f_describe_prf(rec.RENAME.rename_rn1.pdst_old), f_describe_prf(rec.RENAME.rename_rn1.pdst)))
         `PMSG(CDBG, (""))
+        if(rec.RESULT.iprf_wr_pkt_ro0.data == 64'h666) begin
+            `INFO(("Saw 666; dying!"))
+            eot();
+            $error("mark of the beast detected");
+        end
     end
     if(rec.DECODE.uinstr_de1.uop == U_EBREAK) begin
         `INFO(("Saw EBREAK... goodbye, folks!"))
@@ -265,10 +270,31 @@ endfunction
 // EOT stuff //////
 ///////////////////
 
+task cd_print_rec_unretired(t_cd_inst rec);
+    `PMSG(CDBG, ("-------------------------------------------------------"));
+    if (rec.DECODE.valid)
+        `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
+    if (rec.ALLOC.valid)
+        `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.ALLOC.disp_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
+endtask
+
+task cd_print_all_unretired();
+    t_cd_inst rec;
+    for (int i=0; i<INSTQ.size(); i++) begin
+        rec = INSTQ[i];
+        if (!rec.RETIRE.valid) begin
+            cd_print_rec_unretired(rec);
+        end
+    end
+endtask
+
 task eot();
     `PMSG(CDBG, ("Starting EOT dumps"))
     `PMSG(CDBG, (""))
+    cd_print_all_unretired();
+    `PMSG(CDBG, (""))
     dump_gprs();
+    `PMSG(CDBG, (""))
 endtask
 
 ///////////////////
@@ -277,6 +303,7 @@ endtask
 
 localparam MAX_ROB_TIMEOUT = 40;
 task hang_detected();
+    eot();
     $error("HANG detected!");
     $finish();
 endtask

@@ -62,9 +62,10 @@ logic                  q_flush_now_rb1;
 
 if(1) begin : g_rob_head_ptr
    t_rob_id head_id_nxt;
-   assign head_id_nxt = reset        ? '0                    :
-                        q_retire_rb1 ? f_incr_robid(head_id) :
-                                       head_id;
+   assign head_id_nxt = reset           ? '0                    :
+                        nuke_rb1.valid  ? tail_id               :
+                        q_retire_rb1    ? f_incr_robid(head_id) :
+                                          head_id;
    `DFF(head_id, head_id_nxt, clk)
 end : g_rob_head_ptr
 assign oldest_robid = head_id;
@@ -124,6 +125,7 @@ for (genvar i=0; i<RB_NUM_ENTS; i++) begin : g_rob_ents
       .reset,
       .e_valid       ( e_valid[i]      ),
       .robid         ( t_rob_id'(i)    ),
+      .head_id,
       .q_alloc_s_ra0 ( rob_st_new_ra0  ),
       .e_alloc_ra0   ( e_alloc_ra0[i]  ),
       .ro_valid_rb0,

@@ -5,29 +5,27 @@
 `include "instr_decode.pkg"
 `include "common.pkg"
 `include "vroom_macros.sv"
+`include "verif.pkg"
 
 module ibr
-    import instr::*, instr_decode::*, common::*;
+    import instr::*, instr_decode::*, common::*, verif::*;
 (
     input  logic         clk,
     input  logic         reset,
 
-    input  t_uinstr      uinstr_ex0,
+    input  t_uinstr_iss  iss_pkt_ex0,
     input  t_rv_reg_data src1val_ex0,
     input  t_rv_reg_data src2val_ex0,
 
     output logic         resvld_ex0,
-    output t_paddr       br_tgt_ex0,
-    output logic         br_mispred_ex0
+    output t_br_mispred_pkt br_mispred_ex0
 );
 
 //
 // Nets
 //
 
-//
-// Logic
-//
+t_uinstr uinstr_ex0;
 
 t_paddr tkn_tgt_ex0;
 t_paddr tru_tgt_ex0;
@@ -35,8 +33,14 @@ t_paddr pcnxt_ex0;
 logic   tkn_ex0;
 
 //
+// Logic
+//
+
+//
 // EX0
 //
+
+assign uinstr_ex0 = iss_pkt_ex0.uinstr;
 
 always_comb begin
     resvld_ex0 = uinstr_ex0.valid;
@@ -61,20 +65,21 @@ always_comb begin
     endcase
 end
 
-always_comb tru_tgt_ex0    = tkn_ex0 ? tkn_tgt_ex0 : pcnxt_ex0;
-always_comb br_mispred_ex0 = tru_tgt_ex0 != pcnxt_ex0 & resvld_ex0;;
-always_comb br_tgt_ex0     = tru_tgt_ex0;
+assign tru_tgt_ex0                = tkn_ex0 ? tkn_tgt_ex0 : pcnxt_ex0;
+assign br_mispred_ex0.valid       = tru_tgt_ex0 != pcnxt_ex0 & resvld_ex0;
+assign br_mispred_ex0.target_addr = tru_tgt_ex0;
+assign br_mispred_ex0.robid       = iss_pkt_ex0.robid;
 
 ///
 // Debug
 //
 
 `ifdef SIMULATION
-// always @(posedge clk) begin
-//     if (resvld_ex0) begin
-//         `INFO(("unit:EX.IBR %s mispred:%-d tkn:%-d tru_tgt:%h pcnxt:%h ", describe_uinstr(uinstr_ex0), br_mispred_ex0, tkn_ex0, tru_tgt_ex0, pcnxt_ex0))
-//     end
-// end
+always @(posedge clk) begin
+    if (resvld_ex0) begin
+        `UINFO(uinstr_ex0.SIMID, ("unit:EX.IBR %s mispred:%-d tkn:%-d tru_tgt:%h pcnxt:%h ", describe_uinstr(uinstr_ex0), br_mispred_ex0.valid, tkn_ex0, tru_tgt_ex0, pcnxt_ex0))
+    end
+end
 `endif
 
 /*

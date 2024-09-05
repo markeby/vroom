@@ -198,13 +198,13 @@ task croak_instq(int instq_index);
 endtask
 
 task cd_retire();
-    int i; i = f_instq_find_match(top.core.retire.rob.head_entry.s.uinstr.SIMID);
+    int i; i = f_instq_find_match(top.core.rob.head_entry.s.uinstr.SIMID);
     if (INSTQ[i].RETIRE.valid) begin
         $error("Trying to retire a record that is already retired!");
     end
     if (!INSTQ[i].RESULT.valid) begin
         croak_instq(i);
-        `PMSG(CDBG, ("ERROR ROB %0h %s", top.core.retire.rob.head_id, format_simid(top.core.retire.rob.head_entry.s.uinstr.SIMID)))
+        `PMSG(CDBG, ("ERROR ROB %0h %s", top.core.rob.head_id, format_simid(top.core.rob.head_entry.s.uinstr.SIMID)))
         $error("Trying to retire a record with no result!");
     end
     INSTQ[i].RETIRE.valid = 1'b1;
@@ -224,7 +224,7 @@ always_ff @(posedge clk) begin
     if (core.eint_iss_rs2  ) cd_rs_eint();
     if (core.exe.ro_valid_ex1) cd_result_eint();
 
-    if (core.retire.rob.q_retire_rb1) cd_retire();
+    if (core.rob.q_retire_rb1) cd_retire();
 end
 
 ///////////////////
@@ -286,7 +286,7 @@ always_ff @(posedge clk) begin
     if ((top.cclk_count - last_cclk_retire) == MAX_ROB_TIMEOUT) begin
         hang_detected();
     end
-    if (reset | core.retire.rob.q_retire_rb1) last_cclk_retire <= top.cclk_count;
+    if (reset | core.rob.q_retire_rb1) last_cclk_retire <= top.cclk_count;
 end
 
 endmodule

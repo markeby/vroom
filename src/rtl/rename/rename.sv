@@ -13,6 +13,7 @@ module rename
 (
     input  logic         clk,
     input  logic         reset,
+    input  t_nuke_pkt    nuke_rb1,
 
     input  logic         valid_rn0,
     input  t_uinstr      uinstr_rn0,

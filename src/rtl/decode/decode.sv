@@ -13,11 +13,12 @@ module decode
 (
     input  logic             clk,
     input  logic             reset,
+    input  t_nuke_pkt        nuke_rb1,
+    output logic             decode_ready_de0,
     input  logic             rename_ready_rn0,
 
     input  logic             valid_fe1,
     input  t_instr_pkt       instr_fe1,
-    input  logic             br_mispred_rb1,
 
     output t_uinstr          uinstr_de0,
 
@@ -173,6 +174,8 @@ always_comb begin
     uinstr_de1 = uinstr_nq_de1;
     uinstr_de1.valid = valid_de1;
 end
+
+assign decode_ready_de0 = ~uopq_full;
 
 //
 // Debug

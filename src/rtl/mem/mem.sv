@@ -5,10 +5,11 @@
 `include "vroom_macros.sv"
 
 module mem
-    import instr::*, instr_decode::*;
+    import instr::*, instr_decode::*, common::*;
 (
     input  logic         clk,
     input  logic         reset,
+    input  t_nuke_pkt    nuke_rb1,
 
     input  logic         iss_mm0,
     input  t_uinstr_iss  iss_pkt_mm0,

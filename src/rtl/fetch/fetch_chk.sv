@@ -17,8 +17,8 @@ module fetch_chk
     input  logic       valid_fe1,
     input  t_instr_pkt instr_fe1,
 
-    input  logic       br_mispred_rb1,
-    input  t_paddr     br_tgt_rb1
+    input  t_br_mispred_pkt br_mispred_ex0,
+    input  t_nuke_pkt       nuke_rb1
 );
 
 typedef enum logic[2:0] {
@@ -47,7 +47,7 @@ always_comb begin
     state_nxt = state;
     unique case(state)
         IDLE:         if (valid_fe1                    ) state_nxt = PDG_NXT_SEQ;
-        PDG_NXT_SEQ:  if (br_mispred_rb1               ) state_nxt = PDG_BRANCH;
+        PDG_NXT_SEQ:  if (br_mispred_ex0.valid         ) state_nxt = PDG_BRANCH;
         PDG_BRANCH:   if (valid_fe1                    ) state_nxt = PDG_NXT_SEQ;
         default:                                         state_nxt = PDG_NXT_SEQ;
     endcase
@@ -62,8 +62,8 @@ always_comb begin
     PCNxt = PC;
     if (valid_fe1 & state == IDLE) begin
         PCNxt = instr_fe1.pc + t_paddr'(4);;
-    end else if(br_mispred_rb1) begin
-        PCNxt = br_tgt_rb1;
+    end else if(br_mispred_ex0.valid) begin
+        PCNxt = br_mispred_ex0.target_addr;
     end else if(valid_fe1 & ~stall) begin
         PCNxt = PC + t_paddr'(4);;
     end else begin

@@ -30,6 +30,8 @@ package common;
     localparam FE_FB_NUM_ENTS     = 4;
     localparam FE_FB_NUM_ENTS_LG2 = $clog2(FE_FB_NUM_ENTS);
 
+    typedef logic[PA_SZ-1:0]    t_paddr;
+
     //////////////////////////////
     // ROB Defines ///////////////
     //////////////////////////////
@@ -41,6 +43,26 @@ package common;
        logic     wrap;
        t_rob_ptr idx;
     } t_rob_id;
+
+    //////////////////////////////
+    // Branch recovery ///////////
+    //////////////////////////////
+
+    typedef struct packed {
+        logic    valid;
+        t_rob_id robid;
+        t_paddr  target_addr;
+    } t_br_mispred_pkt;
+
+    typedef enum logic {
+        NUKE_BR_MISPRED,
+        NUKE_EXCEPTION
+    } t_nuke_type;
+
+    typedef struct packed {
+        logic       valid;
+        t_nuke_type nuke_type;
+    } t_nuke_pkt;
 
     //////////////////////////////
     // PRF Defines ///////////////
@@ -74,8 +96,6 @@ package common;
     //////////////////////////////
     // Miscellanea ///////////////
     //////////////////////////////
-
-    typedef logic[PA_SZ-1:0]    t_paddr;
 
     typedef logic[ 7:0] t_byte;
     typedef logic[15:0] t_hword;

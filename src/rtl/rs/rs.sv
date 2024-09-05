@@ -15,6 +15,7 @@ module rs
 (
     input  logic          clk,
     input  logic          reset,
+    input  t_nuke_pkt     nuke_rb1,
 
     input  logic          iprf_wr_en_ro0   [IPRF_NUM_WRITES-1:0],
     input  t_prf_wr_pkt   iprf_wr_pkt_ro0  [IPRF_NUM_WRITES-1:0],

@@ -19,8 +19,7 @@ module core
 // Nets
 //
 
-logic         stall;
-
+logic         decode_ready_de0;
 logic         rename_ready_rn0;
 logic         alloc_ready_ra0;
 logic         rob_ready_ra0;
@@ -42,13 +41,12 @@ t_prf_id      rdaddrs_rd0 [1:0];
 
 t_rv_reg_data rddatas_rd1 [1:0];
 
+t_nuke_pkt       nuke_rb1;
+t_br_mispred_pkt br_mispred_ex0;
 t_rv_reg_data result_ex1;
 
 logic        iprf_wr_en_ex1;
 t_prf_wr_pkt iprf_wr_pkt_ex1;
-
-t_paddr       br_tgt_rb1;
-logic         br_mispred_rb1;
 
 logic         reclaim_prf_rb1;
 t_prf_id      reclaim_prf_id_rb1;
@@ -58,6 +56,8 @@ t_rv_reg_data result_mm1;
 t_rv_reg_addr     src_addr_ra0          [NUM_SOURCES-1:0];
 logic             rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0];
 t_rob_id          rob_src_reg_robid_ra0 [NUM_SOURCES-1:0];
+
+t_rob_id          oldest_robid;
 
 // icache
 
@@ -71,21 +71,22 @@ t_mem_rsp ic_fb_rsp_nnn;
 fetch fetch (
     .clk,
     .reset,
+    .decode_ready_de0,
     .fb_ic_req_nnn,
     .ic_fb_rsp_nnn,
+    .br_mispred_ex0,
     .valid_fe1,
     .instr_fe1,
-    .br_tgt_rb1,
-    .br_mispred_rb1,
-    .stall
+    .nuke_rb1
 );
 
 decode decode (
     .clk,
     .reset,
-    .br_mispred_rb1,
+    .nuke_rb1,
 
     .valid_fe1,
+    .decode_ready_de0,
     .rename_ready_rn0,
     .instr_fe1,
     .uinstr_de0,
@@ -96,6 +97,7 @@ decode decode (
 rename rename (
     .clk,
     .reset,
+    .nuke_rb1,
 
     .alloc_ready_ra0,
     .rename_ready_rn0,
@@ -134,6 +136,7 @@ t_uinstr_iss eint_iss_pkt_rs2;
 alloc alloc (
     .clk,
     .reset,
+    .nuke_rb1,
     .alloc_ready_ra0,
     .alloc_ra0,
     .uinstr_ra0 ( uinstr_rn1 ),
@@ -151,6 +154,7 @@ alloc alloc (
 rs #(.NUM_RS_ENTS(8), .RS_NAME("RS_EINT")) rs_eint (
     .clk,
     .reset,
+    .nuke_rb1,
     .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1} ),
     .iprf_wr_pkt_ro0  ( '{iprf_wr_pkt_ex1} ),
 
@@ -169,8 +173,8 @@ t_rob_result ro_result_rb0;
 exe exe (
     .clk,
     .reset,
-    .stall,
-    .br_mispred_rb1,
+    .nuke_rb1,
+    .br_mispred_ex0,
 
     .iss_ex0      ( eint_iss_rs2        ) ,
     .iss_pkt_ex0  ( eint_iss_pkt_rs2    ) ,
@@ -185,6 +189,7 @@ exe exe (
 mem mem (
     .clk,
     .reset,
+    .nuke_rb1,
 
     .iss_mm0     ( 1'b0             ) ,
     .iss_pkt_mm0 ( eint_iss_pkt_rs2 ) ,
@@ -192,14 +197,14 @@ mem mem (
     .result_mm1
 );
 
-retire retire (
+rob rob (
     .clk,
     .reset,
-    .next_robid_ra0,
+    .oldest_robid,
     .rob_ready_ra0,
-    .alloc_ra0  ( alloc_ra0  ),
     .uinstr_ra0 ( uinstr_rn1 ),
     .rename_ra0 ( rename_rn1 ),
+    .alloc_ra0,
 
     .src_addr_ra0,
     .rob_src_reg_pdg_ra0,
@@ -211,14 +216,11 @@ retire retire (
     .reclaim_prf_rb1,
     .reclaim_prf_id_rb1,
 
-    .br_mispred_rb1,
-    .br_tgt_rb1
-);
+    .next_robid_ra0,
 
-scoreboard scoreboard (
-    .clk,
-    .reset,
-    .stall
+    .uinstr_rb1 ( ),
+
+    .nuke_rb1
 );
 
 icache #(.LATENCY(5)) icache (

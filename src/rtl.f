@@ -23,7 +23,6 @@ src/rtl/mem/mem.sv
 
 src/rtl/regrd/regrd.sv
 
-src/rtl/retire/retire.sv
 src/rtl/retire/rob.sv
 src/rtl/retire/rob_entry.sv
 

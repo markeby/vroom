@@ -12,6 +12,7 @@ module alloc
 (
     input  logic         clk,
     input  logic         reset,
+    input  t_nuke_pkt    nuke_rb1,
 
     input  logic         rob_ready_ra0,
     input  t_uinstr      uinstr_ra0,

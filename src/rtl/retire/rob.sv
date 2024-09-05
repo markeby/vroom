@@ -14,6 +14,7 @@ module rob
     input  logic             reset,
 
     output logic             rob_ready_ra0,
+    output t_rob_id          oldest_robid,
 
     input  logic             alloc_ra0,
     input  t_uinstr          uinstr_ra0,
@@ -31,9 +32,7 @@ module rob
     output t_prf_id          reclaim_prf_id_rb1,
 
     output t_uinstr          uinstr_rb1,
-
-    output logic             br_mispred_rb1,
-    output t_paddr           br_tgt_rb1
+    output t_nuke_pkt        nuke_rb1
 );
 
 //
@@ -46,8 +45,6 @@ t_rob_id tail_id; // pointer to first invalid ROBID (if ~full)
 t_rob_ent entries [RB_NUM_ENTS-1:0];
 logic                  q_retire_rb1;
 logic[RB_NUM_ENTS-1:0] e_retire_rb1;
-
-t_rv_reg_data          result_rb1;
 
 logic[RB_NUM_ENTS-1:0] e_valid;
 logic                  q_alloc_ra0;
@@ -70,6 +67,7 @@ if(1) begin : g_rob_head_ptr
                                        head_id;
    `DFF(head_id, head_id_nxt, clk)
 end : g_rob_head_ptr
+assign oldest_robid = head_id;
 
 if(1) begin : g_rob_tail_ptr
    t_rob_id tail_id_nxt;
@@ -94,12 +92,11 @@ assign q_retire_rb1 = ~rob_empty_ra0 & head_entry.d.ready;
 assign e_retire_rb1 = q_retire_rb1 ? (1 << head_id.idx) : '0;
 
 assign uinstr_rb1 = head_entry.s.uinstr;
-assign result_rb1 = '0; //head_entry.d.result;
 
 assign q_flush_now_rb1 = ~rob_empty_ra0 & head_entry.d.flush_needed;
 
-assign br_mispred_rb1 = q_flush_now_rb1 & uinstr_rb1.mispred;
-assign br_tgt_rb1     = result_rb1;
+assign nuke_rb1.valid     = q_flush_now_rb1;
+assign nuke_rb1.nuke_type = uinstr_rb1.mispred ? NUKE_BR_MISPRED : NUKE_EXCEPTION;
 
 assign reclaim_prf_rb1    = q_retire_rb1 & uinstr_rb1.dst.optype == OP_REG;
 assign reclaim_prf_id_rb1 = head_entry.s.pdst_old;

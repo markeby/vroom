@@ -17,12 +17,12 @@ module fetch
     output t_mem_req   fb_ic_req_nnn,
     input  t_mem_rsp   ic_fb_rsp_nnn,
 
-    input  t_paddr     br_tgt_rb1,
-    input  logic       br_mispred_rb1,
+    input  t_br_mispred_pkt br_mispred_ex0,
+    input  t_nuke_pkt       nuke_rb1,
 
+    input  logic       decode_ready_de0,
     output logic       valid_fe1,
-    output t_instr_pkt instr_fe1,
-    input  logic       stall
+    output t_instr_pkt instr_fe1
 );
 
 //
@@ -36,6 +36,9 @@ module fetch
 t_fe_fb_req fe_fb_req_nnn;
 t_fb_fe_rsp fb_fe_rsp_nnn;
 
+logic stall;
+assign stall = ~decode_ready_de0;
+
 //
 // Logic
 //
@@ -43,9 +46,9 @@ t_fb_fe_rsp fb_fe_rsp_nnn;
 fe_ctl fe_ctl (
     .clk,
     .reset,
+    .nuke_rb1,
 
-    .br_tgt_rb1,
-    .br_mispred_rb1,
+    .br_mispred_ex0,
 
     .fe_fb_req_nnn,
     .fb_fe_rsp_nnn,
@@ -79,11 +82,11 @@ always_comb irom_index = instr_fe1.pc[$clog2(128)+1:2];
 fetch_chk fechk (
     .clk,
     .reset,
+    .nuke_rb1,
     .stall,
     .valid_fe1,
     .instr_fe1,
-    .br_mispred_rb1,
-    .br_tgt_rb1
+    .br_mispred_ex0
 );
 
     /*

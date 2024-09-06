@@ -50,9 +50,6 @@ t_rv_reg_data result_ex1;
 logic        iprf_wr_en_ex1;
 t_prf_wr_pkt iprf_wr_pkt_ex1;
 
-logic         reclaim_prf_rb1;
-t_prf_id      reclaim_prf_id_rb1;
-
 t_rv_reg_data result_mm1;
 
 t_rv_reg_addr     src_addr_ra0          [NUM_SOURCES-1:0];
@@ -62,6 +59,7 @@ t_rob_id          rob_src_reg_robid_ra0 [NUM_SOURCES-1:0];
 t_rob_id          oldest_robid;
 
 t_rat_restore_pkt rat_restore_pkt_rbx;
+t_rat_reclaim_pkt rat_reclaim_pkt_rb1;
 
 // icache
 
@@ -117,9 +115,8 @@ rename rename (
     .iprf_rd_psrc_rd0 ( rdaddrs_rd0 ),
     .iprf_rd_data_rd1 ( rddatas_rd1 ),
 
-    .reclaim_prf_rb1,
-    .reclaim_prf_id_rb1,
     .rat_restore_pkt_rbx,
+    .rat_reclaim_pkt_rb1,
 
     .valid_rn1,
     .uinstr_rn1,
@@ -219,8 +216,7 @@ rob rob (
     .ro_valid_rb0,
     .ro_result_rb0,
 
-    .reclaim_prf_rb1,
-    .reclaim_prf_id_rb1,
+    .rat_reclaim_pkt_rb1,
     .rat_restore_pkt_rbx,
 
     .next_robid_ra0,

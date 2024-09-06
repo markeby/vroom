@@ -9,6 +9,12 @@ package rename_defs;
 
     typedef struct packed {
         logic                  valid;
+        common::t_prf_id       prfid;
+        `SIMID_STRUCT
+    } t_rat_reclaim_pkt;
+
+    typedef struct packed {
+        logic                  valid;
         instr::t_rv_reg_addr   gpr;
         common::t_prf_id       prfid;
         `SIMID_STRUCT

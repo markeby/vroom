@@ -28,8 +28,7 @@ module rename
     input  t_prf_id      iprf_rd_psrc_rd0 [IPRF_NUM_READS-1:0],
     output t_rv_reg_data iprf_rd_data_rd1 [IPRF_NUM_READS-1:0],
 
-    input  logic         reclaim_prf_rb1,
-    input  t_prf_id      reclaim_prf_id_rb1,
+    input  t_rat_reclaim_pkt rat_reclaim_pkt_rb1,
     input  t_rat_restore_pkt rat_restore_pkt_rbx,
 
     output logic         valid_rn1,
@@ -86,8 +85,7 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
     `endif
     .rename_ready_rn0,
 
-    .reclaim_prf_rb1,
-    .reclaim_prf_id_rb1,
+    .rat_reclaim_pkt_rb1,
     .rat_restore_pkt_rbx,
 
     .alloc_pdst_rn0,

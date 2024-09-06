@@ -29,9 +29,7 @@ module rob
     output logic             rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0],
     output t_rob_id          rob_src_reg_robid_ra0 [NUM_SOURCES-1:0],
 
-    output logic             reclaim_prf_rb1,
-    output t_prf_id          reclaim_prf_id_rb1,
-
+    output t_rat_reclaim_pkt rat_reclaim_pkt_rb1,
     output t_rat_restore_pkt rat_restore_pkt_rbx,
 
     output t_uinstr          uinstr_rb1,
@@ -103,8 +101,11 @@ assign q_flush_now_rb1 = ~rob_empty_ra0 & head_entry.d.flush_needed;
 assign nuke_rb1.valid     = q_flush_now_rb1;
 assign nuke_rb1.nuke_type = uinstr_rb1.mispred ? NUKE_BR_MISPRED : NUKE_EXCEPTION;
 
-assign reclaim_prf_rb1    = q_retire_rb1 & uinstr_rb1.dst.optype == OP_REG;
-assign reclaim_prf_id_rb1 = head_entry.s.pdst_old;
+assign rat_reclaim_pkt_rb1.valid = q_retire_rb1 & uinstr_rb1.dst.optype == OP_REG;
+assign rat_reclaim_pkt_rb1.prfid = head_entry.s.pdst_old;
+`ifdef SIMULATION
+assign rat_reclaim_pkt_rb1.SIMID = head_entry.s.uinstr.SIMID;
+`endif
 
 //
 // Alloc
@@ -234,10 +235,6 @@ always @(posedge clk) begin
         `UINFO(head_entry.s.uinstr.SIMID, ("unit:ROB func:retire robid:0x%0x %s",
             head_id,
             describe_uinstr(head_entry.s.uinstr)))
-    end
-
-    if (reclaim_prf_rb1) begin
-        `UINFO(head_entry.s.uinstr.SIMID, ("unit:ROB func:reclaim %s", f_describe_prf(reclaim_prf_id_rb1)))
     end
 end
 

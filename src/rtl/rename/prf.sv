@@ -29,8 +29,7 @@ module prf
     output t_prf_id      rdmap_psrc_rd1 [NUM_MAP_READS-1:0],
     output logic         rdmap_pend_rd1 [NUM_MAP_READS-1:0],
 
-    input  logic         reclaim_prf_rb1,
-    input  t_prf_id      reclaim_prf_id_rb1,
+    input  t_rat_reclaim_pkt rat_reclaim_pkt_rb1,
     input  t_rat_restore_pkt rat_restore_pkt_rbx,
 
     output logic         rename_ready_rn0,
@@ -70,10 +69,8 @@ logic[NUM_ENTRIES-1:0] free_list_first_free_rn0;
 assign free_list_first_free_rn0 = gen_funcs#(.IWIDTH(NUM_ENTRIES))::find_first1(free_list);
 
 logic[NUM_ENTRIES-1:0] free_list_reclaim_rb1;
-assign free_list_reclaim_rb1 = (reclaim_prf_rb1 & reclaim_prf_id_rb1.ptype == prf_type) ? (1 << reclaim_prf_id_rb1.idx) : '0;
-
-logic reclaim_ro0;
-assign reclaim_ro0 = 1'b0;  // FIXME
+assign free_list_reclaim_rb1 = ( (rat_reclaim_pkt_rb1.valid & rat_reclaim_pkt_rb1.prfid.ptype == prf_type) ? (1 << rat_reclaim_pkt_rb1.prfid.idx) : '0 )
+                             | ( (rat_restore_pkt_rbx.valid & rat_restore_pkt_rbx.prfid.ptype == prf_type) ? (1 << MAP[rat_restore_pkt_rbx.gpr] ) : '0 );
 
 logic[NUM_ENTRIES-1:0] free_list_rst;
 logic[NUM_ENTRIES-1:0] free_list_nxt;
@@ -184,17 +181,21 @@ end
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (alloc_pdst_rn0) begin
-        `UINFO(simid_rn0_inst, ("unit:RN func:pdst_alloc gpr_id:%s pdst:%s", f_describe_gpr_addr(gpr_id_rn0), f_describe_prf(pdst_rn0)))
+        `UINFO(simid_rn0_inst, ("unit:RN func:pdst_alloc gpr_id:%s pdst:%s pdst_old:%s", f_describe_gpr_addr(gpr_id_rn0), f_describe_prf(pdst_rn0), f_describe_prf(pdst_old_rn0)))
     end
 
     if (rat_restore_pkt_rbx.valid) begin
-        `UINFO(rat_restore_pkt_rbx.SIMID, ("unit:RN func:rat_restore gpr_id:%s pdst:%s", f_describe_gpr_addr(rat_restore_pkt_rbx.gpr), f_describe_prf(rat_restore_pkt_rbx.prfid)))
+        `UINFO(rat_restore_pkt_rbx.SIMID, ("unit:RN func:rat_restore gpr_id:%s pdst:%s reclaim:%s", f_describe_gpr_addr(rat_restore_pkt_rbx.gpr), f_describe_prf(rat_restore_pkt_rbx.prfid), f_describe_prf({prf_type, MAP[rat_restore_pkt_rbx.gpr]})))
     end
 
     for (int r=0; r<NUM_MAP_READS; r++) begin
         if (rdmap_nq_rd0[r]) begin
             `UINFO(simid_rd0_inst, ("unit:RN func:rat_read gpr_id:%s psrc:%s psrc_pend:%0d", f_describe_gpr_addr(rdmap_gpr_rd0[r]), f_describe_prf(rdmap_psrc_rd0[r]), rdmap_pend_rd0[r]))
         end
+    end
+
+    if (rat_reclaim_pkt_rb1.valid) begin
+        `UINFO(rat_reclaim_pkt_rb1.SIMID, ("unit:RN func:reclaim %s", f_describe_prf(rat_reclaim_pkt_rb1.prfid)))
     end
 end
 

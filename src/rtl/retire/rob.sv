@@ -63,7 +63,6 @@ logic                  q_flush_now_rb1;
 if(1) begin : g_rob_head_ptr
    t_rob_id head_id_nxt;
    assign head_id_nxt = reset           ? '0                    :
-                        nuke_rb1.valid  ? tail_id               :
                         q_retire_rb1    ? f_incr_robid(head_id) :
                                           head_id;
    `DFF(head_id, head_id_nxt, clk)
@@ -72,9 +71,10 @@ assign oldest_robid = head_id;
 
 if(1) begin : g_rob_tail_ptr
    t_rob_id tail_id_nxt;
-   assign tail_id_nxt = reset       ? '0                    :
-                        q_alloc_ra0 ? f_incr_robid(tail_id) :
-                                      tail_id;
+   assign tail_id_nxt = reset          ? '0                    :
+                        nuke_rb1.valid ? f_incr_robid(head_id) :
+                        q_alloc_ra0    ? f_incr_robid(tail_id) :
+                                         tail_id;
    `DFF(tail_id, tail_id_nxt, clk)
 end : g_rob_tail_ptr
 

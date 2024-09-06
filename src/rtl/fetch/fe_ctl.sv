@@ -61,10 +61,8 @@ t_fsm_fe state_nxt;
 // Logic
 //
 
-logic halt;
 t_rv_instr fb_fe_rsp_nnn_instr;
 assign fb_fe_rsp_nnn_instr = fb_fe_rsp_nnn.instr;
-assign halt = fb_fe_rsp_nnn.valid & fb_fe_rsp_nnn_instr.opcode == RV_OP_SYSTEM;
 
 logic nuke_pdg;
 `DFF(nuke_pdg, ~reset & (nuke_pdg & ~nuke_rb1.valid | br_mispred_ex0.valid), clk)
@@ -72,7 +70,7 @@ logic nuke_pdg;
 always_comb begin
     state_nxt = state;
     unique case(state)
-        FE_IDLE:      if (~halt                                  ) state_nxt = FE_REQ_IC;
+        FE_IDLE:      if (1'b1                                   ) state_nxt = FE_REQ_IC;
         FE_REQ_IC:    if (1'b1                                   ) state_nxt = FE_PDG_IC;
         FE_PDG_IC:    if (fb_fe_rsp_nnn.valid &  nuke_pdg        ) state_nxt = FE_PDG_NUKE;  // wait for nuke
                  else if (fb_fe_rsp_nnn.valid &  stall           ) state_nxt = FE_PDG_STALL; // wait for stall to resolve
@@ -82,7 +80,6 @@ always_comb begin
         FE_PDG_NUKE:  if (nuke_rb1.valid                         ) state_nxt = FE_PDG_STALL; // after a nuke, head to FE_PDG_STALL state; we can request from thre
         default:                                                   state_nxt = state;
     endcase
-    //if (halt ) state_nxt = FE_DRAIN;
     if (reset) state_nxt = FE_IDLE;
 end
 `DFF(state, state_nxt, clk)
@@ -142,7 +139,7 @@ always_comb begin
     valid_fe1           = ( state == FE_PDG_IC & fb_fe_rsp_nnn.valid
                           | state == FE_PDG_STALL
                           | state == FE_DRAIN
-                          ) & ~nuke_pdg & ~halt & ~fake_stall_now;
+                          ) & ~nuke_pdg & ~fake_stall_now;
     instr_fe1       = t_instr_pkt'('0);
     instr_fe1.instr = ic_rsp.instr;
     instr_fe1.pc    = ic_rsp.pc;
@@ -164,7 +161,6 @@ end
 `endif
 
 `ifdef ASSERT
-`VASSERT(fetch_while_pdg_nuke, nuke_pdg, ~fe_fb_req_nnn.valid, "FE fetched while waiting for nuke")
 
     /*
 logic valid_fe2_inst;

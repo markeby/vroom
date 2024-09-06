@@ -13,6 +13,7 @@ package common;
     localparam CL_ADDR_SZ    = $clog2(CL_SZ_BYTES);
 
     localparam NUM_SOURCES = 2;
+    localparam NUM_COMPLETES = 2;
 
     localparam SRC1 = 0;
     localparam SRC2 = 1;

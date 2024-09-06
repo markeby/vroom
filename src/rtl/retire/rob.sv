@@ -22,8 +22,8 @@ module rob
     input  t_rename_pkt      rename_ra0,
     output t_rob_id          next_robid_ra0,
 
-    input  logic             ro_valid_rb0,
-    input  t_rob_result      ro_result_rb0,
+    input  t_rob_complete_pkt ex_complete_rb0,
+    input  t_rob_complete_pkt mm_complete_rb0,
 
     input  t_rv_reg_addr     src_addr_ra0          [NUM_SOURCES-1:0],
     output logic             rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0],
@@ -124,6 +124,14 @@ always_comb begin
    rob_st_new_ra0.pdst_old = rename_ra0.pdst_old;
 end
 
+localparam COMPLETE_EINT = 0;
+localparam COMPLETE_MEM  = 1;
+
+t_rob_complete_pkt ro_complete_rb0       [NUM_COMPLETES-1:0];
+
+assign ro_complete_rb0[COMPLETE_EINT]       = ex_complete_rb0;
+assign ro_complete_rb0[COMPLETE_MEM]        = mm_complete_rb0;
+
 for (genvar i=0; i<RB_NUM_ENTS; i++) begin : g_rob_ents
    rob_entry rbent (
       .clk,
@@ -133,8 +141,7 @@ for (genvar i=0; i<RB_NUM_ENTS; i++) begin : g_rob_ents
       .head_id,
       .q_alloc_s_ra0 ( rob_st_new_ra0  ),
       .e_alloc_ra0   ( e_alloc_ra0[i]  ),
-      .ro_valid_rb0,
-      .ro_result_rb0,
+      .ro_complete_rb0,
       .q_flush_now_rb1,
       .e_retire_rb1  ( e_retire_rb1[i] ),
       .rob_entry     ( entries[i]      )

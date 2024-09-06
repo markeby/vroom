@@ -22,9 +22,10 @@ package rob_defs;
     } t_rob_ent;
 
     typedef struct packed {
+        logic                       valid;
         common::t_rob_id            robid;
         logic                       mispred;
-    } t_rob_result;
+    } t_rob_complete_pkt;
 
     function common::t_rob_id f_incr_robid(common::t_rob_id robid);
         f_incr_robid = robid;

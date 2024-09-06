@@ -235,7 +235,7 @@ always_ff @(posedge clk) begin
     end
 
     if (core.eint_iss_rs2  ) cd_rs_eint();
-    if (core.exe.ro_valid_ex1) cd_result_eint();
+    if (core.exe.complete_ex1.valid) cd_result_eint();
 
     if (core.rob.q_retire_rb1) cd_retire();
 end

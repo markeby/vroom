@@ -3,9 +3,10 @@
 
 `include "instr.pkg"
 `include "vroom_macros.sv"
+`include "rob_defs.pkg"
 
 module mem
-    import instr::*, instr_decode::*, common::*;
+    import instr::*, instr_decode::*, common::*, rob_defs::*;
 (
     input  logic         clk,
     input  logic         reset,
@@ -14,7 +15,7 @@ module mem
     input  logic         iss_mm0,
     input  t_uinstr_iss  iss_pkt_mm0,
 
-    output t_rv_reg_data result_mm1
+    output t_rob_complete_pkt complete_mm5
 );
 
 localparam MM0 = 0;
@@ -40,7 +41,7 @@ localparam NUM_MM_STAGES = 1;
 // RB0 assign
 
 always_comb begin
-    result_mm1 = '0;
+    complete_mm5 = '0;
 end
 
 

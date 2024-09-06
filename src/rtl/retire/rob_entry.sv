@@ -18,8 +18,7 @@ module rob_entry
                                   q_alloc_s_ra0,
     input  logic                  e_alloc_ra0,
 
-    input  logic                  ro_valid_rb0,
-    input  t_rob_result           ro_result_rb0,
+    input  t_rob_complete_pkt     ro_complete_rb0       [NUM_COMPLETES-1:0],
 
     input  logic                  q_flush_now_rb1,
 
@@ -78,13 +77,21 @@ assign e_valid = (fsm != RBE_IDLE);
 // Logic
 //
 
-assign e_wb_valid_rb0 = ro_valid_rb0 & ro_result_rb0.robid.idx == robid.idx;
+t_rob_complete_pkt e_ro_complete_rb0;
+always_comb begin
+    e_ro_complete_rb0 = '0;
+    for (int i=0; i<NUM_COMPLETES; i++) begin
+        e_ro_complete_rb0 |= (ro_complete_rb0[i].valid & ro_complete_rb0[i].robid.idx == robid.idx) ? ro_complete_rb0[i] : '0;
+    end
+end
+
+assign e_wb_valid_rb0 = e_ro_complete_rb0.valid & e_ro_complete_rb0.robid.idx == robid.idx;
 
 //
 // Dynamic state
 //
 
-`DFF(e_flush_needed, ~e_alloc_ra0 & (e_flush_needed | e_wb_valid_rb0 & ro_result_rb0.mispred), clk)
+`DFF(e_flush_needed, ~e_alloc_ra0 & (e_flush_needed | e_wb_valid_rb0 & e_ro_complete_rb0.mispred), clk)
 
 assign rob_entry.d.ready        = fsm == RBE_READY;
 assign rob_entry.d.flush_needed = e_flush_needed;

@@ -45,12 +45,12 @@ t_rv_reg_data rddatas_rd1 [1:0];
 logic            resume_fetch_rbx;
 t_nuke_pkt       nuke_rb1;
 t_br_mispred_pkt br_mispred_ex0;
-t_rv_reg_data result_ex1;
 
 logic        iprf_wr_en_ex1;
 t_prf_wr_pkt iprf_wr_pkt_ex1;
 
-t_rv_reg_data result_mm1;
+t_rob_complete_pkt ex_complete_rb0;;
+t_rob_complete_pkt mm_complete_rb0;;
 
 t_rv_reg_addr     src_addr_ra0          [NUM_SOURCES-1:0];
 logic             rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0];
@@ -171,8 +171,6 @@ rs #(.NUM_RS_ENTS(8), .RS_NAME("RS_EINT")) rs_eint (
     .iss_pkt_rs2  ( eint_iss_pkt_rs2    )
 );
 
-logic        ro_valid_rb0;
-t_rob_result ro_result_rb0;
 exe exe (
     .clk,
     .reset,
@@ -185,8 +183,7 @@ exe exe (
     .iprf_wr_en_ex1,
     .iprf_wr_pkt_ex1,
 
-    .ro_valid_ex1 ( ro_valid_rb0 ) ,
-    .ro_result_ex1 (ro_result_rb0 )
+    .complete_ex1 (ex_complete_rb0)
 );
 
 mem mem (
@@ -197,7 +194,7 @@ mem mem (
     .iss_mm0     ( 1'b0             ) ,
     .iss_pkt_mm0 ( eint_iss_pkt_rs2 ) ,
 
-    .result_mm1
+    .complete_mm5 ( mm_complete_rb0 )
 );
 
 rob rob (
@@ -213,8 +210,8 @@ rob rob (
     .rob_src_reg_pdg_ra0,
     .rob_src_reg_robid_ra0,
 
-    .ro_valid_rb0,
-    .ro_result_rb0,
+    .ex_complete_rb0,
+    .mm_complete_rb0,
 
     .rat_reclaim_pkt_rb1,
     .rat_restore_pkt_rbx,

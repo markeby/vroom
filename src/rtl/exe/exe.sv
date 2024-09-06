@@ -23,8 +23,7 @@ module exe
     output logic         iprf_wr_en_ex1,
     output t_prf_wr_pkt  iprf_wr_pkt_ex1,
 
-    output logic         ro_valid_ex1,
-    output t_rob_result  ro_result_ex1
+    output t_rob_complete_pkt complete_ex1
 );
 
 localparam EX0 = 0;
@@ -119,9 +118,9 @@ always_comb LOL = uinstr_ex0.uop inside {U_INVALID, U_EBREAK, U_ECALL};
 //
 
 always_comb begin
-    ro_valid_ex1 = uinstr_exx[EX1].valid;
-    ro_result_ex1.mispred = ibr_mispred_exx[EX1].valid;
-    ro_result_ex1.robid = robid_exx[EX1];
+    complete_ex1.valid = uinstr_exx[EX1].valid;
+    complete_ex1.mispred = ibr_mispred_exx[EX1].valid;
+    complete_ex1.robid = robid_exx[EX1];
 
     iprf_wr_en_ex1 = uinstr_exx[EX1].valid & uinstr_exx[EX1].dst.optype == OP_REG;
     iprf_wr_pkt_ex1.pdst = pdst_exx[EX1];

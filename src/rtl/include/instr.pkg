@@ -183,8 +183,12 @@ package instr;
         describe_instr = $sformatf("opcode:%s", inst.instr.opcode.name());
     endfunction
 
+    function automatic string f_describe_gpr_addr_pad(t_rv_reg_addr gpr);
+        return $sformatf("%3s", f_describe_gpr_addr(gpr));
+    endfunction
+
     function automatic string f_describe_gpr_addr(t_rv_reg_addr gpr);
-        return $sformatf("%3s", $sformatf("x%01d", gpr));
+        return $sformatf("x%01d", gpr);
     endfunction
 
     function automatic string f_describe_gpr_data(t_rv_reg_data data, logic hide_zeros);

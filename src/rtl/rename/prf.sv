@@ -184,16 +184,16 @@ end
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (alloc_pdst_rn0) begin
-        `UINFO(simid_rn0_inst, ("unit:RN func:pdst_alloc gpr_id:%0d pdst:%s", gpr_id_rn0, f_describe_prf(pdst_rn0)))
+        `UINFO(simid_rn0_inst, ("unit:RN func:pdst_alloc gpr_id:%s pdst:%s", f_describe_gpr_addr(gpr_id_rn0), f_describe_prf(pdst_rn0)))
     end
 
     if (rat_restore_pkt_rbx.valid) begin
-        `INFO(("unit:RN func:rat_restore gpr_id:%0d pdst:%s", rat_restore_pkt_rbx.gpr, f_describe_prf(rat_restore_pkt_rbx.prfid)))
+        `UINFO(rat_restore_pkt_rbx.SIMID, ("unit:RN func:rat_restore gpr_id:%s pdst:%s", f_describe_gpr_addr(rat_restore_pkt_rbx.gpr), f_describe_prf(rat_restore_pkt_rbx.prfid)))
     end
 
     for (int r=0; r<NUM_MAP_READS; r++) begin
         if (rdmap_nq_rd0[r]) begin
-            `UINFO(simid_rd0_inst, ("unit:RN func:rat_read gpr_id:0x%0x psrc:0x%0x psrc_pend:%0d", rdmap_gpr_rd0[r], rdmap_psrc_rd0[r], rdmap_pend_rd0[r]))
+            `UINFO(simid_rd0_inst, ("unit:RN func:rat_read gpr_id:%s psrc:%s psrc_pend:%0d", f_describe_gpr_addr(rdmap_gpr_rd0[r]), f_describe_prf(rdmap_psrc_rd0[r]), rdmap_pend_rd0[r]))
         end
     end
 end

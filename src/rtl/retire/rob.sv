@@ -215,6 +215,9 @@ assign rat_restore_pkt_rbx.valid = rr_fsm == RR_WALK
                                  & entries[rr_robid.idx].s.uinstr.dst.optype == OP_REG;
 assign rat_restore_pkt_rbx.gpr   = entries[rr_robid.idx].s.uinstr.dst.opreg;
 assign rat_restore_pkt_rbx.prfid = entries[rr_robid.idx].s.pdst_old;
+`ifdef SIMULATION
+assign rat_restore_pkt_rbx.SIMID = entries[rr_robid.idx].s.uinstr.SIMID;
+`endif
 
 assign resume_fetch_rbx = rr_fsm == RR_RESUME_FETCH;
 

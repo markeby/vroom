@@ -103,10 +103,10 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (uinstr_rn1.valid) begin
-        `UINFO(uinstr_rn1.SIMID, ("unit:RN dst_type:%s dst_reg:%0d pdst:0x%0h pdst_old:0x%0h, src1_type:%s src1_reg:%0d psrc1:0x%0h psrc1_pend:%0d src2_type:%s src2_reg:%0d psrc2:0x%0h psrc2_pend:%d",
-            uinstr_rn1.dst.optype.name, uinstr_rn1.dst.opreg, rename_rn1.pdst, rename_rn1.pdst_old,
-            uinstr_rn1.src1.optype.name, uinstr_rn1.src1.opreg, rename_rn1.psrc1, rename_rn1.psrc1_pend,
-            uinstr_rn1.src2.optype.name, uinstr_rn1.src2.opreg, rename_rn1.psrc2, rename_rn1.psrc2_pend))
+        `UINFO(uinstr_rn1.SIMID, ("unit:RN dst_type:%s dst_reg:%s pdst:%s pdst_old:%s, src1_type:%s src1_reg:%s psrc1:%s psrc1_pend:%0d src2_type:%s src2_reg:%s psrc2:%s psrc2_pend:%d",
+            uinstr_rn1.dst.optype.name,  f_describe_gpr_addr(uinstr_rn1.dst.opreg ), f_describe_prf(rename_rn1.pdst ), f_describe_prf(rename_rn1.pdst_old),
+            uinstr_rn1.src1.optype.name, f_describe_gpr_addr(uinstr_rn1.src1.opreg), f_describe_prf(rename_rn1.psrc1), rename_rn1.psrc1_pend,
+            uinstr_rn1.src2.optype.name, f_describe_gpr_addr(uinstr_rn1.src2.opreg), f_describe_prf(rename_rn1.psrc2), rename_rn1.psrc2_pend))
     end
 end
 `endif

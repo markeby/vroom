@@ -184,7 +184,11 @@ end
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (alloc_pdst_rn0) begin
-        `UINFO(simid_rn0_inst, ("unit:RN func:pdst_alloc gpr_id:0x%0x pdst:0x%0x", gpr_id_rn0, pdst_rn0))
+        `UINFO(simid_rn0_inst, ("unit:RN func:pdst_alloc gpr_id:%0d pdst:%s", gpr_id_rn0, f_describe_prf(pdst_rn0)))
+    end
+
+    if (rat_restore_pkt_rbx.valid) begin
+        `INFO(("unit:RN func:rat_restore gpr_id:%0d pdst:%s", rat_restore_pkt_rbx.gpr, f_describe_prf(rat_restore_pkt_rbx.prfid)))
     end
 
     for (int r=0; r<NUM_MAP_READS; r++) begin

@@ -59,6 +59,7 @@ typedef struct packed {
 typedef struct packed {
     logic       valid;
     int         clk;
+    t_nuke_pkt  nuke_rb1;
 } t_cd_retire;
 
 typedef struct packed {
@@ -98,7 +99,7 @@ task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ("    Rename -> Alloc  @ %-d", rec.RENAME.clk))
     `PMSG(CDBG, ("    Alloc  -> RS.%0d   @ %-d", rec.ALLOC.port, rec.ALLOC.clk))
     `PMSG(CDBG, ("              Result @ %-d", rec.RESULT.clk))
-    `PMSG(CDBG, ("              Retire @ %-d", rec.RETIRE.clk))
+    `PMSG(CDBG, ("              Retire @ %-d %s", rec.RETIRE.clk, rec.RETIRE.nuke_rb1.valid ? "NUKE!!!" : ""))
     `PMSG(CDBG, (""))
     if (rec.DECODE.uinstr_de1.dst.optype == OP_REG) begin
         `PMSG(CDBG, ("Register Updates"))
@@ -204,6 +205,7 @@ endtask
 
 task cd_retire();
     int i; i = f_instq_find_match(top.core.rob.head_entry.s.uinstr.SIMID);
+
     if (INSTQ[i].RETIRE.valid) begin
         $error("Trying to retire a record that is already retired!");
     end
@@ -214,7 +216,13 @@ task cd_retire();
     end
     INSTQ[i].RETIRE.valid = 1'b1;
     INSTQ[i].RETIRE.clk = top.cclk_count;
+    INSTQ[i].RETIRE.nuke_rb1 = core.rob.nuke_rb1;
     cd_print_rec(INSTQ[i]);
+    if (INSTQ[i].RETIRE.nuke_rb1.valid) begin
+        INSTQ.delete();
+    end else begin
+        INSTQ.delete(i);
+    end
 endtask
 
 always_ff @(posedge clk) begin
@@ -272,10 +280,16 @@ endfunction
 
 task cd_print_rec_unretired(t_cd_inst rec);
     `PMSG(CDBG, ("-------------------------------------------------------"));
-    if (rec.DECODE.valid)
+    if (rec.ALLOC.valid) begin
         `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
-    if (rec.ALLOC.valid)
         `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.ALLOC.disp_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
+    end else if (rec.DECODE.valid) begin
+        `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
+        `PMSG(CDBG, ("PC 0x%04h -- %s", rec.FETCH.instr_fe1.SIMID.pc, format_simid(rec.FETCH.instr_fe1.SIMID)))
+    end else begin
+        `PMSG(CDBG, (describe_instr(rec.FETCH.instr_fe1)))
+        `PMSG(CDBG, ("PC 0x%04h -- %s", rec.FETCH.instr_fe1.SIMID.pc, format_simid(rec.FETCH.instr_fe1.SIMID)))
+    end
 endtask
 
 task cd_print_all_unretired();

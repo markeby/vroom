@@ -187,10 +187,6 @@ initial begin
     // IROM[a++] = rvXOR(0,0,0);
     // IROM[a++] = rvXOR(0,0,0);
     IROM[a++] = rvEBREAK();
-    IROM[a++] = rvEBREAK();
-    IROM[a++] = rvEBREAK();
-    IROM[a++] = rvEBREAK();
-    IROM[a++] = rvEBREAK();
 
 end
 

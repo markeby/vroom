@@ -30,6 +30,7 @@ module rename
 
     input  logic         reclaim_prf_rb1,
     input  t_prf_id      reclaim_prf_id_rb1,
+    input  t_rat_restore_pkt rat_restore_pkt_rbx,
 
     output logic         valid_rn1,
     output t_uinstr      uinstr_rn1,
@@ -87,6 +88,7 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
 
     .reclaim_prf_rb1,
     .reclaim_prf_id_rb1,
+    .rat_restore_pkt_rbx,
 
     .alloc_pdst_rn0,
     .gpr_id_rn0     ( uinstr_rn0.dst.opreg                           ) ,

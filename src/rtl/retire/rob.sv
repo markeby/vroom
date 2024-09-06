@@ -6,9 +6,10 @@
 `include "common.pkg"
 `include "rob_defs.pkg"
 `include "gen_funcs.pkg"
+`include "rename_defs.pkg"
 
 module rob
-    import instr::*, instr_decode::*, verif::*, common::*, rob_defs::*, gen_funcs::*;
+    import instr::*, instr_decode::*, verif::*, common::*, rob_defs::*, gen_funcs::*, rename_defs::*;
 (
     input  logic             clk,
     input  logic             reset,
@@ -31,8 +32,11 @@ module rob
     output logic             reclaim_prf_rb1,
     output t_prf_id          reclaim_prf_id_rb1,
 
+    output t_rat_restore_pkt rat_restore_pkt_rbx,
+
     output t_uinstr          uinstr_rb1,
-    output t_nuke_pkt        nuke_rb1
+    output t_nuke_pkt        nuke_rb1,
+    output logic             resume_fetch_rbx
 );
 
 //
@@ -154,6 +158,67 @@ for (genvar src=0; src<NUM_SOURCES; src++) begin : g_rob_source
         rob_src_reg_robid_ra0[src] = {1'b0, gen_funcs#(.IWIDTH(RB_NUM_ENTS))::oh_encode(rob_src_1st_match_ra0[src])}; // FIXME: does the wrap bit need to be correct?  (probably!)
     end
 end
+
+//
+// RAT restore
+//
+// When the oldest ROB entry needs a nuke, the process is:
+//   1. q_flush_now_rb1 asserts to all parts of the core to quiesce ASAP
+//      - capture tail_id in rr_robid;
+//   2. we wait 5 cycles (way too long, but whatever -- TBD, shorten or make dynamic)
+//      - at this point, we have stopped renaming
+//   3. walk from rr_robid - 1 to rob_head, backwards, restoring the RAT
+//   4. once we're at rob_head, send resume_fetch_rbx to fe_ctl
+
+typedef enum logic[1:0] {
+    RR_IDLE,
+    RR_QUIET,
+    RR_WALK,
+    RR_RESUME_FETCH
+} t_rat_restore_fsm;
+t_rat_restore_fsm rr_fsm, rr_fsm_nxt;
+
+localparam RR_QUIESCE_CYCLES = 5;
+
+t_rob_id rr_robid;
+logic[$clog2(RR_QUIESCE_CYCLES):0] rr_cntr;
+
+always_comb begin
+    rr_fsm_nxt = rr_fsm;
+    if (reset) begin
+        rr_fsm_nxt = RR_IDLE;
+    end else begin
+        unique casez (rr_fsm)
+            RR_IDLE:         if ( q_flush_now_rb1          ) rr_fsm_nxt = RR_QUIET;
+            RR_QUIET:        if ( ~|rr_cntr                ) rr_fsm_nxt = RR_WALK;
+            RR_WALK:         if ( rr_robid == head_id      ) rr_fsm_nxt = RR_RESUME_FETCH;
+            RR_RESUME_FETCH: if ( 1'b1                     ) rr_fsm_nxt = RR_IDLE;
+        endcase
+    end
+end
+`DFF(rr_fsm, rr_fsm_nxt, clk)
+
+if (1) begin : g_rr_robid
+    t_rob_id rr_robid_nxt;
+    always_comb begin
+        rr_robid_nxt = rr_robid;
+        if (q_flush_now_rb1) begin
+            rr_robid_nxt = tail_id;
+        end else if (rr_fsm == RR_WALK) begin
+            rr_robid_nxt = f_decr_robid(rr_robid);
+        end
+    end
+    `DFF(rr_robid, rr_robid_nxt, clk)
+end
+
+assign rat_restore_pkt_rbx.valid = rr_fsm == RR_WALK
+                                 & entries[rr_robid.idx].s.uinstr.dst.optype == OP_REG;
+assign rat_restore_pkt_rbx.gpr   = entries[rr_robid.idx].s.uinstr.dst.opreg;
+assign rat_restore_pkt_rbx.prfid = entries[rr_robid.idx].s.pdst_old;
+
+assign resume_fetch_rbx = rr_fsm == RR_RESUME_FETCH;
+
+`DFF_EN(rr_cntr, (rr_fsm == RR_IDLE) ? (1+$clog2(RR_QUIESCE_CYCLES))'(RR_QUIESCE_CYCLES) : (rr_cntr - (1+$clog2(RR_QUIESCE_CYCLES))'(1)), clk, (rr_fsm == RR_IDLE | (|rr_cntr)))
 
 //
 // Debug

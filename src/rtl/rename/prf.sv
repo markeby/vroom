@@ -31,6 +31,7 @@ module prf
 
     input  logic         reclaim_prf_rb1,
     input  t_prf_id      reclaim_prf_id_rb1,
+    input  t_rat_restore_pkt rat_restore_pkt_rbx,
 
     output logic         rename_ready_rn0,
 
@@ -136,6 +137,8 @@ end
 always_ff @(posedge clk) begin
     if (reset) begin
         MAP <= map_tbl_rst;
+    end else if(rat_restore_pkt_rbx.valid) begin
+        MAP[rat_restore_pkt_rbx.gpr] <= rat_restore_pkt_rbx.prfid.idx;
     end else if(alloc_pdst_rn0) begin
         MAP[gpr_id_rn0] <= pdst_rn0.idx;
     end

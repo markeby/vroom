@@ -4,12 +4,13 @@
 `include "instr.pkg"
 `include "instr_decode.pkg"
 `include "mem_common.pkg"
+`include "rename_defs.pkg"
 `include "common.pkg"
 `include "vroom_macros.sv"
 `include "rob_defs.pkg"
 
 module core
-    import instr::*, instr_decode::*, mem_common::*, common::*, rob_defs::*;
+    import instr::*, instr_decode::*, mem_common::*, common::*, rob_defs::*, rename_defs::*;
 (
     input  logic clk,
     input  logic reset
@@ -41,6 +42,7 @@ t_prf_id      rdaddrs_rd0 [1:0];
 
 t_rv_reg_data rddatas_rd1 [1:0];
 
+logic            resume_fetch_rbx;
 t_nuke_pkt       nuke_rb1;
 t_br_mispred_pkt br_mispred_ex0;
 t_rv_reg_data result_ex1;
@@ -58,6 +60,8 @@ logic             rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0];
 t_rob_id          rob_src_reg_robid_ra0 [NUM_SOURCES-1:0];
 
 t_rob_id          oldest_robid;
+
+t_rat_restore_pkt rat_restore_pkt_rbx;
 
 // icache
 
@@ -77,7 +81,8 @@ fetch fetch (
     .br_mispred_ex0,
     .valid_fe1,
     .instr_fe1,
-    .nuke_rb1
+    .nuke_rb1,
+    .resume_fetch_rbx
 );
 
 decode decode (
@@ -114,6 +119,7 @@ rename rename (
 
     .reclaim_prf_rb1,
     .reclaim_prf_id_rb1,
+    .rat_restore_pkt_rbx,
 
     .valid_rn1,
     .uinstr_rn1,
@@ -215,12 +221,14 @@ rob rob (
 
     .reclaim_prf_rb1,
     .reclaim_prf_id_rb1,
+    .rat_restore_pkt_rbx,
 
     .next_robid_ra0,
 
     .uinstr_rb1 ( ),
 
-    .nuke_rb1
+    .nuke_rb1,
+    .resume_fetch_rbx
 );
 
 icache #(.LATENCY(5)) icache (

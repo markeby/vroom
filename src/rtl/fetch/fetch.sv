@@ -19,6 +19,7 @@ module fetch
 
     input  t_br_mispred_pkt br_mispred_ex0,
     input  t_nuke_pkt       nuke_rb1,
+    input  logic            resume_fetch_rbx,
 
     input  logic       decode_ready_de0,
     output logic       valid_fe1,
@@ -47,6 +48,7 @@ fe_ctl fe_ctl (
     .clk,
     .reset,
     .nuke_rb1,
+    .resume_fetch_rbx,
 
     .br_mispred_ex0,
 

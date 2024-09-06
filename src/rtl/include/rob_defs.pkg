@@ -36,6 +36,17 @@ package rob_defs;
         end
     endfunction
 
+    // used for RAT restore
+    function common::t_rob_id f_decr_robid(common::t_rob_id robid);
+        f_decr_robid = robid;
+        if ({1'b0,f_decr_robid.idx} == '0) begin
+            f_decr_robid.wrap ^= 1'b1;
+            f_decr_robid.idx   = $clog2(common::RB_NUM_ENTS)'(common::RB_NUM_ENTS-1);
+        end else begin
+            f_decr_robid.idx  -= 1'b1;
+        end
+    endfunction
+
     function logic f_rob_empty(common::t_rob_id rob_head, common::t_rob_id rob_tail);
         f_rob_empty = rob_head == rob_tail;
     endfunction

@@ -13,6 +13,7 @@ module fe_ctl
     input  logic       clk,
     input  logic       reset,
     input  t_nuke_pkt  nuke_rb1,
+    input  logic       resume_fetch_rbx,
 
     output t_fe_fb_req fe_fb_req_nnn,
     input  t_fb_fe_rsp fb_fe_rsp_nnn,
@@ -29,7 +30,6 @@ typedef enum logic[2:0] {
     FE_REQ_IC,
     FE_PDG_IC,
     FE_PDG_STALL,
-    FE_DRAIN,
     FE_HALT,
     FE_PDG_NUKE
 } t_fsm_fe;
@@ -76,8 +76,7 @@ always_comb begin
                  else if (fb_fe_rsp_nnn.valid &  stall           ) state_nxt = FE_PDG_STALL; // wait for stall to resolve
                  else if (fb_fe_rsp_nnn.valid & ~stall           ) state_nxt = FE_PDG_IC;    // no stall or nuke -> early send
         FE_PDG_STALL: if (~stall                                 ) state_nxt = FE_PDG_IC;
-        FE_DRAIN:     if (~stall                                 ) state_nxt = FE_HALT;
-        FE_PDG_NUKE:  if (nuke_rb1.valid                         ) state_nxt = FE_PDG_STALL; // after a nuke, head to FE_PDG_STALL state; we can request from thre
+        FE_PDG_NUKE:  if (resume_fetch_rbx                       ) state_nxt = FE_PDG_STALL; // after a nuke, head to FE_PDG_STALL state; we can request from thre
         default:                                                   state_nxt = state;
     endcase
     if (reset) state_nxt = FE_IDLE;
@@ -138,7 +137,6 @@ always_comb begin
 
     valid_fe1           = ( state == FE_PDG_IC & fb_fe_rsp_nnn.valid
                           | state == FE_PDG_STALL
-                          | state == FE_DRAIN
                           ) & ~nuke_pdg & ~fake_stall_now;
     instr_fe1       = t_instr_pkt'('0);
     instr_fe1.instr = ic_rsp.instr;

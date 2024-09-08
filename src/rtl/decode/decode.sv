@@ -186,7 +186,7 @@ assign decode_ready_de0 = ~uopq_full;
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (uinstr_de0.valid) begin
-        `UINFO(uinstr_de0.SIMID, ("unit:DE func:uopq_push %s", describe_uinstr(uinstr_de1)))
+        `UINFO(uinstr_de0.SIMID, ("unit:DE func:uopq_push %s", describe_uinstr(uinstr_de0)))
     end
     if (uopq_valid_de1  & ~valid_de1) begin
         `UINFO(uinstr_nq_de1.SIMID, ("unit:DE func:uopq_stalled %s", describe_uinstr(uinstr_de1)))

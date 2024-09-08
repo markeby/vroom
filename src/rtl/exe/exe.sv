@@ -47,6 +47,7 @@ logic         ibr_resvld_ex0;
 t_paddr       ibr_tgt_ex0;
 t_br_mispred_pkt ibr_mispred_ex0;
 
+`MKPIPE_INIT(logic,          iss_exx,    iss_ex0,            EX0, NUM_EX_STAGES)
 `MKPIPE_INIT(t_uinstr,       uinstr_exx, uinstr_ql_ex0,      EX0, NUM_EX_STAGES)
 `MKPIPE_INIT(t_rob_id,       robid_exx,  iss_pkt_ex0.robid,  EX0, NUM_EX_STAGES)
 `MKPIPE_INIT(t_prf_id,       pdst_exx,   iss_pkt_ex0.pdst,   EX0, NUM_EX_STAGES)
@@ -110,7 +111,7 @@ end
 logic LOL;
 always_comb LOL = uinstr_ex0.uop inside {U_INVALID, U_EBREAK, U_ECALL};
 
-`CHK_ONEHOT(exe_rslt_valid, uinstr_ex0.valid, {LOL,ialu_resvld_ex0,ibr_resvld_ex0})
+`CHK_ONEHOT(exe_rslt_valid, iss_ex0, {LOL,ialu_resvld_ex0,ibr_resvld_ex0})
 `endif
 
 //
@@ -118,11 +119,11 @@ always_comb LOL = uinstr_ex0.uop inside {U_INVALID, U_EBREAK, U_ECALL};
 //
 
 always_comb begin
-    complete_ex1.valid = uinstr_exx[EX1].valid;
+    complete_ex1.valid = iss_exx[EX1];
     complete_ex1.mispred = ibr_mispred_exx[EX1].valid;
     complete_ex1.robid = robid_exx[EX1];
 
-    iprf_wr_en_ex1 = uinstr_exx[EX1].valid & uinstr_exx[EX1].dst.optype == OP_REG;
+    iprf_wr_en_ex1 = iss_exx[EX1] & uinstr_exx[EX1].dst.optype == OP_REG;
     iprf_wr_pkt_ex1.pdst = pdst_exx[EX1];
     iprf_wr_pkt_ex1.data = result_exx[EX1];
     `ifdef SIMULATION
@@ -136,7 +137,7 @@ end
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (uinstr_exx[EX1].valid) begin
+    if (iss_exx[EX1]) begin
         `UINFO(uinstr_exx[EX1].SIMID, ("unit:EX pdst:%s result:%08h %s", f_describe_prf(pdst_exx[EX1]), result_exx[EX1], describe_uinstr(uinstr_exx[EX1])))
     end
 end

@@ -176,15 +176,15 @@ task cd_alloc();
     INSTQ[i].ALLOC.disp_pkt_ra1 = top.core.alloc.disp_pkt_rs0;
 endtask
 
-task cd_rs_eint();
-    int i; i = f_instq_find_match(top.core.ex_iss_pkt_rs2.uinstr.SIMID);
+task cd_rs();
+    int i; i = f_instq_find_match(top.core.rs.iss_pkt_rs2.uinstr.SIMID);
 
     if (INSTQ[i].RS.valid) begin
         $error("Trying to add an rs to a record that is already valid!");
     end
     INSTQ[i].RS.valid = 1'b1;
     INSTQ[i].RS.clk = top.cclk_count;
-    INSTQ[i].RS.iss_pkt_rs2 = top.core.ex_iss_pkt_rs2;
+    INSTQ[i].RS.iss_pkt_rs2 = top.core.rs.iss_pkt_rs2;
 endtask
 
 task cd_result_mm();
@@ -242,7 +242,7 @@ always_ff @(posedge clk) begin
 
     if (core.alloc.disp_valid_rs0) cd_alloc();
 
-    if (core.ex_iss_rs2  ) cd_rs_eint();
+    if (core.rs.iss_rs2  ) cd_rs();
     if (core.exe.complete_ex1.valid) cd_result_eint();
     if (core.mem.complete_mm5.valid) cd_result_mm();
 

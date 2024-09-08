@@ -10,20 +10,20 @@
 module mem
     import instr::*, instr_decode::*, common::*, rob_defs::*, mem_defs::*, mem_common::*;
 (
-    input  logic         clk,
-    input  logic         reset,
-    input  t_nuke_pkt    nuke_rb1,
+    input  logic              clk,
+    input  logic              reset,
+    input  t_nuke_pkt         nuke_rb1,
 
-    input  logic         disp_valid_rs0,
-    input  t_disp_pkt    disp_pkt_rs0,
+    input  logic              disp_valid_rs0,
+    input  t_disp_pkt         disp_pkt_rs0,
 
-    input  logic         iss_mm0,
-    input  t_iss_pkt     iss_pkt_mm0,
+    input  logic              iss_mm0,
+    input  t_iss_pkt          iss_pkt_mm0,
 
     output t_rob_complete_pkt complete_mm5,
 
-    output logic         iprf_wr_en_mm5,
-    output t_prf_wr_pkt  iprf_wr_pkt_mm5
+    output logic              iprf_wr_en_mm5,
+    output t_prf_wr_pkt       iprf_wr_pkt_mm5
 );
 
 //

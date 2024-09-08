@@ -114,6 +114,7 @@ always_comb begin
     e_issue_pkt_rs1.pdst     = e_static.uinstr_disp.rename.pdst;
     e_issue_pkt_rs1.src1_val = '0;
     e_issue_pkt_rs1.src2_val = '0;
+    e_issue_pkt_rs1.meta     = t_issue_meta'('0);
 end
 
 //

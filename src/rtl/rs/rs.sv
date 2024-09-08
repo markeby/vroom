@@ -22,14 +22,17 @@ module rs
 
     output logic          rs_stall_rs0,
     input  logic          disp_valid_rs0,
-    input  t_uinstr_disp  uinstr_rs0,
+    input  t_uinstr_disp  disp_pkt_rs0,
 
     output logic          prf_rdens_rd0   [1:0],
     output t_prf_id       prf_rdaddrs_rd0 [1:0],
     input  t_rv_reg_data  prf_rddatas_rd1 [1:0],
 
-    output logic          iss_rs2,
-    output t_uinstr_iss   iss_pkt_rs2
+    output logic          ex_iss_rs2,
+    output t_uinstr_iss   ex_iss_pkt_rs2,
+
+    output logic          mm_iss_rs2,
+    output t_uinstr_iss   mm_iss_pkt_rs2
 );
 
 localparam RS0 = 0;
@@ -74,11 +77,11 @@ assign e_sel_issue_rs1 = gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first1(e_req_iss
 assign q_gnt_issue_rs1 = q_req_issue_rs1;
 assign e_gnt_issue_rs1 = q_gnt_issue_rs1 ? e_sel_issue_rs1 : '0;
 
-assign q_sel_static_rs1 = gen_funcs#(.IWIDTH(NUM_RS_ENTS),.T(t_rs_entry_static))::uaomux(e_static, e_sel_issue_rs1);
+assign q_sel_static_rs1 = mux_funcs#(.IWIDTH(NUM_RS_ENTS),.T(t_rs_entry_static))::uaomux(e_static, e_sel_issue_rs1);
 assign q_sel_rename_rs1 = q_sel_static_rs1.uinstr_disp.rename;
 
 assign iss_rs1     = q_gnt_issue_rs1;
-assign iss_pkt_rs1 = gen_funcs#(.IWIDTH(NUM_RS_ENTS),.T(t_uinstr_iss))::uaomux(e_issue_pkt_rs1, e_sel_issue_rs1);
+assign iss_pkt_rs1 = mux_funcs#(.IWIDTH(NUM_RS_ENTS),.T(t_uinstr_iss))::uaomux(e_issue_pkt_rs1, e_sel_issue_rs1);
 
 assign src_from_prf_rs1[SRC1] = q_sel_static_rs1.uinstr_disp.uinstr.src1.optype == OP_REG;
 assign src_from_prf_rs1[SRC2] = q_sel_static_rs1.uinstr_disp.uinstr.src2.optype == OP_REG;
@@ -94,6 +97,7 @@ end
 
 // Issue staging
 
+logic iss_rs2;
 `DFF(iss_rs2,        iss_rs1,     clk)
 
 t_uinstr_iss   iss_pkt_nq_rs2;
@@ -110,18 +114,25 @@ function automatic t_rv_reg_data f_opsel(t_optype optype, t_rv_reg_data imm_data
     endcase
 endfunction
 
+t_uinstr_iss iss_pkt_rs2;
 always_comb begin
     iss_pkt_rs2 = iss_pkt_nq_rs2;
     iss_pkt_rs2.src1_val = f_opsel(iss_pkt_nq_rs2.uinstr.src1.optype, iss_pkt_nq_rs2.uinstr.imm64, prf_rddatas_rd1[SRC1]);
     iss_pkt_rs2.src2_val = f_opsel(iss_pkt_nq_rs2.uinstr.src2.optype, iss_pkt_nq_rs2.uinstr.imm64, prf_rddatas_rd1[SRC2]);
 end
 
+assign ex_iss_rs2     = iss_rs2;
+assign ex_iss_pkt_rs2 = iss_pkt_rs2;
+
+assign mm_iss_rs2     = 1'b0; //iss_rs2;
+assign mm_iss_pkt_rs2 = iss_pkt_rs2;
+
 //
 // Entries
 //
 
 always_comb begin
-   q_alloc_static_rs0.uinstr_disp = uinstr_rs0;
+   q_alloc_static_rs0.uinstr_disp = disp_pkt_rs0;
 end
 
 for (genvar i=0; i<NUM_RS_ENTS; i++) begin : g_entries
@@ -150,10 +161,10 @@ end
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (iss_rs2) begin
-        `UINFO(iss_pkt_rs2.uinstr.SIMID, ("unit:%s func:issue robid:0x%0x pdst:%s src1:0x%0x src2:0x%0x %s",
-            RS_NAME, iss_pkt_rs2.robid, f_describe_prf(iss_pkt_rs2.pdst), iss_pkt_rs2.src1_val, iss_pkt_rs2.src2_val,
-            describe_uinstr(iss_pkt_rs2.uinstr)))
+    if (ex_iss_rs2) begin
+        `UINFO(ex_iss_pkt_rs2.uinstr.SIMID, ("unit:%s func:issue robid:0x%0x pdst:%s src1:0x%0x src2:0x%0x %s",
+            RS_NAME, ex_iss_pkt_rs2.robid, f_describe_prf(ex_iss_pkt_rs2.pdst), ex_iss_pkt_rs2.src1_val, ex_iss_pkt_rs2.src2_val,
+            describe_uinstr(ex_iss_pkt_rs2.uinstr)))
     end
 end
 `endif

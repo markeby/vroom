@@ -166,26 +166,25 @@ task cd_rename();
     INSTQ[i].RENAME.rename_rn1 = top.core.rename_rn1;
 endtask
 
-task cd_alloc(int port);
-    int i; i = f_instq_find_match(top.core.alloc.disp_ports_rs0[port].uinstr.SIMID);
+task cd_alloc();
+    int i; i = f_instq_find_match(top.core.alloc.disp_pkt_rs0.uinstr.SIMID);
     if (INSTQ[i].ALLOC.valid) begin
         $error("Trying to add an alloc to a record that is already valid!");
     end
     INSTQ[i].ALLOC.valid = 1'b1;
     INSTQ[i].ALLOC.clk = top.cclk_count;
-    INSTQ[i].ALLOC.port = port;
-    INSTQ[i].ALLOC.disp_ra1 = top.core.alloc.disp_ports_rs0[port];
+    INSTQ[i].ALLOC.disp_ra1 = top.core.alloc.disp_pkt_rs0;
 endtask
 
 task cd_rs_eint();
-    int i; i = f_instq_find_match(top.core.eint_iss_pkt_rs2.uinstr.SIMID);
+    int i; i = f_instq_find_match(top.core.ex_iss_pkt_rs2.uinstr.SIMID);
 
     if (INSTQ[i].RS.valid) begin
         $error("Trying to add an rs to a record that is already valid!");
     end
     INSTQ[i].RS.valid = 1'b1;
     INSTQ[i].RS.clk = top.cclk_count;
-    INSTQ[i].RS.iss_pkt_rs2 = top.core.eint_iss_pkt_rs2;
+    INSTQ[i].RS.iss_pkt_rs2 = top.core.ex_iss_pkt_rs2;
 endtask
 
 task cd_result_eint();
@@ -230,11 +229,9 @@ always_ff @(posedge clk) begin
     if (core.valid_de1) cd_decode();
     if (core.valid_rn1) cd_rename();
 
-    for (int p=0; p<NUM_DISP_PORTS; p++) begin
-        if (core.alloc.disp_valid_ports_rs0[p]) cd_alloc(p);
-    end
+    if (core.alloc.disp_valid_rs0) cd_alloc();
 
-    if (core.eint_iss_rs2  ) cd_rs_eint();
+    if (core.ex_iss_rs2  ) cd_rs_eint();
     if (core.exe.complete_ex1.valid) cd_result_eint();
 
     if (core.rob.q_retire_rb1) cd_retire();

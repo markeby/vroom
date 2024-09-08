@@ -1,0 +1,181 @@
+`ifndef __MEMPIPE_SV
+`define __MEMPIPE_SV
+
+`include "instr.pkg"
+`include "vroom_macros.sv"
+`include "rob_defs.pkg"
+`include "mem_common.pkg"
+`include "mem_defs.pkg"
+`include "gen_funcs.pkg"
+
+module mempipe
+    import instr::*, instr_decode::*, common::*, rob_defs::*, gen_funcs::*, mem_defs::*, mem_common::*;
+(
+    input  logic            clk,
+    input  logic            reset,
+    input  t_nuke_pkt       nuke_rb1,
+
+    input  logic            ld_req_mm0,
+    input  t_mempipe_arb    ld_req_pkt_mm0,
+    output logic            ld_gnt_mm0,
+
+    input  t_l1_tag         tag_rd_ways_mm2   [L1_NUM_WAYS-1:0],
+    input  t_mesi           state_rd_ways_mm2 [L1_NUM_WAYS-1:0],
+    input  t_cl             data_rd_ways_mm2  [L1_NUM_WAYS-1:0],
+
+    output logic            valid_mm5,
+    output t_mempipe_arb    req_pkt_mm5,
+    output t_mempipe_action action_mm5
+);
+
+/*
+
+MM0 - Arbitration
+MM1 - TLB (curently a passthru stage)
+      Read tag   set
+      Read state set
+      Read data  set
+MM2 - Calculate hit/miss
+MM3 - Data mux
+MM4 - Data rotate
+MM5 - Result valid
+
+*/
+
+//
+// Nets
+//
+
+t_mempipe_arb req_pkt_mm0;
+logic valid_mm0;
+
+`MKPIPE_INIT(t_mempipe_arb,           req_pkt_mmx, req_pkt_mm0, MM0, NUM_MM_STAGES)
+`MKPIPE_INIT(logic,                   valid_mmx,   valid_mm0,   MM0, NUM_MM_STAGES)
+`MKPIPE     (logic,                   is_ld_mmx,                MM0, NUM_MM_STAGES)
+`MKPIPE     (logic,                   is_st_mmx,                MM0, NUM_MM_STAGES)
+`MKPIPE     (logic,                   cacheable_mmx,            MM0, NUM_MM_STAGES)
+`MKPIPE     (t_paddr,                 paddr_mmx,                MM1, NUM_MM_STAGES)
+`MKPIPE     (logic,                   hit_mmx,                  MM2, NUM_MM_STAGES)
+`MKPIPE     (logic[L1_NUM_WAYS-1:0],  hit_vec_mmx,              MM2, NUM_MM_STAGES)
+`MKPIPE     (t_cl[L1_NUM_WAYS-1:0],   rd_cl_data_set_mmx,       MM2, NUM_MM_STAGES)
+`MKPIPE     (t_cl,                    rd_cl_data_mmx,           MM3, NUM_MM_STAGES)
+`MKPIPE     (t_rv_reg_data,           rd_cl_data_rot_mmx,       MM4, NUM_MM_STAGES)
+
+// SHOULD BE PORTS!
+logic         tag_rd_en_mm1;
+logic         state_rd_en_mm1;
+logic         data_rd_en_mm1;
+t_l1_set_addr set_addr_mm1;
+
+//
+// Logic
+//
+
+    //
+    // MM0
+    // - Arbitration
+    //
+
+gen_arbiter #(.POLICY("FIND_FIRST"), .NREQS(1), .T(t_mempipe_arb)) pipe_arb (
+    .clk,
+    .reset,
+    .int_req_valids ( {ld_req_mm0}       ) ,
+    .int_req_pkts   ( {ld_req_pkt_mm0}   ) ,
+    .int_gnts       ( {ld_gnt_mm0}       ) ,
+    .ext_req_valid  ( valid_mm0          ) ,
+    .ext_req_pkt    ( req_pkt_mm0        ) ,
+    .ext_gnt        ( 1'b1               )
+);
+
+assign is_ld_mmx[MM0] = req_pkt_mm0.arb_type == MEM_LOAD;
+assign is_st_mmx[MM0] = req_pkt_mm0.arb_type == MEM_STORE;
+assign cacheable_mmx[MM0] = valid_mm0;
+
+    //
+    // MM1
+    // - TLB (currently a passthru)
+    // - Read tag   set
+    // - Read state set
+    // - Read data  set
+    //
+
+assign paddr_mmx[MM1]   = req_pkt_mmx[MM1].addr;
+assign tag_rd_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
+assign state_rd_en_mm1  = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
+assign data_rd_en_mm1   = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1]                  );
+assign set_addr_mm1     = req_pkt_mmx[MM1].addr[L1_SET_HI:L1_SET_LO];
+
+    //
+    // MM2
+    // - Calculate hit/miss
+    //
+
+for (genvar w=0; w<L1_NUM_WAYS; w++) begin : g_hit_vec
+    assign hit_vec_mmx[MM2][w] = valid_mmx[MM2]
+                               & cacheable_mmx[MM2]
+                               & tag_rd_ways_mm2[w] == paddr_mmx[MM2][L1_TAG_HI:L1_TAG_LO]
+                               & ( is_ld_mmx[MM2] & state_rd_ways_mm2[w] inside {MESI_M, MESI_E, MESI_S}
+                                 | is_st_mmx[MM2] & state_rd_ways_mm2[w] inside {MESI_M, MESI_E        }
+                                 );
+    assign rd_cl_data_set_mmx[MM2][w] = data_rd_ways_mm2[w];
+end
+assign hit_mmx[MM2] = |hit_vec_mmx[MM2];
+
+    //
+    // MM3
+    // - Data mux
+    //
+
+assign rd_cl_data_mmx[MM3] = mux_funcs#(.IWIDTH(L1_NUM_WAYS), .T(t_cl))::aomux(rd_cl_data_set_mmx[MM3], hit_vec_mmx[MM3]);
+
+    //
+    // MM4
+    // - Data rotate
+    //
+
+always_comb begin
+    t_cl_offset o;
+    rd_cl_data_rot_mmx[MM4] = '0;
+    o = paddr_mmx[MM4][L1_OFFSET_HI:L1_OFFSET_LO];;
+    for (int b=0; b<8; b++) begin
+        rd_cl_data_rot_mmx[MM4][8*b +: 8] = rd_cl_data_mmx[MM4].B[o];
+        o += 1'b1;
+    end
+end
+
+    //
+    // MM5
+    // - Result valid
+    //
+
+assign valid_mm5   = valid_mmx[MM5];
+assign req_pkt_mm5 = req_pkt_mmx[MM5];
+
+always_comb begin
+    action_mm5.complete = valid_mmx[MM5];
+    action_mm5.recycle  = 1'b0;
+end
+
+//
+// Debug
+//
+
+`ifdef SIMULATION
+// always @(posedge clk) begin
+//     if (iss_mm0) begin
+//         `INFO(("unit:MM %s", describe_uinstr(iss_pkt_mm0.uinstr)))
+//     end
+// end
+`endif
+
+    /*
+`ifdef ASSERT
+`VASSERT(a_illegal_format, uinstr_de1.valid, uinstr_de1.ifmt inside {RV_FMT_I,RV_FMT_R}, $sformatf("Unsupported instr fmt: %s", uinstr_de1.ifmt.name()))
+`endif
+    */
+
+endmodule
+
+`endif // __MEMPIPE_SV
+
+

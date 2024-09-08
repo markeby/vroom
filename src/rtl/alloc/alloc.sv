@@ -26,9 +26,9 @@ module alloc
     input  logic         rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0],
     input  t_rob_id      rob_src_reg_robid_ra0 [NUM_SOURCES-1:0],
 
-    input  logic         rs_stall_ex_rs0,
-    output logic         disp_valid_ex_rs0,
-    output t_uinstr_disp disp_ex_rs0
+    input  logic         rs_stall_rs0,
+    output logic         disp_valid_rs0,
+    output t_uinstr_disp disp_pkt_rs0
 );
 
 localparam RA0 = 0;
@@ -41,10 +41,6 @@ localparam NUM_RA_STAGES = 1;
 
 t_uinstr_disp disp_ra0;
 t_uinstr_disp disp_ra1;
-
-logic         rs_stall_ports_rs0    [NUM_DISP_PORTS-1:0];
-logic         disp_valid_ports_rs0  [NUM_DISP_PORTS-1:0];
-t_uinstr_disp disp_ports_rs0        [NUM_DISP_PORTS-1:0];
 
 //
 // Logic
@@ -61,35 +57,14 @@ end
 
 `DFF(disp_ra1, disp_ra0, clk)
 
-// Dispatch port assignments
-
 logic stall_ra1;
 
-assign disp_ports_rs0       [DISP_PORT_EINT] = disp_ra1;
-assign disp_valid_ports_rs0 [DISP_PORT_EINT] = disp_ra1.uinstr.valid & ~stall_ra1;
-
-assign disp_ports_rs0       [DISP_PORT_MEM ] = disp_ra1;
-assign disp_valid_ports_rs0 [DISP_PORT_MEM ] = 1'b0; // disp_ra1.uinstr.valid;
-
-// Dispatch port demux
-
-assign disp_ex_rs0       = disp_ports_rs0[DISP_PORT_EINT];
-assign disp_valid_ex_rs0 = disp_valid_ports_rs0[DISP_PORT_EINT];
-assign rs_stall_ports_rs0[DISP_PORT_EINT] = rs_stall_ex_rs0;
-
-// assign disp_mm_rs0       = disp_ports_rs0[DISP_PORT_EINT];
-// assign disp_valid_mm_rs0 = disp_valid_ports_rs0[DISP_PORT_EINT];
-assign rs_stall_ports_rs0[DISP_PORT_MEM] = 1'b0; //rs_stall_mm_rs0;
+assign disp_pkt_rs0       = disp_ra1;
+assign disp_valid_rs0 = disp_ra1.uinstr.valid & ~stall_ra1;
 
 // Stall
 
-always_comb begin
-   stall_ra1 = 1'b0;
-   for (int i=0; i<NUM_DISP_PORTS; i++) begin
-      stall_ra1 |= rs_stall_ports_rs0[i];
-   end
-   stall_ra1 |= ~rob_ready_ra0;
-end
+assign stall_ra1 = rs_stall_rs0 | ~rob_ready_ra0;
 
 assign alloc_ready_ra0 = rob_ready_ra0 & ~stall_ra1;
 assign alloc_ra0 = uinstr_ra0.valid & alloc_ready_ra0;
@@ -100,12 +75,10 @@ assign alloc_ra0 = uinstr_ra0.valid & alloc_ready_ra0;
 
 `ifdef SIMULATION
     always @(posedge clk) begin
-        for (int p=0; p<NUM_DISP_PORTS; p++) begin
-            if (disp_valid_ports_rs0[p]) begin
-                `UINFO(disp_ports_rs0[p].uinstr.SIMID, ("unit:RA robid:0x%0x pdst:0x%0x psrc1:0x%0x psrc2:0x%0x %s", 
-                    disp_ports_rs0[p].robid, disp_ports_rs0[p].rename.pdst, disp_ports_rs0[p].rename.psrc1, disp_ports_rs0[p].rename.psrc2, 
-                    describe_uinstr(disp_ports_rs0[p].uinstr)))
-            end
+        if (disp_valid_rs0) begin
+            `UINFO(disp_pkt_rs0.uinstr.SIMID, ("unit:RA robid:0x%0x pdst:0x%0x psrc1:0x%0x psrc2:0x%0x %s", 
+                disp_pkt_rs0.robid, disp_pkt_rs0.rename.pdst, disp_pkt_rs0.rename.psrc1, disp_pkt_rs0.rename.psrc2, 
+                describe_uinstr(disp_pkt_rs0.uinstr)))
         end
     end
 `endif

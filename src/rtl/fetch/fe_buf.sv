@@ -151,7 +151,7 @@ end
 // FE rsp
 
 always_comb e_fe_rsp_gn_nnn = gen_funcs#(FE_FB_NUM_ENTS)::find_first1(e_fe_rsp_rq_nnn);
-always_comb c_fe_rsp_sl_nnn = gen_funcs#(FE_FB_NUM_ENTS)::oh_encode(e_fe_rsp_gn_nnn);
+always_comb c_fe_rsp_sl_nnn = gen_lg2_funcs#(FE_FB_NUM_ENTS)::oh_encode(e_fe_rsp_gn_nnn);
 
 t_fb_fe_rsp fb_fe_rsp_nxt_nnn;
 always_comb begin
@@ -182,7 +182,7 @@ assign f__fb_fe_rsp_nnn_data = fb_fe_rsp_nnn.instr;
 // IC req
 
 always_comb e_ic_req_gn_nnn = gen_funcs#(FE_FB_NUM_ENTS)::find_first1(e_ic_req_rq_nnn);
-always_comb c_ic_req_sl_nnn = gen_funcs#(FE_FB_NUM_ENTS)::oh_encode(e_ic_req_gn_nnn);
+always_comb c_ic_req_sl_nnn = gen_lg2_funcs#(FE_FB_NUM_ENTS)::oh_encode(e_ic_req_gn_nnn);
 
 always_comb begin
     fb_ic_req_nnn = '0;

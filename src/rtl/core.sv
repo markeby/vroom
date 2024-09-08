@@ -125,16 +125,15 @@ rename rename (
 
 t_rob_id next_robid_ra0;
 
-logic         rs_stall_mm_rs0;
-logic         disp_valid_mm_rs0;
-t_uinstr_disp disp_mm_rs0;
+logic         rs_stall_rs0;
+logic         disp_valid_rs0;
+t_uinstr_disp disp_pkt_rs0;
 
-logic         rs_stall_ex_rs0;
-logic         disp_valid_ex_rs0;
-t_uinstr_disp disp_ex_rs0;
+logic        ex_iss_rs2;
+t_uinstr_iss ex_iss_pkt_rs2;
 
-logic        eint_iss_rs2;
-t_uinstr_iss eint_iss_pkt_rs2;
+logic        mm_iss_rs2;
+t_uinstr_iss mm_iss_pkt_rs2;
 
 alloc alloc (
     .clk,
@@ -146,29 +145,34 @@ alloc alloc (
     .rename_ra0 ( rename_rn1 ),
     .rob_ready_ra0,
     .next_robid_ra0,
-    .rs_stall_ex_rs0,
+    .rs_stall_rs0,
     .src_addr_ra0,
     .rob_src_reg_pdg_ra0,
     .rob_src_reg_robid_ra0,
-    .disp_valid_ex_rs0,
-    .disp_ex_rs0
+    .disp_valid_rs0,
+    .disp_pkt_rs0
 );
 
-rs #(.NUM_RS_ENTS(8), .RS_NAME("RS_EINT")) rs_eint (
+rs #(.NUM_RS_ENTS(8), .RS_NAME("RS0")) rs (
     .clk,
     .reset,
     .nuke_rb1,
     .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1} ),
     .iprf_wr_pkt_ro0  ( '{iprf_wr_pkt_ex1} ),
 
-    .rs_stall_rs0 ( rs_stall_ex_rs0     ) ,
-    .disp_valid_rs0 ( disp_valid_ex_rs0 ) ,
-    .uinstr_rs0   ( disp_ex_rs0         ) ,
+    .rs_stall_rs0,
+    .disp_valid_rs0,
+    .disp_pkt_rs0,
+
     .prf_rdens_rd0 ( rdens_rd0 ) ,
     .prf_rdaddrs_rd0 ( rdaddrs_rd0 ) ,
     .prf_rddatas_rd1 ( rddatas_rd1 ) ,
-    .iss_rs2      ( eint_iss_rs2        ) ,
-    .iss_pkt_rs2  ( eint_iss_pkt_rs2    )
+
+    .ex_iss_rs2,
+    .ex_iss_pkt_rs2,
+
+    .mm_iss_rs2,
+    .mm_iss_pkt_rs2
 );
 
 exe exe (
@@ -177,8 +181,8 @@ exe exe (
     .nuke_rb1,
     .br_mispred_ex0,
 
-    .iss_ex0      ( eint_iss_rs2        ) ,
-    .iss_pkt_ex0  ( eint_iss_pkt_rs2    ) ,
+    .iss_ex0      ( ex_iss_rs2        ) ,
+    .iss_pkt_ex0  ( ex_iss_pkt_rs2    ) ,
 
     .iprf_wr_en_ex1,
     .iprf_wr_pkt_ex1,
@@ -191,8 +195,11 @@ mem mem (
     .reset,
     .nuke_rb1,
 
-    .iss_mm0     ( 1'b0             ) ,
-    .iss_pkt_mm0 ( eint_iss_pkt_rs2 ) ,
+    .disp_valid_rs0,
+    .disp_pkt_rs0,
+
+    .iss_mm0      ( mm_iss_rs2      ) ,
+    .iss_pkt_mm0  ( mm_iss_pkt_rs2  ) ,
 
     .complete_mm5 ( mm_complete_rb0 )
 );

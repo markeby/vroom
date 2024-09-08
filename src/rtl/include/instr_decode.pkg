@@ -73,11 +73,21 @@ package instr_decode;
     } t_uinstr_disp;
 
     typedef struct packed {
+        t_ldq_id ldqid;
+        t_stq_id stqid;
+    } t_issue_meta_mem;
+
+    typedef union packed {
+        t_issue_meta_mem mem;
+    } t_issue_meta;
+
+    typedef struct packed {
        t_uinstr      uinstr;
        t_rob_id      robid;
        t_prf_id      pdst;
        t_rv_reg_data src1_val;
        t_rv_reg_data src2_val;
+       t_issue_meta  meta;
     } t_uinstr_iss;
 
     typedef struct packed {

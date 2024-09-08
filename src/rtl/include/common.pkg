@@ -5,6 +5,7 @@
 
 package common;
     localparam PA_SZ         = 64;
+    localparam VA_SZ         = 64;
     localparam CL_SZ         = 512;
     localparam CL_SZ_BYTES   = CL_SZ/8;
     localparam CL_SZ_HWORDS  = CL_SZ_BYTES/2;
@@ -32,6 +33,7 @@ package common;
     localparam FE_FB_NUM_ENTS_LG2 = $clog2(FE_FB_NUM_ENTS);
 
     typedef logic[PA_SZ-1:0]    t_paddr;
+    typedef logic[VA_SZ-1:0]    t_vaddr;
 
     //////////////////////////////
     // ROB Defines ///////////////
@@ -95,6 +97,43 @@ package common;
     endfunction
 
     //////////////////////////////
+    // MEM defines ///////////////
+    //////////////////////////////
+
+    localparam L1_NUM_WAYS = 8;
+    localparam L1_NUM_WAYS_LG2 = $clog2(L1_NUM_WAYS);
+
+    localparam L1_NUM_SETS = 32;
+    localparam L1_NUM_SETS_LG2 = $clog2(L1_NUM_SETS);
+
+    localparam L1_TAG_SIZE = VA_SZ - CL_ADDR_SZ - L1_NUM_SETS_LG2;
+
+    typedef logic[L1_NUM_WAYS_LG2-1:0] t_l1_way;
+    typedef logic[L1_NUM_SETS_LG2-1:0] t_l1_set_addr;
+    typedef logic[L1_TAG_SIZE-1:0]     t_l1_tag;
+
+    localparam L1_OFFSET_LO = 0;
+    localparam L1_OFFSET_HI = L1_OFFSET_LO + CL_ADDR_SZ - 1;
+
+    localparam L1_SET_LO = L1_OFFSET_HI + 1;
+    localparam L1_SET_HI = L1_SET_LO + L1_NUM_SETS_LG2 - 1;
+
+    localparam L1_TAG_LO = L1_SET_HI + 1;
+    localparam L1_TAG_HI = VA_SZ-1;
+
+    localparam LDQ_NUM_ENTRIES = 8;
+    localparam LDQ_NUM_ENTRIES_LG2 = $clog2(LDQ_NUM_ENTRIES);
+
+    localparam STQ_NUM_ENTRIES = 8;
+    localparam STQ_NUM_ENTRIES_LG2 = $clog2(STQ_NUM_ENTRIES);
+
+    localparam MEM_ID_WIDTH = LDQ_NUM_ENTRIES_LG2; // FIXME: should be MAX of all IDs
+
+    typedef logic[LDQ_NUM_ENTRIES_LG2-1:0] t_ldq_id;
+    typedef logic[STQ_NUM_ENTRIES_LG2-1:0] t_stq_id;
+    typedef logic[MEM_ID_WIDTH-1:0] t_mem_id;
+
+    //////////////////////////////
     // Miscellanea ///////////////
     //////////////////////////////
 
@@ -125,6 +164,13 @@ package common;
     function logic cl_match(t_paddr a, t_paddr b);
         cl_match = get_cl_addr(a) == get_cl_addr(b);
     endfunction
+
+    typedef enum logic[1:0] {
+        MESI_I = 0,
+        MESI_S = 1,
+        MESI_E = 2,
+        MESI_M = 3
+    } t_mesi;
 
 endpackage
 

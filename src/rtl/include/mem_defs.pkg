@@ -1,0 +1,47 @@
+`ifndef __MEM_DEFS_PKG
+`define __MEM_DEFS_PKG
+
+`include "verif.pkg"
+`include "common.pkg"
+
+package mem_defs;
+    import common::*;
+    import instr::*;
+    import verif::*;
+
+    localparam NUM_MM_STAGES = 5;
+
+    localparam MM0 = 0;
+    localparam MM1 = 1;
+    localparam MM2 = 2;
+    localparam MM3 = 3;
+    localparam MM4 = 4;
+    localparam MM5 = 5;
+
+    typedef enum logic[1:0] {
+        MEM_LOAD,
+        MEM_STORE,
+        MEM_FILL
+    } t_mem_arb_type;
+
+    typedef struct packed {
+        t_mem_id       id;
+        t_mem_arb_type arb_type;
+        t_paddr        addr;
+    } t_mempipe_arb;
+
+    typedef struct packed {
+        `SIMID_STRUCT
+        t_vaddr  vaddr;
+        t_rob_id robid;
+        t_prf_id pdst;
+    } t_ldq_static;
+
+    typedef struct packed {
+        logic complete;
+        logic recycle;
+    } t_mempipe_action;
+
+endpackage
+
+`endif // __MEM_DEFS_PKG

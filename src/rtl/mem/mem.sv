@@ -4,13 +4,18 @@
 `include "instr.pkg"
 `include "vroom_macros.sv"
 `include "rob_defs.pkg"
+`include "mem_common.pkg"
+`include "mem_defs.pkg"
 
 module mem
-    import instr::*, instr_decode::*, common::*, rob_defs::*;
+    import instr::*, instr_decode::*, common::*, rob_defs::*, mem_defs::*, mem_common::*;
 (
     input  logic         clk,
     input  logic         reset,
     input  t_nuke_pkt    nuke_rb1,
+
+    input  logic         disp_valid_rs0,
+    input  t_uinstr_disp disp_pkt_rs0,
 
     input  logic         iss_mm0,
     input  t_uinstr_iss  iss_pkt_mm0,
@@ -18,32 +23,78 @@ module mem
     output t_rob_complete_pkt complete_mm5
 );
 
-localparam MM0 = 0;
-localparam MM1 = 1;
-localparam NUM_MM_STAGES = 1;
-
 //
 // Nets
 //
+
+logic            ld_req_mm0;
+t_mempipe_arb    ld_req_pkt_mm0;
+logic            ld_gnt_mm0;
+
+logic            pipe_valid_mm5;
+t_mempipe_arb    pipe_req_pkt_mm5;
+t_mempipe_action pipe_action_mm5;
 
 //
 // Logic
 //
 
-//
-// MM0
-//
+// Loads
 
-//
-// MM1/RB0
-//
+loadq loadq (
+    .clk,
+    .reset,
+    .nuke_rb1,
 
-// RB0 assign
+    .disp_valid_rs0,
+    .disp_pkt_rs0,
+
+    .iss_mm0,
+    .iss_pkt_mm0,
+
+    .pipe_req_mm0     ( ld_req_mm0     ) ,
+    .pipe_req_pkt_mm0 ( ld_req_pkt_mm0 ) ,
+    .pipe_gnt_mm0     ( ld_gnt_mm0     ) ,
+
+    .pipe_valid_mm5,
+    .pipe_req_pkt_mm5,
+    .pipe_action_mm5
+);
+
+// MemPipe
+
+t_l1_tag         tag_rd_ways_mm2   [L1_NUM_WAYS-1:0];
+t_mesi           state_rd_ways_mm2 [L1_NUM_WAYS-1:0];
+t_cl             data_rd_ways_mm2  [L1_NUM_WAYS-1:0];
+for (genvar w=0; w<L1_NUM_WAYS; w++) begin : g_garbage
+    assign tag_rd_ways_mm2[w] = '0;
+    assign state_rd_ways_mm2[w] = t_mesi'('0);
+    assign data_rd_ways_mm2[w] = '0;
+end
+
+mempipe mempipe (
+    .clk,
+    .reset,
+    .nuke_rb1,
+
+    .ld_req_mm0,
+    .ld_req_pkt_mm0,
+    .ld_gnt_mm0,
+
+    .tag_rd_ways_mm2,
+    .state_rd_ways_mm2,
+    .data_rd_ways_mm2,
+
+    .valid_mm5    ( pipe_valid_mm5   ) ,
+    .req_pkt_mm5  ( pipe_req_pkt_mm5 ) ,
+    .action_mm5   ( pipe_action_mm5  )
+);
+
+// Tie-offs
 
 always_comb begin
     complete_mm5 = '0;
 end
-
 
 //
 // Debug

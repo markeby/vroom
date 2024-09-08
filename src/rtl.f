@@ -20,6 +20,9 @@ src/rtl/globals/scoreboard.sv
 src/rtl/icache/icache.sv
 
 src/rtl/mem/mem.sv
+src/rtl/mem/mempipe.sv
+src/rtl/mem/loadq.sv
+src/rtl/mem/loadq_entry.sv
 
 src/rtl/regrd/regrd.sv
 
@@ -36,5 +39,7 @@ src/rtl/rename/rename.sv
 src/rtl/rename/prf.sv
 
 src/rtl/gen/gen_fifo.sv
+src/rtl/gen/gen_arbiter.sv
+src/rtl/gen/gen_arbiter_ff.sv
 
 src/rtl/coredebug.sv

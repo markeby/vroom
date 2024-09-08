@@ -95,7 +95,7 @@ t_prf_id      pdst_rn0;
 t_prf_id      pdst_old_rn0;
 always_comb begin
     pdst_rn0.ptype = prf_type;
-    pdst_rn0.idx  = gen_funcs#(.IWIDTH(NUM_ENTRIES))::oh_encode(free_list_first_free_rn0);
+    pdst_rn0.idx  = gen_lg2_funcs#(.IWIDTH(NUM_ENTRIES))::oh_encode(free_list_first_free_rn0);
 
     pdst_old_rn0.ptype = prf_type;
     pdst_old_rn0.idx   = MAP[gpr_id_rn0];

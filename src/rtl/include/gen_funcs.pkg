@@ -3,7 +3,7 @@
 
 /* verilator lint_off DECLFILENAME */
 package gen_funcs;
-    virtual class gen_funcs #(parameter IWIDTH=8, parameter type T=logic);
+    virtual class gen_funcs #(parameter IWIDTH=8);
 
         //
         // Find-First functions
@@ -23,24 +23,6 @@ package gen_funcs;
             find_first0 = find_first1(~inp);
         endfunction
 
-        static function logic[IWIDTH-1:0] find_first1_from (logic[IWIDTH-1:0] inp, logic[$clog2(IWIDTH)-1:0] from_idx);
-            logic[IWIDTH-1:0] inp_ql = inp;
-            for (int i=0; i<from_idx; i++)
-                inp_ql[i] = 1'b0;
-            find_first1_from = find_first1(inp_ql);
-        endfunction
-
-        static function logic[IWIDTH-1:0] find_first1_from_w (logic[IWIDTH-1:0] inp, logic[$clog2(IWIDTH)-1:0] from_idx);
-            logic[IWIDTH-1:0] find_from;
-            find_from = find_first1_from(inp, from_idx);
-            find_first1_from_w = (|find_from) ? find_from : find_first1(inp);
-        endfunction
-
-        static function logic[$clog2(IWIDTH)-1:0] find_first1_enc (logic[IWIDTH-1:0] inp);
-            logic[IWIDTH-1:0] inp_ff = find_first1(inp);
-            find_first1_enc = oh_encode(inp_ff);
-        endfunction
-
         //
         // Find-Last functions
         //
@@ -56,33 +38,58 @@ package gen_funcs;
         static function logic[IWIDTH-1:0] find_last0 (logic[IWIDTH-1:0] inp);
             find_last0 = find_last1(~inp);
         endfunction
+    endclass
+
+    virtual class gen_lg2_funcs #(parameter IWIDTH=8);
+        static function logic[IWIDTH-1:0] find_first1_from (logic[IWIDTH-1:0] inp, logic[$clog2(IWIDTH)-1:0] from_idx);
+            logic[IWIDTH-1:0] inp_ql = inp;
+            for (int i=0; i<from_idx; i++)
+                inp_ql[i] = 1'b0;
+            find_first1_from = gen_funcs#(.IWIDTH(IWIDTH))::find_first1(inp_ql);
+        endfunction
+
+        static function logic[IWIDTH-1:0] find_first1_from_w (logic[IWIDTH-1:0] inp, logic[$clog2(IWIDTH)-1:0] from_idx);
+            logic[IWIDTH-1:0] find_from;
+            find_from = find_first1_from(inp, from_idx);
+            find_first1_from_w = (|find_from) ? find_from : gen_funcs#(.IWIDTH(IWIDTH))::find_first1(inp);
+        endfunction
+
+        static function logic[$clog2(IWIDTH)-1:0] find_first1_enc (logic[IWIDTH-1:0] inp);
+            logic[IWIDTH-1:0] inp_ff = gen_funcs#(.IWIDTH(IWIDTH))::find_first1(inp);
+            find_first1_enc = oh_encode(inp_ff);
+        endfunction
 
         static function logic[IWIDTH-1:0] find_last1_from (logic[IWIDTH-1:0] inp, logic[$clog2(IWIDTH)-1:0] from_idx);
             logic[IWIDTH-1:0] inp_ql = inp;
             for (int i=0; i<from_idx; i++)
                 inp_ql[i] = 1'b0;
-            find_last1_from = find_last1(inp_ql);
+            find_last1_from = gen_funcs#(.IWIDTH(IWIDTH))::find_last1(inp_ql);
         endfunction
 
         static function logic[IWIDTH-1:0] find_last1_from_w (logic[IWIDTH-1:0] inp, logic[$clog2(IWIDTH)-1:0] from_idx);
             logic[IWIDTH-1:0] find_from;
             find_from = find_last1_from(inp, from_idx);
-            find_last1_from_w = (|find_from) ? find_from : find_last1(inp);
+            find_last1_from_w = (|find_from) ? find_from : gen_funcs#(.IWIDTH(IWIDTH))::find_last1(inp);
         endfunction
 
         static function logic[$clog2(IWIDTH)-1:0] find_last1_enc (logic[IWIDTH-1:0] inp);
-            logic[IWIDTH-1:0] inp_ff = find_last1(inp);
+            logic[IWIDTH-1:0] inp_ff = gen_funcs#(.IWIDTH(IWIDTH))::find_last1(inp);
             find_last1_enc = oh_encode(inp_ff);
         endfunction
-
-        //
-        // Enc/Dec
-        //
 
         static function logic[$clog2(IWIDTH)-1:0] oh_encode (logic[IWIDTH-1:0] inp);
             oh_encode = '0;
             for (int i=0; i<IWIDTH; i++) begin
                 oh_encode |= (inp[i] ? i[$clog2(IWIDTH)-1:0] : '0);
+            end
+        endfunction
+    endclass
+
+    virtual class mux_funcs #(parameter IWIDTH=8, parameter type T);
+        static function T aomux (T[IWIDTH-1:0] inps, logic[IWIDTH-1:0] sels);
+            aomux = T'('0);
+            for (int i=0; i<IWIDTH; i++) begin
+                aomux |= (sels[i] ? inps[i] : '0);
             end
         endfunction
 
@@ -92,7 +99,6 @@ package gen_funcs;
                 uaomux |= (sels[i] ? inps[i] : '0);
             end
         endfunction
-
     endclass
 
     virtual class sext_funcs #(parameter IWIDTH=8, OWIDTH=32);

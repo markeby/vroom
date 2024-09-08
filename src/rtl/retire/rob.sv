@@ -159,11 +159,11 @@ for (genvar src=0; src<NUM_SOURCES; src++) begin : g_rob_source
     for (genvar ri=0; ri<RB_NUM_ENTS; ri++) begin : g_rob_srcmat
         assign rob_src_match_ra0[src][ri] = e_valid[ri] & (entries[ri].s.uinstr.dst.optype == OP_REG) & (entries[ri].s.uinstr.dst.opreg == src_addr_ra0[src]);
     end : g_rob_srcmat
-    assign rob_src_1st_match_ra0[src] = gen_funcs#(.IWIDTH(RB_NUM_ENTS))::find_last1_from(rob_src_match_ra0[src], head_id.idx);
+    assign rob_src_1st_match_ra0[src] = gen_lg2_funcs#(.IWIDTH(RB_NUM_ENTS))::find_last1_from(rob_src_match_ra0[src], head_id.idx);
 
     always_comb begin
         rob_src_reg_pdg_ra0[src]   = |rob_src_match_ra0[src];
-        rob_src_reg_robid_ra0[src] = {1'b0, gen_funcs#(.IWIDTH(RB_NUM_ENTS))::oh_encode(rob_src_1st_match_ra0[src])}; // FIXME: does the wrap bit need to be correct?  (probably!)
+        rob_src_reg_robid_ra0[src] = {1'b0, gen_lg2_funcs#(.IWIDTH(RB_NUM_ENTS))::oh_encode(rob_src_1st_match_ra0[src])}; // FIXME: does the wrap bit need to be correct?  (probably!)
     end
 end
 

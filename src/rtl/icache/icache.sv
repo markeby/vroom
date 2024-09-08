@@ -101,7 +101,7 @@ initial begin
     // IROM[a++] = rvXOR(9,8,8);
 
     `ifdef TEST_LOAD
-        //IRAM[a++] = 
+        IROM[a++] = rvLB(9,10,12'h100);
     `endif
     `ifdef TEST_BR_NT
         IROM[a++] = rvXOR(1,1,1);

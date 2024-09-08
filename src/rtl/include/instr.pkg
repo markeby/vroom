@@ -41,6 +41,12 @@ package instr;
     } t_rv_ld_op_funct3;
 
     typedef enum logic[2:0] {
+        MEM_SB  = 3'b000,
+        MEM_SH  = 3'b001,
+        MEM_SW  = 3'b010
+    } t_rv_st_op_funct3;
+
+    typedef enum logic[2:0] {
         ALU_ADD  = 3'b000,
         ALU_SHL  = 3'b001,
         ALU_SLT  = 3'b010,

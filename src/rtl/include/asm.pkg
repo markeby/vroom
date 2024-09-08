@@ -66,6 +66,9 @@ package asm;
     function t_word rvSLLW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_SHL,  7'b0000000); endfunction
     function t_word rvSRLW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_SHR,  7'b0000000); endfunction
     function t_word rvSRAW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_SHR,  7'b0100000); endfunction
+    function t_word rvSB  (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ST,     rd, rs1, rs2, MEM_SB,   7'b0100011); endfunction
+    function t_word rvSH  (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ST,     rd, rs1, rs2, MEM_SH,   7'b0100011); endfunction
+    function t_word rvSW  (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ST,     rd, rs1, rs2, MEM_SW,   7'b0100011); endfunction
 
     // B-format instructions
 

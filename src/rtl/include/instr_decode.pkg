@@ -29,6 +29,7 @@ package instr_decode;
         U_AND,
         U_BR,
         U_LOAD,
+        U_STORE,
         U_EBREAK,
         U_ECALL
     } t_uop;
@@ -168,6 +169,10 @@ package instr_decode;
                         //t_rv_ld_op_funct3 ld_op = t_rv_ld_op_funct3'(instr.d.I.funct3);
                         rv_instr_to_uop = U_LOAD;
                     end
+                    RV_OP_ST    : begin
+                        //t_rv_st_op_funct3 st_op = t_rv_st_op_funct3'(instr.d.I.funct3);
+                        rv_instr_to_uop = U_STORE;
+                    end
                     RV_OP_ALU0_I : begin
                         t_rv_alu_op_funct3 alu_op = t_rv_alu_op_funct3'(instr.d.R.funct3);
                         unique casez(alu_op)
@@ -261,6 +266,7 @@ package instr_decode;
             U_AND:     uop_to_fu = FU_EXE;
             U_BR:      uop_to_fu = FU_EXE;
             U_LOAD:    uop_to_fu = FU_MEM;
+            U_STORE:   uop_to_fu = FU_MEM;
             U_EBREAK:  uop_to_fu = FU_EXE;
             U_ECALL:   uop_to_fu = FU_EXE;
         endcase

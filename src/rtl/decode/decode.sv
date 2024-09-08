@@ -97,8 +97,10 @@ always_comb begin
                     uinstr_de0.src1   = '{opreg: rv_instr_fe1.d.I.rs1, optype: OP_REG, opsize: SZ_4B};
                     uinstr_de0.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_4B};
                 end
-            // end else if (rv_opcode_is_ld(rv_instr_fe1.opcode)) begin
-                // t_rv_ld_op_funct3 f3 = t_rv_ld_op_funct3'(uinstr_de0.funct3);
+            end else if (rv_opcode_is_ld(rv_instr_fe1.opcode)) begin
+                uinstr_de0.dst    = '{opreg: rv_instr_fe1.d.I.rd,  optype: OP_REG, opsize: SZ_4B};
+                uinstr_de0.src1   = '{opreg: rv_instr_fe1.d.I.rs1, optype: OP_REG, opsize: SZ_4B};
+                uinstr_de0.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_4B};
             end
             uinstr_de0.imm64  = sext_funcs#(.IWIDTH(12), .OWIDTH(64))::sext(rv_instr_fe1.d.I.imm_11_0);
             uinstr_de0.uop    = rv_instr_to_uop(rv_instr_fe1);

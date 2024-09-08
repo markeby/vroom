@@ -16,7 +16,7 @@ module exe
     input  t_nuke_pkt    nuke_rb1,
 
     input  logic         iss_ex0,
-    input  t_uinstr_iss  iss_pkt_ex0,
+    input  t_iss_pkt  iss_pkt_ex0,
 
     output t_br_mispred_pkt br_mispred_ex0,
 

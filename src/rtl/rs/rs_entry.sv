@@ -8,7 +8,7 @@
 `include "rob_defs.pkg"
 
 typedef struct packed {
-   instr_decode::t_uinstr_disp uinstr_disp;
+   instr_decode::t_disp_pkt uinstr_disp;
 } t_rs_entry_static;
 
 module rs_entry
@@ -26,7 +26,7 @@ module rs_entry
     output logic          e_valid,
     output t_rs_entry_static
                           e_static,
-    output t_uinstr_iss   e_issue_pkt_rs1,
+    output t_iss_pkt   e_issue_pkt_rs1,
 
     output logic          e_req_issue_rs1,
     input  logic          e_gnt_issue_rs1
@@ -114,7 +114,7 @@ always_comb begin
     e_issue_pkt_rs1.pdst     = e_static.uinstr_disp.rename.pdst;
     e_issue_pkt_rs1.src1_val = '0;
     e_issue_pkt_rs1.src2_val = '0;
-    e_issue_pkt_rs1.meta     = t_issue_meta'('0);
+    e_issue_pkt_rs1.meta     = e_static.uinstr_disp.meta;
 end
 
 //

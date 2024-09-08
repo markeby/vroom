@@ -22,17 +22,17 @@ module rs
 
     output logic          rs_stall_rs0,
     input  logic          disp_valid_rs0,
-    input  t_uinstr_disp  disp_pkt_rs0,
+    input  t_disp_pkt  disp_pkt_rs0,
 
     output logic          prf_rdens_rd0   [1:0],
     output t_prf_id       prf_rdaddrs_rd0 [1:0],
     input  t_rv_reg_data  prf_rddatas_rd1 [1:0],
 
     output logic          ex_iss_rs2,
-    output t_uinstr_iss   ex_iss_pkt_rs2,
+    output t_iss_pkt   ex_iss_pkt_rs2,
 
     output logic          mm_iss_rs2,
-    output t_uinstr_iss   mm_iss_pkt_rs2
+    output t_iss_pkt   mm_iss_pkt_rs2
 );
 
 localparam RS0 = 0;
@@ -56,10 +56,10 @@ logic[NUM_RS_ENTS-1:0] e_req_issue_rs1;
 logic[NUM_RS_ENTS-1:0] e_sel_issue_rs1;
 logic                  q_gnt_issue_rs1;
 logic[NUM_RS_ENTS-1:0] e_gnt_issue_rs1;
-t_uinstr_iss           e_issue_pkt_rs1        [NUM_RS_ENTS-1:0];
+t_iss_pkt           e_issue_pkt_rs1        [NUM_RS_ENTS-1:0];
 
 logic                  iss_rs1;
-t_uinstr_iss           iss_pkt_rs1;
+t_iss_pkt           iss_pkt_rs1;
 logic[NUM_SOURCES-1:0] src_from_prf_rs1;
 
 //
@@ -81,7 +81,7 @@ assign q_sel_static_rs1 = mux_funcs#(.IWIDTH(NUM_RS_ENTS),.T(t_rs_entry_static))
 assign q_sel_rename_rs1 = q_sel_static_rs1.uinstr_disp.rename;
 
 assign iss_rs1     = q_gnt_issue_rs1;
-assign iss_pkt_rs1 = mux_funcs#(.IWIDTH(NUM_RS_ENTS),.T(t_uinstr_iss))::uaomux(e_issue_pkt_rs1, e_sel_issue_rs1);
+assign iss_pkt_rs1 = mux_funcs#(.IWIDTH(NUM_RS_ENTS),.T(t_iss_pkt))::uaomux(e_issue_pkt_rs1, e_sel_issue_rs1);
 
 assign src_from_prf_rs1[SRC1] = q_sel_static_rs1.uinstr_disp.uinstr.src1.optype == OP_REG;
 assign src_from_prf_rs1[SRC2] = q_sel_static_rs1.uinstr_disp.uinstr.src2.optype == OP_REG;
@@ -100,7 +100,7 @@ end
 logic iss_rs2;
 `DFF(iss_rs2,        iss_rs1,     clk)
 
-t_uinstr_iss   iss_pkt_nq_rs2;
+t_iss_pkt   iss_pkt_nq_rs2;
 `DFF(iss_pkt_nq_rs2, iss_pkt_rs1, clk)
 
 function automatic t_rv_reg_data f_opsel(t_optype optype, t_rv_reg_data imm_data, t_rv_reg_data prf_data);
@@ -114,7 +114,7 @@ function automatic t_rv_reg_data f_opsel(t_optype optype, t_rv_reg_data imm_data
     endcase
 endfunction
 
-t_uinstr_iss iss_pkt_rs2;
+t_iss_pkt iss_pkt_rs2;
 always_comb begin
     iss_pkt_rs2 = iss_pkt_nq_rs2;
     iss_pkt_rs2.src1_val = f_opsel(iss_pkt_nq_rs2.uinstr.src1.optype, iss_pkt_nq_rs2.uinstr.imm64, prf_rddatas_rd1[SRC1]);

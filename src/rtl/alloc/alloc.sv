@@ -28,7 +28,7 @@ module alloc
 
     input  logic         rs_stall_rs0,
     output logic         disp_valid_rs0,
-    output t_uinstr_disp disp_pkt_rs0
+    output t_disp_pkt    disp_pkt_rs0
 );
 
 localparam RA0 = 0;
@@ -39,8 +39,8 @@ localparam NUM_RA_STAGES = 1;
 // Nets
 //
 
-t_uinstr_disp disp_ra0;
-t_uinstr_disp disp_ra1;
+t_disp_pkt disp_pkt_ra0;
+t_disp_pkt disp_pkt_ra1;
 
 //
 // Logic
@@ -50,17 +50,18 @@ assign src_addr_ra0[SRC1] = uinstr_ra0.src1.opreg;
 assign src_addr_ra0[SRC2] = uinstr_ra0.src2.opreg;
 
 always_comb begin
-   disp_ra0.uinstr       = uinstr_ra0;
-   disp_ra0.robid        = next_robid_ra0;
-   disp_ra0.rename       = rename_ra0;
+   disp_pkt_ra0.uinstr       = uinstr_ra0;
+   disp_pkt_ra0.robid        = next_robid_ra0;
+   disp_pkt_ra0.rename       = rename_ra0;
+   disp_pkt_ra0.meta         = '0;
 end
 
-`DFF(disp_ra1, disp_ra0, clk)
+`DFF(disp_pkt_ra1, disp_pkt_ra0, clk)
 
 logic stall_ra1;
 
-assign disp_pkt_rs0       = disp_ra1;
-assign disp_valid_rs0 = disp_ra1.uinstr.valid & ~stall_ra1;
+assign disp_pkt_rs0   = disp_pkt_ra1;
+assign disp_valid_rs0 = disp_pkt_ra1.uinstr.valid & ~stall_ra1;
 
 // Stall
 

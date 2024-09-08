@@ -71,7 +71,7 @@ package common;
     // PRF Defines ///////////////
     //////////////////////////////
 
-    localparam IPRF_NUM_WRITES     = 1;
+    localparam IPRF_NUM_WRITES     = 2;
     localparam IPRF_NUM_READS      = 2;
     localparam IPRF_NUM_MAP_READS  = 2;
 

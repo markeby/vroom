@@ -25,7 +25,11 @@ module mempipe
 
     output logic            valid_mm5,
     output t_mempipe_arb    req_pkt_mm5,
-    output t_mempipe_action action_mm5
+    output t_mempipe_action action_mm5,
+
+    output t_rob_complete_pkt complete_mm5,
+    output logic              iprf_wr_en_mm5,
+    output t_prf_wr_pkt       iprf_wr_pkt_mm5
 );
 
 /*
@@ -154,6 +158,20 @@ assign req_pkt_mm5 = req_pkt_mmx[MM5];
 always_comb begin
     action_mm5.complete = valid_mmx[MM5];
     action_mm5.recycle  = 1'b0;
+end
+
+always_comb begin
+    complete_mm5.valid   = valid_mmx[MM5] & action_mm5.complete & req_pkt_mmx[MM5].arb_type inside {MEM_LOAD, MEM_STORE};
+    complete_mm5.mispred = 1'b0;
+    complete_mm5.robid   = req_pkt_mmx[MM5].robid;
+
+    iprf_wr_en_mm5 = valid_mmx[MM5] & action_mm5.complete & req_pkt_mmx[MM5].arb_type inside {MEM_LOAD};
+    iprf_wr_pkt_mm5 = '0;
+    iprf_wr_pkt_mm5.pdst = req_pkt_mmx[MM5].pdst;
+    iprf_wr_pkt_mm5.data = rd_cl_data_rot_mmx[MM5];
+    `ifdef SIMULATION
+    iprf_wr_pkt_mm5.SIMID = req_pkt_mmx[MM5].SIMID;
+    `endif
 end
 
 //

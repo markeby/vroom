@@ -85,6 +85,11 @@ always_comb begin
     e_pipe_req_pkt_mm0.id       = id;
     e_pipe_req_pkt_mm0.arb_type = MEM_LOAD;
     e_pipe_req_pkt_mm0.addr     = e_static.vaddr;
+    e_pipe_req_pkt_mm0.robid    = e_static.robid;
+    e_pipe_req_pkt_mm0.pdst     = e_static.pdst;
+    `ifdef SIMULATION
+    e_pipe_req_pkt_mm0.SIMID    = e_static.SIMID;
+    `endif
 end
 
 //

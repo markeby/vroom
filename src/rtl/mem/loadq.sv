@@ -16,10 +16,10 @@ module loadq
     input  t_nuke_pkt       nuke_rb1,
 
     input  logic            disp_valid_rs0,
-    input  t_uinstr_disp    disp_pkt_rs0,
+    input  t_disp_pkt       disp_pkt_rs0,
 
     input  logic            iss_mm0,
-    input  t_uinstr_iss     iss_pkt_mm0,
+    input  t_iss_pkt     iss_pkt_mm0,
 
     output logic            pipe_req_mm0,
     output t_mempipe_arb    pipe_req_pkt_mm0,

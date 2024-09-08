@@ -41,13 +41,13 @@ typedef struct packed {
     logic         valid;
     int           clk;
     int           port;
-    t_uinstr_disp disp_ra1;
+    t_disp_pkt    disp_pkt_ra1;
 } t_cd_alloc;
 
 typedef struct packed {
     logic        valid;
     int          clk;
-    t_uinstr_iss iss_pkt_rs2;
+    t_iss_pkt iss_pkt_rs2;
 } t_cd_rs;
 
 typedef struct packed {
@@ -88,7 +88,7 @@ endfunction
 task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ("---------------------[ %4d @%-4t ]---------------------", top.cclk_count, $time()));
     `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
-    `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.ALLOC.disp_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
+    `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.ALLOC.disp_pkt_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
     `PMSG(CDBG, (""))
     `PMSG(CDBG, ($sformatf(" src1 %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.src1.optype, rec.RS.iss_pkt_rs2.uinstr.src1.opreg, rec.RENAME.rename_rn1.psrc1, rec.RS.iss_pkt_rs2.src1_val))))
     `PMSG(CDBG, ($sformatf(" src2 %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.src2.optype, rec.RS.iss_pkt_rs2.uinstr.src2.opreg, rec.RENAME.rename_rn1.psrc2, rec.RS.iss_pkt_rs2.src2_val))))
@@ -173,7 +173,7 @@ task cd_alloc();
     end
     INSTQ[i].ALLOC.valid = 1'b1;
     INSTQ[i].ALLOC.clk = top.cclk_count;
-    INSTQ[i].ALLOC.disp_ra1 = top.core.alloc.disp_pkt_rs0;
+    INSTQ[i].ALLOC.disp_pkt_ra1 = top.core.alloc.disp_pkt_rs0;
 endtask
 
 task cd_rs_eint();
@@ -185,6 +185,17 @@ task cd_rs_eint();
     INSTQ[i].RS.valid = 1'b1;
     INSTQ[i].RS.clk = top.cclk_count;
     INSTQ[i].RS.iss_pkt_rs2 = top.core.ex_iss_pkt_rs2;
+endtask
+
+task cd_result_mm();
+    int i; i = f_instq_find_match(top.core.iprf_wr_pkt_mm5.SIMID);
+
+    if (INSTQ[i].RESULT.valid) begin
+        $error("Trying to add a result to a record that is already valid!");
+    end
+    INSTQ[i].RESULT.valid = 1'b1;
+    INSTQ[i].RESULT.clk = top.cclk_count;
+    INSTQ[i].RESULT.iprf_wr_pkt_ro0 = top.core.iprf_wr_pkt_mm5;
 endtask
 
 task cd_result_eint();
@@ -233,6 +244,7 @@ always_ff @(posedge clk) begin
 
     if (core.ex_iss_rs2  ) cd_rs_eint();
     if (core.exe.complete_ex1.valid) cd_result_eint();
+    if (core.mem.complete_mm5.valid) cd_result_mm();
 
     if (core.rob.q_retire_rb1) cd_retire();
 end
@@ -279,7 +291,7 @@ task cd_print_rec_unretired(t_cd_inst rec);
     `PMSG(CDBG, ("-------------------------------------------------------"));
     if (rec.ALLOC.valid) begin
         `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
-        `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.ALLOC.disp_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
+        `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.ALLOC.disp_pkt_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
     end else if (rec.DECODE.valid) begin
         `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
         `PMSG(CDBG, ("PC 0x%04h -- %s", rec.FETCH.instr_fe1.SIMID.pc, format_simid(rec.FETCH.instr_fe1.SIMID)))

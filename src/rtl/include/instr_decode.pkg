@@ -68,19 +68,20 @@ package instr_decode;
     } t_rename_pkt;
 
     typedef struct packed {
+        t_ldq_id ldqid;
+        t_stq_id stqid;
+    } t_disp_meta_mem;
+
+    typedef union packed {
+        t_disp_meta_mem mem;
+    } t_disp_meta;
+
+    typedef struct packed {
        t_uinstr     uinstr;
        t_rob_id     robid;
        t_rename_pkt rename;
-    } t_uinstr_disp;
-
-    typedef struct packed {
-        t_ldq_id ldqid;
-        t_stq_id stqid;
-    } t_issue_meta_mem;
-
-    typedef union packed {
-        t_issue_meta_mem mem;
-    } t_issue_meta;
+       t_disp_meta  meta;
+    } t_disp_pkt;
 
     typedef struct packed {
        t_uinstr      uinstr;
@@ -88,8 +89,8 @@ package instr_decode;
        t_prf_id      pdst;
        t_rv_reg_data src1_val;
        t_rv_reg_data src2_val;
-       t_issue_meta  meta;
-    } t_uinstr_iss;
+       t_disp_meta   meta;
+    } t_iss_pkt;
 
     typedef struct packed {
         `SIMID_STRUCT

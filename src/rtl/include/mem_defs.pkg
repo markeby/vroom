@@ -25,9 +25,12 @@ package mem_defs;
     } t_mem_arb_type;
 
     typedef struct packed {
+        `SIMID_STRUCT
         t_mem_id       id;
         t_mem_arb_type arb_type;
-        t_paddr        addr;
+        t_vaddr        addr;
+        t_rob_id       robid;
+        t_prf_id       pdst;
     } t_mempipe_arb;
 
     typedef struct packed {

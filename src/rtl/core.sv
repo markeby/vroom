@@ -49,6 +49,9 @@ t_br_mispred_pkt br_mispred_ex0;
 logic        iprf_wr_en_ex1;
 t_prf_wr_pkt iprf_wr_pkt_ex1;
 
+logic        iprf_wr_en_mm5;
+t_prf_wr_pkt iprf_wr_pkt_mm5;
+
 t_rob_complete_pkt ex_complete_rb0;;
 t_rob_complete_pkt mm_complete_rb0;;
 
@@ -108,8 +111,8 @@ rename rename (
     .valid_rn0 ( uinstr_de1.valid ) ,
     .uinstr_rn0 ( uinstr_de1 ) ,
 
-    .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1} ),
-    .iprf_wr_pkt_ro0  ( '{iprf_wr_pkt_ex1} ),
+    .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1,  iprf_wr_en_mm5}  ),
+    .iprf_wr_pkt_ro0  ( '{iprf_wr_pkt_ex1, iprf_wr_pkt_mm5} ),
 
     .iprf_rd_en_rd0   ( rdens_rd0 ),
     .iprf_rd_psrc_rd0 ( rdaddrs_rd0 ),
@@ -127,13 +130,13 @@ t_rob_id next_robid_ra0;
 
 logic         rs_stall_rs0;
 logic         disp_valid_rs0;
-t_uinstr_disp disp_pkt_rs0;
+t_disp_pkt    disp_pkt_rs0;
 
 logic        ex_iss_rs2;
-t_uinstr_iss ex_iss_pkt_rs2;
+t_iss_pkt ex_iss_pkt_rs2;
 
 logic        mm_iss_rs2;
-t_uinstr_iss mm_iss_pkt_rs2;
+t_iss_pkt mm_iss_pkt_rs2;
 
 alloc alloc (
     .clk,
@@ -157,8 +160,8 @@ rs #(.NUM_RS_ENTS(8), .RS_NAME("RS0")) rs (
     .clk,
     .reset,
     .nuke_rb1,
-    .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1} ),
-    .iprf_wr_pkt_ro0  ( '{iprf_wr_pkt_ex1} ),
+    .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1, iprf_wr_en_mm5} ),
+    .iprf_wr_pkt_ro0  ( '{iprf_wr_pkt_ex1, iprf_wr_pkt_mm5} ),
 
     .rs_stall_rs0,
     .disp_valid_rs0,
@@ -200,6 +203,9 @@ mem mem (
 
     .iss_mm0      ( mm_iss_rs2      ) ,
     .iss_pkt_mm0  ( mm_iss_pkt_rs2  ) ,
+
+    .iprf_wr_en_mm5,
+    .iprf_wr_pkt_mm5,
 
     .complete_mm5 ( mm_complete_rb0 )
 );

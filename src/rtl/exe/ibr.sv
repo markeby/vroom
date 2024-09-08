@@ -13,7 +13,7 @@ module ibr
     input  logic         clk,
     input  logic         reset,
 
-    input  t_uinstr_iss  iss_pkt_ex0,
+    input  t_iss_pkt  iss_pkt_ex0,
     input  t_rv_reg_data src1val_ex0,
     input  t_rv_reg_data src2val_ex0,
 

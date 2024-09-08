@@ -30,6 +30,12 @@ package asm;
     function t_word rvSLLIW(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[4:0]  shamt   ); return __rvI(RV_OP_ALU1_I, rd, rs1, {7'b0000000, shamt[4:0]}, ALU_SHL ); endfunction
     function t_word rvSRLIW(t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[4:0]  shamt   ); return __rvI(RV_OP_ALU1_I, rd, rs1, {7'b0000000, shamt[4:0]}, ALU_SHR ); endfunction
 
+    function t_word rvLB   (t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(RV_OP_LD,     rd, rs1, imm_11_0,                 MEM_LB  ); endfunction
+    function t_word rvLH   (t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(RV_OP_LD,     rd, rs1, imm_11_0,                 MEM_LH  ); endfunction
+    function t_word rvLW   (t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(RV_OP_LD,     rd, rs1, imm_11_0,                 MEM_LW  ); endfunction
+    function t_word rvLBU  (t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(RV_OP_LD,     rd, rs1, imm_11_0,                 MEM_LBU ); endfunction
+    function t_word rvLHU  (t_rv_reg_addr rd, t_rv_reg_addr rs1, logic[11:0] imm_11_0); return __rvI(RV_OP_LD,     rd, rs1, imm_11_0,                 MEM_LHU ); endfunction
+
     function t_word rvECALL(                                                         ); return __rvI(RV_OP_SYSTEM, '0, '0 , 12'b000000000000,         '0      ); endfunction
     function t_word rvEBREAK(                                                        ); return __rvI(RV_OP_SYSTEM, '0, '0 , 12'b000000000001,         '0      ); endfunction
 

@@ -99,11 +99,9 @@ end
 // end
 `endif
 
-    /*
 `ifdef ASSERT
-`VASSERT(a_illegal_format, uinstr_de1.valid, uinstr_de1.ifmt inside {RV_FMT_I,RV_FMT_R}, $sformatf("Unsupported instr fmt: %s", uinstr_de1.ifmt.name()))
+`VASSERT(a_alloc_when_valid, e_alloc_mm0, ~e_valid, "Allocated loadq entry while valid")
 `endif
-    */
 
 endmodule
 

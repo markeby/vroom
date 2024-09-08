@@ -121,10 +121,10 @@ always_comb begin
     iss_pkt_rs2.src2_val = f_opsel(iss_pkt_nq_rs2.uinstr.src2.optype, iss_pkt_nq_rs2.uinstr.imm64, prf_rddatas_rd1[SRC2]);
 end
 
-assign ex_iss_rs2     = iss_rs2;
+assign ex_iss_rs2     = iss_rs2 & uop_to_fu(iss_pkt_nq_rs2.uinstr.uop) == FU_EXE;
 assign ex_iss_pkt_rs2 = iss_pkt_rs2;
 
-assign mm_iss_rs2     = 1'b0; //iss_rs2;
+assign mm_iss_rs2     = iss_rs2 & uop_to_fu(iss_pkt_nq_rs2.uinstr.uop) == FU_MEM;
 assign mm_iss_pkt_rs2 = iss_pkt_rs2;
 
 //

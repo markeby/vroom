@@ -33,11 +33,11 @@ package instr;
     } t_rv_opcode;
 
     typedef enum logic[2:0] {
-        LD_BYTE   = 3'b000,
-        LD_HALF   = 3'b001,
-        LD_WORD   = 3'b010,
-        LD_BYTE_U = 3'b100,
-        LD_BYTE_L = 3'b101
+        MEM_LB  = 3'b000,
+        MEM_LH  = 3'b001,
+        MEM_LW  = 3'b010,
+        MEM_LBU = 3'b100,
+        MEM_LHU = 3'b101
     } t_rv_ld_op_funct3;
 
     typedef enum logic[2:0] {

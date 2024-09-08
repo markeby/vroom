@@ -61,8 +61,9 @@ initial begin
     //`define TEST_LOGICAL
     //`define TEST_SLT
     //`define TEST_BR_NT
-    `define TEST_BR_T
+    //`define TEST_BR_T
     //`define TEST_BEEF
+    `define TEST_LOAD
 
     // IROM[a++] = rvADDI(1,1,12'h1);
     // IROM[a++] = rvADDI(8,8,12'h1);
@@ -99,6 +100,9 @@ initial begin
     // IROM[a++] = rvXOR(8,7,7);
     // IROM[a++] = rvXOR(9,8,8);
 
+    `ifdef TEST_LOAD
+        //IRAM[a++] = 
+    `endif
     `ifdef TEST_BR_NT
         IROM[a++] = rvXOR(1,1,1);
         IROM[a++] = rvADDI(1,1,32);

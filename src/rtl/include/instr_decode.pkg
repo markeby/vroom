@@ -28,7 +28,7 @@ package instr_decode;
         U_OR,
         U_AND,
         U_BR,
-        U_LD_BYTE,
+        U_LOAD,
         U_EBREAK,
         U_ECALL
     } t_uop;
@@ -166,7 +166,7 @@ package instr_decode;
                     RV_OP_JALR  : rv_instr_to_uop = U_INVALID;
                     RV_OP_LD    : begin
                         //t_rv_ld_op_funct3 ld_op = t_rv_ld_op_funct3'(instr.d.I.funct3);
-                        rv_instr_to_uop = U_LD_BYTE;
+                        rv_instr_to_uop = U_LOAD;
                     end
                     RV_OP_ALU0_I : begin
                         t_rv_alu_op_funct3 alu_op = t_rv_alu_op_funct3'(instr.d.R.funct3);
@@ -233,6 +233,37 @@ package instr_decode;
             uinstr_to_wrmask = '0;
             if (u.dst.optype == OP_REG) uinstr_to_wrmask[u.dst.opreg] = 1'b1;
         end
+    endfunction
+
+    typedef enum logic[1:0] {
+        FU_INVALID,
+        FU_EXE,
+        FU_MEM
+    } t_fu_type;
+
+    function t_fu_type uop_to_fu(t_uop uop);
+        unique casez(uop)
+            U_INVALID: uop_to_fu = FU_INVALID;
+            U_ADD:     uop_to_fu = FU_EXE;
+            U_ADDW:    uop_to_fu = FU_EXE;
+            U_SUB:     uop_to_fu = FU_EXE;
+            U_SUBW:    uop_to_fu = FU_EXE;
+            U_SLL:     uop_to_fu = FU_EXE;
+            U_SLLW:    uop_to_fu = FU_EXE;
+            U_SLT:     uop_to_fu = FU_EXE;
+            U_SLTU:    uop_to_fu = FU_EXE;
+            U_XOR:     uop_to_fu = FU_EXE;
+            U_SRL:     uop_to_fu = FU_EXE;
+            U_SRLW:    uop_to_fu = FU_EXE;
+            U_SRA:     uop_to_fu = FU_EXE;
+            U_SRAW:    uop_to_fu = FU_EXE;
+            U_OR:      uop_to_fu = FU_EXE;
+            U_AND:     uop_to_fu = FU_EXE;
+            U_BR:      uop_to_fu = FU_EXE;
+            U_LOAD:    uop_to_fu = FU_MEM;
+            U_EBREAK:  uop_to_fu = FU_EXE;
+            U_ECALL:   uop_to_fu = FU_EXE;
+        endcase
     endfunction
 
     `ifdef SIMULATION

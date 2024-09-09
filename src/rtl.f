@@ -7,17 +7,17 @@ src/rtl/exe/exe.sv
 src/rtl/exe/ialu.sv
 src/rtl/exe/ibr.sv
 
-src/rtl/fetch/fetch.sv
-src/rtl/fetch/fe_ctl.sv
-src/rtl/fetch/fe_fb_entry.sv
-src/rtl/fetch/fe_buf.sv
-src/rtl/fetch/fe_pf.sv
-src/rtl/fetch/fetch_chk.sv
+src/rtl/fe/fetch.sv
+src/rtl/fe/fe_ctl.sv
+src/rtl/fe/fe_fb_entry.sv
+src/rtl/fe/fe_buf.sv
+src/rtl/fe/fe_pf.sv
+src/rtl/fe/fetch_chk.sv
 
 src/rtl/globals/gprs.sv
 src/rtl/globals/scoreboard.sv
 
-src/rtl/icache/icache.sv
+src/rtl/fe/icache.sv
 
 src/rtl/mem/mem.sv
 src/rtl/mem/mempipe.sv

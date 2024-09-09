@@ -18,6 +18,8 @@ src/rtl/fe/icache.sv
 src/rtl/globals/gprs.sv
 src/rtl/globals/scoreboard.sv
 
+src/rtl/l2/l2.sv
+
 src/rtl/mem/mem.sv
 src/rtl/mem/mempipe.sv
 src/rtl/mem/loadq.sv

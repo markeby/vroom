@@ -14,6 +14,9 @@ module mem
     input  logic              reset,
     input  t_nuke_pkt         nuke_rb1,
 
+    output t_mem_req_pkt      flq_mem_req_pkt,
+    input  t_mem_rsp_pkt      flq_mem_rsp_pkt,
+
     input  logic              disp_valid_rs0,
     input  t_disp_pkt         disp_pkt_rs0,
 
@@ -105,8 +108,9 @@ fillq fillq (
     .reset,
 
     .flq_alloc_mm5,
-    .flq_mem_req_pkt  (    ),
-    .flq_mem_rsp_pkt  ( '0 ),
+
+    .flq_mem_req_pkt,
+    .flq_mem_rsp_pkt,
 
     .pipe_req_mm0     ( fl_req_mm0     ) ,
     .pipe_req_pkt_mm0 ( fl_req_pkt_mm0 ) ,

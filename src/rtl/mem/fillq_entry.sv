@@ -108,9 +108,11 @@ always_comb begin
 end
 
 always_comb begin
+    e_mem_req_pkt.op    = MEM_OP_READ;
     e_mem_req_pkt.valid = e_mem_req;
     e_mem_req_pkt.addr  = e_static.paddr;
     e_mem_req_pkt.id    = id;
+    e_mem_req_pkt.data  = '0;
 end
 
 assign e_mem_rsp_valid = q_mem_rsp_pkt.valid & q_mem_rsp_pkt.id == id;
@@ -129,6 +131,7 @@ assign e_mem_rsp_valid = q_mem_rsp_pkt.valid & q_mem_rsp_pkt.id == id;
 
 `ifdef ASSERT
 `VASSERT(a_alloc_when_valid, e_alloc_mm5, ~e_valid, "Allocated fillq entry while valid")
+`VASSERT(a_recycle,          e_action_valid_mm5, ~pipe_action_mm5.recycle, "Fill recycled!")
 `endif
 
 endmodule

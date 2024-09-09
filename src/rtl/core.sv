@@ -46,6 +46,18 @@ logic            resume_fetch_rbx;
 t_nuke_pkt       nuke_rb1;
 t_br_mispred_pkt br_mispred_ex0;
 
+t_rob_id next_robid_ra0;
+
+logic         rs_stall_rs0;
+logic         disp_valid_rs0;
+t_disp_pkt    disp_pkt_rs0;
+
+logic        ex_iss_rs2;
+t_iss_pkt ex_iss_pkt_rs2;
+
+logic        mm_iss_rs2;
+t_iss_pkt mm_iss_pkt_rs2;
+
 logic        iprf_wr_en_ex1;
 t_prf_wr_pkt iprf_wr_pkt_ex1;
 
@@ -65,7 +77,7 @@ t_rat_restore_pkt rat_restore_pkt_rbx;
 t_rat_reclaim_pkt rat_reclaim_pkt_rb1;
 
 //
-// Nets
+// Blocks
 //
 
 fe fe (
@@ -118,18 +130,6 @@ rename rename (
     .uinstr_rn1,
     .rename_rn1
 );
-
-t_rob_id next_robid_ra0;
-
-logic         rs_stall_rs0;
-logic         disp_valid_rs0;
-t_disp_pkt    disp_pkt_rs0;
-
-logic        ex_iss_rs2;
-t_iss_pkt ex_iss_pkt_rs2;
-
-logic        mm_iss_rs2;
-t_iss_pkt mm_iss_pkt_rs2;
 
 alloc alloc (
     .clk,
@@ -186,6 +186,9 @@ exe exe (
     .complete_ex1 (ex_complete_rb0)
 );
 
+t_mem_req_pkt      dc_l2_req_pkt;
+t_mem_rsp_pkt      l2_dc_rsp_pkt;
+
 mem mem (
     .clk,
     .reset,
@@ -194,6 +197,9 @@ mem mem (
     .disp_valid_rs0,
     .disp_pkt_rs0,
 
+    .flq_mem_req_pkt ( dc_l2_req_pkt ) ,
+    .flq_mem_rsp_pkt ( l2_dc_rsp_pkt ) ,
+
     .iss_mm0      ( mm_iss_rs2      ) ,
     .iss_pkt_mm0  ( mm_iss_pkt_rs2  ) ,
 
@@ -201,6 +207,17 @@ mem mem (
     .iprf_wr_pkt_mm5,
 
     .complete_mm5 ( mm_complete_rb0 )
+);
+
+l2 l2 (
+    .clk,
+    .reset,
+
+    .dc_l2_req_pkt,
+    .l2_dc_rsp_pkt,
+
+    .ic_l2_req_pkt ( '0 ),
+    .l2_ic_rsp_pkt (    )
 );
 
 rob rob (

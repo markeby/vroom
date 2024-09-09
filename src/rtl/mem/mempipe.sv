@@ -79,6 +79,7 @@ logic valid_mm0;
 `MKPIPE_INIT(t_mempipe_arb,           req_pkt_mmx, req_pkt_mm0,             MM0, NUM_MM_STAGES)
 `MKPIPE_INIT(logic,                   valid_mmx,   valid_mm0,               MM0, NUM_MM_STAGES)
 `MKPIPE     (logic,                   is_ld_mmx,                            MM0, NUM_MM_STAGES)
+`MKPIPE     (logic,                   is_fl_mmx,                            MM0, NUM_MM_STAGES)
 `MKPIPE     (logic,                   is_st_mmx,                            MM0, NUM_MM_STAGES)
 `MKPIPE     (logic,                   cacheable_mmx,                        MM0, NUM_MM_STAGES)
 `MKPIPE     (t_paddr,                 paddr_mmx,                            MM1, NUM_MM_STAGES)
@@ -115,6 +116,7 @@ gen_arbiter #(.POLICY("FIND_FIRST"), .NREQS(3), .T(t_mempipe_arb)) pipe_arb (
 
 assign is_ld_mmx[MM0] = req_pkt_mm0.arb_type == MEM_LOAD;
 assign is_st_mmx[MM0] = req_pkt_mm0.arb_type == MEM_STORE;
+assign is_fl_mmx[MM0] = req_pkt_mm0.arb_type == MEM_FILL;
 assign cacheable_mmx[MM0] = valid_mm0;
 
     //
@@ -131,8 +133,8 @@ assign data_rd_en_mm1   = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1]
 assign set_addr_mm1     = req_pkt_mmx[MM1].addr[L1_SET_HI:L1_SET_LO];
 
 assign tag_rd_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
-assign tag_wr_en_mm1    = '0;
-assign tag_wr_tag_mm1   = '0;
+assign tag_wr_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_fl_mmx[MM1] );
+assign tag_wr_tag_mm1   = req_pkt_mmx[MM1].addr[L1_TAG_HI:L1_TAG_LO];
 assign tag_wr_way_mm1   = '0;
 
 assign req_pkt_mm1 = req_pkt_mmx[MM1];
@@ -188,7 +190,10 @@ assign flq_alloc_mm5 = valid_mm5
                      & ~flq_addr_mat_mmx[MM5];
 
 always_comb begin
-    action_mm5.complete = valid_mmx[MM5] & hit_mmx[MM5];
+    action_mm5.complete = valid_mmx[MM5]
+                        & ( (req_pkt_mmx[MM5].arb_type inside {MEM_LOAD} & hit_mmx[MM5])
+                          | (req_pkt_mmx[MM5].arb_type inside {MEM_FILL}               )
+                          );
     action_mm5.recycle  = valid_mmx[MM5] & ~action_mm5.complete;
 end
 

@@ -21,10 +21,18 @@ package mem_common;
         t_paddr    pc;
     } t_fb_fe_rsp;
 
+    typedef enum logic[1:0] {
+        MEM_OP_READ,
+        MEM_OP_READ_INV,
+        MEM_OP_WRITE
+    } t_mem_op;
+
     typedef struct packed {
         logic    valid;
         t_mem_id id;
         t_paddr  addr;
+        t_mem_op op;
+        t_cl     data;
     } t_mem_req_pkt;
 
     typedef struct packed {

@@ -12,8 +12,8 @@ module icache
 (
     input  logic      clk,
     input  logic      reset,
-    input  t_mem_req  fb_ic_req_nnn,
-    output t_mem_rsp  ic_fb_rsp_nnn
+    input  t_mem_req_pkt  fb_ic_req_nnn,
+    output t_mem_rsp_pkt  ic_fb_rsp_nnn
 );
 
 localparam IROM_SZ     = 128;
@@ -21,7 +21,7 @@ localparam IROM_SZ_LG2 = $clog2(IROM_SZ);
 
 t_word IROM [IROM_SZ-1:0];
 
-t_mem_rsp ic_fb_rsp_pipe_nnn [LATENCY-1:0];
+t_mem_rsp_pkt ic_fb_rsp_pipe_nnn [LATENCY-1:0];
 for (genvar i=1; i<LATENCY; i++) begin : g_fbrsppipe
     `DFF(ic_fb_rsp_pipe_nnn[i], ic_fb_rsp_pipe_nnn[i-1], clk)
 end

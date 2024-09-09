@@ -25,7 +25,7 @@ package mem_common;
         logic    valid;
         t_mem_id id;
         t_paddr  addr;
-    } t_mem_req;
+    } t_mem_req_pkt;
 
     typedef struct packed {
         logic    valid;
@@ -34,7 +34,7 @@ package mem_common;
         `ifdef SIMULATION
         t_paddr  __addr_inst;
         `endif
-    } t_mem_rsp;
+    } t_mem_rsp_pkt;
 
     function t_rv_instr instr_from_cl(t_cl data, t_cl_offset offset);
         instr_from_cl = t_rv_instr'(data.B[offset +: RV_INSTR_BYTES]);

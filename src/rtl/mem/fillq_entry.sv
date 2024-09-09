@@ -18,10 +18,10 @@ module fillq_entry
     output logic            e_valid,
 
     output logic            e_mem_req,
-    output t_mem_req        e_mem_req_pkt,
+    output t_mem_req_pkt    e_mem_req_pkt,
     input  logic            e_mem_gnt,
 
-    input  t_mem_rsp        q_mem_rsp_pkt,
+    input  t_mem_rsp_pkt    q_mem_rsp_pkt,
 
     input  logic            e_alloc_mm5,
     input  t_flq_static     q_alloc_static_mm5,

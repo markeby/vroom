@@ -66,8 +66,8 @@ t_rat_reclaim_pkt rat_reclaim_pkt_rb1;
 
 // icache
 
-t_mem_req fb_ic_req_nnn;
-t_mem_rsp ic_fb_rsp_nnn;
+t_mem_req_pkt fb_ic_req_nnn;
+t_mem_rsp_pkt ic_fb_rsp_nnn;
 
 //
 // Nets

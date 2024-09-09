@@ -14,8 +14,8 @@ module fetch
     input  logic       clk,
     input  logic       reset,
 
-    output t_mem_req   fb_ic_req_nnn,
-    input  t_mem_rsp   ic_fb_rsp_nnn,
+    output t_mem_req_pkt   fb_ic_req_nnn,
+    input  t_mem_rsp_pkt   ic_fb_rsp_nnn,
 
     input  t_br_mispred_pkt br_mispred_ex0,
     input  t_nuke_pkt       nuke_rb1,

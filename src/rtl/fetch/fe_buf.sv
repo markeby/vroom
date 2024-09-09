@@ -19,8 +19,8 @@ module fe_buf
     output t_fb_fe_rsp fb_fe_rsp_nnn,
 
     // IC
-    output t_mem_req   fb_ic_req_nnn,
-    input  t_mem_rsp   ic_fb_rsp_nnn
+    output t_mem_req_pkt   fb_ic_req_nnn,
+    input  t_mem_rsp_pkt   ic_fb_rsp_nnn
 );
 
 localparam NUM_SETS = FE_FB_NUM_SETS;
@@ -60,8 +60,8 @@ t_fe_fb_active                e_active_nnn        [FE_FB_NUM_ENTS-1:0];
 
 logic[FE_FB_NUM_ENTS-1:0]     e_ic_req_rq_nnn;
 logic[FE_FB_NUM_ENTS-1:0]     e_ic_req_gn_nnn;
-t_mem_req                     e_ic_req_pkt_nnn    [FE_FB_NUM_ENTS-1:0];
-t_mem_rsp                     e_ic_rsp_pkt_nnn    [FE_FB_NUM_ENTS-1:0];
+t_mem_req_pkt                     e_ic_req_pkt_nnn    [FE_FB_NUM_ENTS-1:0];
+t_mem_rsp_pkt                     e_ic_rsp_pkt_nnn    [FE_FB_NUM_ENTS-1:0];
 logic[FE_FB_NUM_ENTS_LG2-1:0] c_ic_req_sl_nnn;
 
 logic[FE_FB_NUM_ENTS-1:0]     e_fe_rsp_rq_nnn;

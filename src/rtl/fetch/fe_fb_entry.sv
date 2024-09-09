@@ -33,11 +33,11 @@ module fe_fb_entry
 
     // IC req
     output logic           e_ic_req_rq_nnn,
-    output t_mem_req       e_ic_req_pkt_nnn,
+    output t_mem_req_pkt       e_ic_req_pkt_nnn,
     input  logic           e_ic_req_gn_nnn,
 
     // IC rsp
-    input  t_mem_rsp       e_ic_rsp_pkt_nnn,
+    input  t_mem_rsp_pkt       e_ic_rsp_pkt_nnn,
 
     // FE req
     output logic           e_fe_rsp_rq_nnn,

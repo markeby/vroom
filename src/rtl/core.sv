@@ -64,21 +64,14 @@ t_rob_id          oldest_robid;
 t_rat_restore_pkt rat_restore_pkt_rbx;
 t_rat_reclaim_pkt rat_reclaim_pkt_rb1;
 
-// icache
-
-t_mem_req_pkt fb_ic_req_nnn;
-t_mem_rsp_pkt ic_fb_rsp_nnn;
-
 //
 // Nets
 //
 
-fetch fetch (
+fe fe (
     .clk,
     .reset,
     .decode_ready_de0,
-    .fb_ic_req_nnn,
-    .ic_fb_rsp_nnn,
     .br_mispred_ex0,
     .valid_fe1,
     .instr_fe1,
@@ -235,13 +228,6 @@ rob rob (
 
     .nuke_rb1,
     .resume_fetch_rbx
-);
-
-icache #(.LATENCY(5)) icache (
-    .clk,
-    .reset,
-    .fb_ic_req_nnn,
-    .ic_fb_rsp_nnn
 );
 
 `ifdef ASSERT

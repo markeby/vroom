@@ -1,5 +1,5 @@
-`ifndef __FETCH_SV
-`define __FETCH_SV
+`ifndef __FE_SV
+`define __FE_SV
 
 `include "instr.pkg"
 `include "verif.pkg"
@@ -8,14 +8,11 @@
 `include "common.pkg"
 `include "vroom_macros.sv"
 
-module fetch
+module fe
     import instr::*, mem_common::*, verif::*, common::*;
 (
     input  logic       clk,
     input  logic       reset,
-
-    output t_mem_req_pkt   fb_ic_req_nnn,
-    input  t_mem_rsp_pkt   ic_fb_rsp_nnn,
 
     input  t_br_mispred_pkt br_mispred_ex0,
     input  t_nuke_pkt       nuke_rb1,
@@ -36,6 +33,9 @@ module fetch
 
 t_fe_fb_req fe_fb_req_nnn;
 t_fb_fe_rsp fb_fe_rsp_nnn;
+
+t_mem_req_pkt   fb_ic_req_nnn;
+t_mem_rsp_pkt   ic_fb_rsp_nnn;
 
 logic stall;
 assign stall = ~decode_ready_de0;
@@ -71,6 +71,13 @@ fe_buf fe_buf (
     .ic_fb_rsp_nnn
 );
 
+icache #(.LATENCY(5)) icache (
+    .clk,
+    .reset,
+    .fb_ic_req_nnn,
+    .ic_fb_rsp_nnn
+);
+
 //
 // Displays
 //
@@ -79,9 +86,9 @@ fe_buf fe_buf (
 
 logic[$clog2(128)-1:0] irom_index;
 always_comb irom_index = instr_fe1.pc[$clog2(128)+1:2];
-`VASSERT(a_corrupt_instr, valid_fe1, instr_fe1.instr == t_rv_instr'(core.icache.IROM[irom_index]), $sformatf("Instruction mismatch simid:%s exp(%h) != act(%h)", format_simid(instr_fe1.SIMID), core.icache.IROM[irom_index], instr_fe1.instr))
+`VASSERT(a_corrupt_instr, valid_fe1, instr_fe1.instr == t_rv_instr'(icache.IROM[irom_index]), $sformatf("Instruction mismatch simid:%s exp(%h) != act(%h)", format_simid(instr_fe1.SIMID), icache.IROM[irom_index], instr_fe1.instr))
 
-fetch_chk fechk (
+fetch_chk fetch_chk (
     .clk,
     .reset,
     .nuke_rb1,
@@ -106,5 +113,5 @@ logic valid_fe2_inst;
 
 endmodule
 
-`endif // __FETCH_SV
+`endif // __FE_SV
 

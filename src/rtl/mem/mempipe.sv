@@ -19,6 +19,16 @@ module mempipe
     input  t_mempipe_arb    ld_req_pkt_mm0,
     output logic            ld_gnt_mm0,
 
+    input  logic            st_req_mm0,
+    input  t_mempipe_arb    st_req_pkt_mm0,
+    output logic            st_gnt_mm0,
+
+    output t_l1_set_addr    set_addr_mm1,
+    output logic            tag_rd_en_mm1,
+    output logic            tag_wr_en_mm1,
+    output t_l1_tag         tag_wr_tag_mm1,
+    output t_l1_way         tag_wr_way_mm1,
+
     input  t_l1_tag         tag_rd_ways_mm2   [L1_NUM_WAYS-1:0],
     input  t_mesi           state_rd_ways_mm2 [L1_NUM_WAYS-1:0],
     input  t_cl             data_rd_ways_mm2  [L1_NUM_WAYS-1:0],
@@ -66,10 +76,8 @@ logic valid_mm0;
 `MKPIPE     (t_rv_reg_data,           rd_cl_data_rot_mmx,       MM4, NUM_MM_STAGES)
 
 // SHOULD BE PORTS!
-logic         tag_rd_en_mm1;
 logic         state_rd_en_mm1;
 logic         data_rd_en_mm1;
-t_l1_set_addr set_addr_mm1;
 
 //
 // Logic
@@ -80,12 +88,12 @@ t_l1_set_addr set_addr_mm1;
     // - Arbitration
     //
 
-gen_arbiter #(.POLICY("FIND_FIRST"), .NREQS(1), .T(t_mempipe_arb)) pipe_arb (
+gen_arbiter #(.POLICY("FIND_FIRST"), .NREQS(2), .T(t_mempipe_arb)) pipe_arb (
     .clk,
     .reset,
-    .int_req_valids ( {ld_req_mm0}       ) ,
-    .int_req_pkts   ( {ld_req_pkt_mm0}   ) ,
-    .int_gnts       ( {ld_gnt_mm0}       ) ,
+    .int_req_valids ( {ld_req_mm0,     st_req_mm0    } ) ,
+    .int_req_pkts   ( {ld_req_pkt_mm0, st_req_pkt_mm0} ) ,
+    .int_gnts       ( {ld_gnt_mm0,     st_gnt_mm0    } ) ,
     .ext_req_valid  ( valid_mm0          ) ,
     .ext_req_pkt    ( req_pkt_mm0        ) ,
     .ext_gnt        ( 1'b1               )
@@ -104,10 +112,14 @@ assign cacheable_mmx[MM0] = valid_mm0;
     //
 
 assign paddr_mmx[MM1]   = req_pkt_mmx[MM1].addr;
-assign tag_rd_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
 assign state_rd_en_mm1  = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
 assign data_rd_en_mm1   = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1]                  );
 assign set_addr_mm1     = req_pkt_mmx[MM1].addr[L1_SET_HI:L1_SET_LO];
+
+assign tag_rd_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
+assign tag_wr_en_mm1    = '0;
+assign tag_wr_tag_mm1   = '0;
+assign tag_wr_way_mm1   = '0;
 
     //
     // MM2

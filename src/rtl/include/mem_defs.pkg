@@ -31,13 +31,21 @@ package mem_defs;
         t_vaddr        addr;
         t_rob_id       robid;
         t_prf_id       pdst;
+        t_stq_id       yost;
     } t_mempipe_arb;
 
     typedef struct packed {
         `SIMID_STRUCT
         t_vaddr  vaddr;
         t_rob_id robid;
+    } t_stq_static;
+
+    typedef struct packed {
+        `SIMID_STRUCT
+        t_vaddr  vaddr;
+        t_rob_id robid;
         t_prf_id pdst;
+        t_stq_id yost;
     } t_ldq_static;
 
     typedef struct packed {

@@ -1,5 +1,5 @@
-`ifndef __LOADQ_SV
-`define __LOADQ_SV
+`ifndef __STOREQ_SV
+`define __STOREQ_SV
 
 `include "instr.pkg"
 `include "vroom_macros.sv"
@@ -8,7 +8,7 @@
 `include "mem_defs.pkg"
 `include "gen_funcs.pkg"
 
-module loadq
+module storeq
     import instr::*, instr_decode::*, common::*, rob_defs::*, gen_funcs::*, mem_defs::*, mem_common::*;
 (
     input  logic            clk,
@@ -19,7 +19,7 @@ module loadq
     input  t_disp_pkt       disp_pkt_rs0,
 
     input  logic            iss_mm0,
-    input  t_iss_pkt     iss_pkt_mm0,
+    input  t_iss_pkt        iss_pkt_mm0,
 
     output logic            pipe_req_mm0,
     output t_mempipe_arb    pipe_req_pkt_mm0,
@@ -35,18 +35,18 @@ module loadq
 //
 
 logic                      q_alloc_mm0;
-logic[LDQ_NUM_ENTRIES-1:0] e_alloc_mm0;
-logic[LDQ_NUM_ENTRIES-1:0] e_alloc_sel_mm0;
+logic[STQ_NUM_ENTRIES-1:0] e_alloc_mm0;
+logic[STQ_NUM_ENTRIES-1:0] e_alloc_sel_mm0;
 
-logic[LDQ_NUM_ENTRIES-1:0] e_valid;
+logic[STQ_NUM_ENTRIES-1:0] e_valid;
 
-logic[LDQ_NUM_ENTRIES-1:0] e_pipe_req_mm0;
-t_mempipe_arb              e_pipe_req_pkt_mm0 [LDQ_NUM_ENTRIES-1:0];
-logic[LDQ_NUM_ENTRIES-1:0] e_pipe_sel_mm0;
-logic[LDQ_NUM_ENTRIES-1:0] e_pipe_gnt_mm0;
+logic[STQ_NUM_ENTRIES-1:0] e_pipe_req_mm0;
+t_mempipe_arb              e_pipe_req_pkt_mm0 [STQ_NUM_ENTRIES-1:0];
+logic[STQ_NUM_ENTRIES-1:0] e_pipe_sel_mm0;
+logic[STQ_NUM_ENTRIES-1:0] e_pipe_gnt_mm0;
 
-t_ldq_static q_alloc_static_mm0;
-t_ldq_static e_static [LDQ_NUM_ENTRIES-1:0];
+t_stq_static q_alloc_static_mm0;
+t_stq_static e_static [STQ_NUM_ENTRIES-1:0];
 
 logic                      q_pipe_req_mm0;
 t_mempipe_arb              q_pipe_req_pkt_mm0;
@@ -56,8 +56,8 @@ logic                      q_pipe_gnt_mm0;
 // Logic
 //
 
-assign q_alloc_mm0     = iss_mm0 & rv_opcode_is_ld(iss_pkt_mm0.uinstr.opcode);
-assign e_alloc_sel_mm0 = 1 << iss_pkt_mm0.meta.mem.ldqid;
+assign q_alloc_mm0     = iss_mm0 & rv_opcode_is_st(iss_pkt_mm0.uinstr.opcode);
+assign e_alloc_sel_mm0 = 1 << iss_pkt_mm0.meta.mem.stqid;
 assign e_alloc_mm0     = q_alloc_mm0 ? e_alloc_sel_mm0 : '0;
 
 always_comb begin
@@ -65,16 +65,14 @@ always_comb begin
     q_alloc_static_mm0.SIMID = iss_pkt_mm0.uinstr.SIMID;
     `endif
     q_alloc_static_mm0.robid = iss_pkt_mm0.robid;
-    q_alloc_static_mm0.pdst  = iss_pkt_mm0.pdst;
     q_alloc_static_mm0.vaddr = '0;
-    q_alloc_static_mm0.yost  = iss_pkt_mm0.meta.mem.stqid;
 end
 
 //
 // Pipe arb
 //
 
-gen_arbiter #(.POLICY("FIND_FIRST"), .NREQS(LDQ_NUM_ENTRIES), .T(t_mempipe_arb)) pipe_arb (
+gen_arbiter #(.POLICY("FIND_FIRST"), .NREQS(STQ_NUM_ENTRIES), .T(t_mempipe_arb)) pipe_arb (
     .clk,
     .reset,
     .int_req_valids ( e_pipe_req_mm0     ) ,
@@ -93,11 +91,11 @@ assign q_pipe_gnt_mm0   = pipe_gnt_mm0;
 // Entries
 //
 
-for (genvar e=0; e<LDQ_NUM_ENTRIES; e++) begin : g_ldq_entries
-    loadq_entry loadq_entry (
+for (genvar e=0; e<STQ_NUM_ENTRIES; e++) begin : g_stq_entries
+    storeq_entry storeq_entry (
         .clk,
         .reset,
-        .id                 ( t_ldq_id'(e)          ) ,
+        .id                 ( t_stq_id'(e)          ) ,
         .nuke_rb1,
         .e_valid            ( e_valid[e]            ) ,
         .e_alloc_mm0        ( e_alloc_mm0[e]        ) ,
@@ -132,6 +130,6 @@ end
 
 endmodule
 
-`endif // __LOADQ_SV
+`endif // __STOREQ_SV
 
 

@@ -23,6 +23,10 @@ src/rtl/mem/mem.sv
 src/rtl/mem/mempipe.sv
 src/rtl/mem/loadq.sv
 src/rtl/mem/loadq_entry.sv
+src/rtl/mem/storeq.sv
+src/rtl/mem/storeq_entry.sv
+
+src/rtl/mem/l1tag.sv
 
 src/rtl/regrd/regrd.sv
 

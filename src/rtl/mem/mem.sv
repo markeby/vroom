@@ -34,9 +34,20 @@ logic            ld_req_mm0;
 t_mempipe_arb    ld_req_pkt_mm0;
 logic            ld_gnt_mm0;
 
+logic            st_req_mm0;
+t_mempipe_arb    st_req_pkt_mm0;
+logic            st_gnt_mm0;
+
 logic            pipe_valid_mm5;
 t_mempipe_arb    pipe_req_pkt_mm5;
 t_mempipe_action pipe_action_mm5;
+
+logic              tag_rd_en_mm1;
+logic              tag_wr_en_mm1;
+t_l1_set_addr      set_addr_mm1;
+t_l1_tag           tag_wr_tag_mm1;
+t_l1_way           tag_wr_way_mm1;
+t_l1_tag           tag_rd_ways_mm2[L1_NUM_WAYS-1:0];
 
 //
 // Logic
@@ -64,25 +75,66 @@ loadq loadq (
     .pipe_action_mm5
 );
 
+// Stores
+
+storeq storeq (
+    .clk,
+    .reset,
+    .nuke_rb1,
+
+    .disp_valid_rs0,
+    .disp_pkt_rs0,
+
+    .iss_mm0,
+    .iss_pkt_mm0,
+
+    .pipe_req_mm0     ( st_req_mm0     ) ,
+    .pipe_req_pkt_mm0 ( st_req_pkt_mm0 ) ,
+    .pipe_gnt_mm0     ( st_gnt_mm0     ) ,
+
+    .pipe_valid_mm5,
+    .pipe_req_pkt_mm5,
+    .pipe_action_mm5
+);
+
 // MemPipe
 
-t_l1_tag         tag_rd_ways_mm2   [L1_NUM_WAYS-1:0];
 t_mesi           state_rd_ways_mm2 [L1_NUM_WAYS-1:0];
 t_cl             data_rd_ways_mm2  [L1_NUM_WAYS-1:0];
 for (genvar w=0; w<L1_NUM_WAYS; w++) begin : g_garbage
-    assign tag_rd_ways_mm2[w] = '0;
     assign state_rd_ways_mm2[w] = t_mesi'('0);
     assign data_rd_ways_mm2[w] = '0;
 end
+
+// Arrays 
+
+l1tag l1tag (
+    .clk,
+    .reset,
+
+    .tag_rd_en_mm1,
+    .tag_wr_en_mm1,
+    .set_addr_mm1,
+    .tag_wr_tag_mm1,
+    .tag_wr_way_mm1,
+
+    .tag_rd_ways_mm2
+);
 
 mempipe mempipe (
     .clk,
     .reset,
     .nuke_rb1,
 
-    .ld_req_mm0,
-    .ld_req_pkt_mm0,
-    .ld_gnt_mm0,
+    .ld_req_mm0, .ld_req_pkt_mm0, .ld_gnt_mm0,
+    .st_req_mm0, .st_req_pkt_mm0, .st_gnt_mm0,
+
+    .set_addr_mm1,
+
+    .tag_rd_en_mm1,
+    .tag_wr_en_mm1,
+    .tag_wr_tag_mm1,
+    .tag_wr_way_mm1,
 
     .tag_rd_ways_mm2,
     .state_rd_ways_mm2,

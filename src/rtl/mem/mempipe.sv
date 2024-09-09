@@ -33,6 +33,12 @@ module mempipe
     output t_l1_tag         tag_wr_tag_mm1,
     output t_l1_way         tag_wr_way_mm1,
 
+    // FLQ CAM
+    output t_mempipe_arb    req_pkt_mm1,
+
+    // FLQ CAM
+    input  logic            flq_addr_mat_mm2,
+
     input  t_l1_tag         tag_rd_ways_mm2   [L1_NUM_WAYS-1:0],
     input  t_mesi           state_rd_ways_mm2 [L1_NUM_WAYS-1:0],
     input  t_cl             data_rd_ways_mm2  [L1_NUM_WAYS-1:0],
@@ -54,7 +60,9 @@ MM1 - TLB (curently a passthru stage)
       Read tag   set
       Read state set
       Read data  set
+      PA to FLQ CAM
 MM2 - Calculate hit/miss
+      FLQ CAM Match
 MM3 - Data mux
 MM4 - Data rotate
 MM5 - Result valid
@@ -68,17 +76,18 @@ MM5 - Result valid
 t_mempipe_arb req_pkt_mm0;
 logic valid_mm0;
 
-`MKPIPE_INIT(t_mempipe_arb,           req_pkt_mmx, req_pkt_mm0, MM0, NUM_MM_STAGES)
-`MKPIPE_INIT(logic,                   valid_mmx,   valid_mm0,   MM0, NUM_MM_STAGES)
-`MKPIPE     (logic,                   is_ld_mmx,                MM0, NUM_MM_STAGES)
-`MKPIPE     (logic,                   is_st_mmx,                MM0, NUM_MM_STAGES)
-`MKPIPE     (logic,                   cacheable_mmx,            MM0, NUM_MM_STAGES)
-`MKPIPE     (t_paddr,                 paddr_mmx,                MM1, NUM_MM_STAGES)
-`MKPIPE     (logic,                   hit_mmx,                  MM2, NUM_MM_STAGES)
-`MKPIPE     (logic[L1_NUM_WAYS-1:0],  hit_vec_mmx,              MM2, NUM_MM_STAGES)
-`MKPIPE     (t_cl[L1_NUM_WAYS-1:0],   rd_cl_data_set_mmx,       MM2, NUM_MM_STAGES)
-`MKPIPE     (t_cl,                    rd_cl_data_mmx,           MM3, NUM_MM_STAGES)
-`MKPIPE     (t_rv_reg_data,           rd_cl_data_rot_mmx,       MM4, NUM_MM_STAGES)
+`MKPIPE_INIT(t_mempipe_arb,           req_pkt_mmx, req_pkt_mm0,             MM0, NUM_MM_STAGES)
+`MKPIPE_INIT(logic,                   valid_mmx,   valid_mm0,               MM0, NUM_MM_STAGES)
+`MKPIPE     (logic,                   is_ld_mmx,                            MM0, NUM_MM_STAGES)
+`MKPIPE     (logic,                   is_st_mmx,                            MM0, NUM_MM_STAGES)
+`MKPIPE     (logic,                   cacheable_mmx,                        MM0, NUM_MM_STAGES)
+`MKPIPE     (t_paddr,                 paddr_mmx,                            MM1, NUM_MM_STAGES)
+`MKPIPE     (logic,                   hit_mmx,                              MM2, NUM_MM_STAGES)
+`MKPIPE     (logic[L1_NUM_WAYS-1:0],  hit_vec_mmx,                          MM2, NUM_MM_STAGES)
+`MKPIPE     (t_cl[L1_NUM_WAYS-1:0],   rd_cl_data_set_mmx,                   MM2, NUM_MM_STAGES)
+`MKPIPE_INIT(logic,                   flq_addr_mat_mmx, flq_addr_mat_mm2,   MM2, NUM_MM_STAGES)
+`MKPIPE     (t_cl,                    rd_cl_data_mmx,                       MM3, NUM_MM_STAGES)
+`MKPIPE     (t_rv_reg_data,           rd_cl_data_rot_mmx,                   MM4, NUM_MM_STAGES)
 
 // SHOULD BE PORTS!
 logic         state_rd_en_mm1;
@@ -125,6 +134,8 @@ assign tag_rd_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1]
 assign tag_wr_en_mm1    = '0;
 assign tag_wr_tag_mm1   = '0;
 assign tag_wr_way_mm1   = '0;
+
+assign req_pkt_mm1 = req_pkt_mmx[MM1];
 
     //
     // MM2
@@ -173,11 +184,12 @@ assign valid_mm5   = valid_mmx[MM5];
 assign req_pkt_mm5 = req_pkt_mmx[MM5];
 assign flq_alloc_mm5 = valid_mm5
                      & req_pkt_mmx[MM5].arb_type inside {MEM_LOAD, MEM_STORE}
-                     & ~hit_mmx[MM5];
+                     & ~hit_mmx[MM5]
+                     & ~flq_addr_mat_mmx[MM5];
 
 always_comb begin
-    action_mm5.complete = valid_mmx[MM5];
-    action_mm5.recycle  = 1'b0;
+    action_mm5.complete = valid_mmx[MM5] & hit_mmx[MM5];
+    action_mm5.recycle  = valid_mmx[MM5] & ~action_mm5.complete;
 end
 
 always_comb begin

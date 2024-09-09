@@ -21,6 +21,10 @@ module fillq
     output t_mempipe_arb    pipe_req_pkt_mm0,
     input  logic            pipe_gnt_mm0,
 
+    input  t_mempipe_arb    pipe_pkt_mm1,
+
+    output logic            flq_addr_mat_mm2,
+
     input  logic            pipe_valid_mm5,
     input  t_mempipe_arb    pipe_req_pkt_mm5,
     input  t_mempipe_action pipe_action_mm5
@@ -107,6 +111,34 @@ for (genvar e=0; e<FLQ_NUM_ENTRIES; e++) begin : g_flq_entries
         .pipe_action_mm5
     );
 end
+
+//
+// CAM
+//
+
+if(1) begin : g_pipe_cam
+    logic[FLQ_NUM_ENTRIES-1:0] e_pipe_pkt_addr_mat_set_mm1;
+    logic[FLQ_NUM_ENTRIES-1:0] e_pipe_pkt_addr_mat_ful_mm1;
+    logic                      q_pipe_pkt_addr_mat_mm1;
+    logic                      q_pipe_pkt_addr_mat_mm2;
+    for (genvar e=0; e<FLQ_NUM_ENTRIES; e++) begin : g_cam_loop
+        assign e_pipe_pkt_addr_mat_set_mm1[e] = e_valid[e] & e_static[e].paddr                      == pipe_pkt_mm1.addr;
+        assign e_pipe_pkt_addr_mat_ful_mm1[e] = e_valid[e] & e_static[e].paddr[L1_SET_HI:L1_SET_LO] == pipe_pkt_mm1.addr[L1_SET_HI:L1_SET_LO];
+    end
+    assign q_pipe_pkt_addr_mat_mm1 = (|e_pipe_pkt_addr_mat_set_mm1); // FIXME: too conservative
+    `DFF(q_pipe_pkt_addr_mat_mm2, q_pipe_pkt_addr_mat_mm1, clk)
+    assign flq_addr_mat_mm2 = q_pipe_pkt_addr_mat_mm2;
+end
+
+//
+// SVAs
+//
+
+`ifdef SIMULATION
+    for (genvar e=0; e<FLQ_NUM_ENTRIES; e++) begin : g_addr_chk
+        `VASSERT(a_addr_chk, q_alloc_mm5 & e_valid[e], q_alloc_static_mm5.paddr != e_static[e].paddr, "Multiple FLQ entries with same PA!")
+    end
+`endif
 
 //
 // Debug

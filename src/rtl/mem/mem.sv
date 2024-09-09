@@ -34,17 +34,21 @@ logic ld_req_mm0; t_mempipe_arb ld_req_pkt_mm0; logic ld_gnt_mm0;
 logic st_req_mm0; t_mempipe_arb st_req_pkt_mm0; logic st_gnt_mm0;
 logic fl_req_mm0; t_mempipe_arb fl_req_pkt_mm0; logic fl_gnt_mm0;
 
+t_mempipe_arb    pipe_pkt_mm1;
+
+logic            tag_rd_en_mm1;
+logic            tag_wr_en_mm1;
+t_l1_set_addr    set_addr_mm1;
+t_l1_tag         tag_wr_tag_mm1;
+t_l1_way         tag_wr_way_mm1;
+t_l1_tag         tag_rd_ways_mm2[L1_NUM_WAYS-1:0];
+
+logic            flq_addr_mat_mm2;
+
 logic            flq_alloc_mm5;
 logic            pipe_valid_mm5;
 t_mempipe_arb    pipe_req_pkt_mm5;
 t_mempipe_action pipe_action_mm5;
-
-logic              tag_rd_en_mm1;
-logic              tag_wr_en_mm1;
-t_l1_set_addr      set_addr_mm1;
-t_l1_tag           tag_wr_tag_mm1;
-t_l1_way           tag_wr_way_mm1;
-t_l1_tag           tag_rd_ways_mm2[L1_NUM_WAYS-1:0];
 
 //
 // Logic
@@ -106,6 +110,9 @@ fillq fillq (
     .pipe_req_pkt_mm0 ( fl_req_pkt_mm0 ) ,
     .pipe_gnt_mm0     ( fl_gnt_mm0     ) ,
 
+    .pipe_pkt_mm1,
+    .flq_addr_mat_mm2,
+
     .pipe_valid_mm5,
     .pipe_req_pkt_mm5,
     .pipe_action_mm5
@@ -144,12 +151,15 @@ mempipe mempipe (
     .st_req_mm0, .st_req_pkt_mm0, .st_gnt_mm0,
     .fl_req_mm0, .fl_req_pkt_mm0, .fl_gnt_mm0,
 
+    .req_pkt_mm1 ( pipe_pkt_mm1 ) ,
     .set_addr_mm1,
 
     .tag_rd_en_mm1,
     .tag_wr_en_mm1,
     .tag_wr_tag_mm1,
     .tag_wr_way_mm1,
+
+    .flq_addr_mat_mm2,
 
     .tag_rd_ways_mm2,
     .state_rd_ways_mm2,

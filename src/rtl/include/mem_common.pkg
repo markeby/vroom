@@ -8,35 +8,31 @@ package mem_common;
     import common::*;
     import instr::*;
 
-    localparam MEMID_SZ     = 3;
-
-    typedef logic[MEMID_SZ-1:0] t_memid;
-
     typedef struct packed {
-        logic   valid;
-        t_memid id;
-        t_paddr addr;
+        logic    valid;
+        t_mem_id id;
+        t_paddr  addr;
     } t_fe_fb_req;
 
     typedef struct packed {
         logic      valid;
-        t_memid    id;
+        t_mem_id   id;
         t_rv_instr instr;
         t_paddr    pc;
     } t_fb_fe_rsp;
 
     typedef struct packed {
-        logic   valid;
-        t_memid id;
-        t_paddr addr;
+        logic    valid;
+        t_mem_id id;
+        t_paddr  addr;
     } t_mem_req;
 
     typedef struct packed {
-        logic   valid;
-        t_memid id;
-        t_cl    data;
+        logic    valid;
+        t_mem_id id;
+        t_cl     data;
         `ifdef SIMULATION
-        t_paddr __addr_inst;
+        t_paddr  __addr_inst;
         `endif
     } t_mem_rsp;
 

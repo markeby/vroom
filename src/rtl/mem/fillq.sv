@@ -15,6 +15,9 @@ module fillq
     input  logic            clk,
     input  logic            reset,
 
+    output t_mem_req        flq_mem_req_pkt,
+    input  t_mem_rsp        flq_mem_rsp_pkt,
+
     input  logic            flq_alloc_mm5,
 
     output logic            pipe_req_mm0,
@@ -51,6 +54,14 @@ t_flq_static e_static [FLQ_NUM_ENTRIES-1:0];
 logic                      q_pipe_req_mm0;
 t_mempipe_arb              q_pipe_req_pkt_mm0;
 logic                      q_pipe_gnt_mm0;
+
+logic[FLQ_NUM_ENTRIES-1:0] e_mem_req;
+t_mem_req                  e_mem_req_pkt [FLQ_NUM_ENTRIES-1:0];
+logic[FLQ_NUM_ENTRIES-1:0] e_mem_gnt;
+
+logic                      q_mem_req;
+t_mem_req                  q_mem_req_pkt;
+logic                      q_mem_gnt;
 
 //
 // Logic
@@ -91,6 +102,24 @@ assign pipe_req_pkt_mm0 = q_pipe_req_pkt_mm0;
 assign q_pipe_gnt_mm0   = pipe_gnt_mm0;
 
 //
+// Mem arb
+//
+
+gen_arbiter #(.POLICY("FIND_FIRST"), .NREQS(FLQ_NUM_ENTRIES), .T(t_mem_req)) mem_arb (
+    .clk,
+    .reset,
+    .int_req_valids ( e_mem_req     ) ,
+    .int_req_pkts   ( e_mem_req_pkt ) ,
+    .int_gnts       ( e_mem_gnt     ) ,
+    .ext_req_valid  ( q_mem_req     ) ,
+    .ext_req_pkt    ( q_mem_req_pkt ) ,
+    .ext_gnt        ( q_mem_gnt     )
+);
+
+assign flq_mem_req_pkt = q_mem_req_pkt;
+assign q_mem_gnt       = q_mem_req;
+
+//
 // Entries
 //
 
@@ -103,6 +132,10 @@ for (genvar e=0; e<FLQ_NUM_ENTRIES; e++) begin : g_flq_entries
         .e_alloc_mm5        ( e_alloc_mm5[e]        ) ,
         .q_alloc_static_mm5,
         .e_static           ( e_static[e]           ) ,
+        .e_mem_req          ( e_mem_req[e]          ) ,
+        .e_mem_req_pkt      ( e_mem_req_pkt[e]      ) ,
+        .e_mem_gnt          ( e_mem_gnt[e]          ) ,
+        .q_mem_rsp_pkt      ( '0                    ) ,
         .e_pipe_req_mm0     ( e_pipe_req_mm0[e]     ) ,
         .e_pipe_req_pkt_mm0 ( e_pipe_req_pkt_mm0[e] ) ,
         .e_pipe_gnt_mm0     ( e_pipe_gnt_mm0[e]     ) ,

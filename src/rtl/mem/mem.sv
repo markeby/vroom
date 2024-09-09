@@ -105,6 +105,8 @@ fillq fillq (
     .reset,
 
     .flq_alloc_mm5,
+    .flq_mem_req_pkt  (    ),
+    .flq_mem_rsp_pkt  ( '0 ),
 
     .pipe_req_mm0     ( fl_req_mm0     ) ,
     .pipe_req_pkt_mm0 ( fl_req_pkt_mm0 ) ,

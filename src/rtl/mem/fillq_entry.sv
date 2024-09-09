@@ -17,6 +17,12 @@ module fillq_entry
 
     output logic            e_valid,
 
+    output logic            e_mem_req,
+    output t_mem_req        e_mem_req_pkt,
+    input  logic            e_mem_gnt,
+
+    input  t_mem_rsp        q_mem_rsp_pkt,
+
     input  logic            e_alloc_mm5,
     input  t_flq_static     q_alloc_static_mm5,
     output t_flq_static     e_static,
@@ -38,12 +44,17 @@ logic e_complete_mm5;
 logic e_recycle_mm5;
 logic e_action_valid_mm5;
 
+logic e_mem_rsp_valid;
+
 //
 // FSM
 //
 
 typedef enum logic[2:0] {
     FLQ_IDLE,
+    FLQ_PDG_EVQ,
+    FLQ_REQ_MEM,
+    FLQ_PDG_MEM,
     FLQ_REQ_PIPE,
     FLQ_PDG_PIPE,
     FLQ_WAIT
@@ -56,7 +67,10 @@ always_comb begin
         fsm_nxt = FLQ_IDLE;
     end else begin
         unique casez(fsm)
-            FLQ_IDLE:     if ( e_alloc_mm5      ) fsm_nxt = FLQ_REQ_PIPE;
+            FLQ_IDLE:     if ( e_alloc_mm5      ) fsm_nxt = FLQ_PDG_EVQ;
+            FLQ_PDG_EVQ:  if ( 1'b1             ) fsm_nxt = FLQ_REQ_MEM;
+            FLQ_REQ_MEM:  if ( e_mem_gnt        ) fsm_nxt = FLQ_PDG_MEM;
+            FLQ_PDG_MEM:  if ( e_mem_rsp_valid  ) fsm_nxt = FLQ_REQ_PIPE;
             FLQ_REQ_PIPE: if ( e_pipe_gnt_mm0   ) fsm_nxt = FLQ_PDG_PIPE;
             FLQ_PDG_PIPE: if ( e_complete_mm5   ) fsm_nxt = FLQ_IDLE;
                      else if ( e_recycle_mm5    ) fsm_nxt = FLQ_WAIT;
@@ -68,6 +82,7 @@ end
 
 assign e_valid        = (fsm != FLQ_IDLE);
 assign e_pipe_req_mm0 = (fsm == FLQ_REQ_PIPE);
+assign e_mem_req      = (fsm == FLQ_REQ_MEM);
 
 //
 // Logic
@@ -91,6 +106,14 @@ always_comb begin
     e_pipe_req_pkt_mm0.SIMID    = e_static.SIMID;
     `endif
 end
+
+always_comb begin
+    e_mem_req_pkt.valid = e_mem_req;
+    e_mem_req_pkt.addr  = e_static.paddr;
+    e_mem_req_pkt.id    = id;
+end
+
+assign e_mem_rsp_valid = q_mem_rsp_pkt.valid & q_mem_rsp_pkt.id == id;
 
 //
 // Debug

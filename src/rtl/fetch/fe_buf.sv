@@ -164,7 +164,7 @@ always_comb begin
     end else begin
         for (int i=0; i<FE_FB_NUM_ENTS; i++) begin
             fb_fe_rsp_nxt_nnn    |= e_fe_rsp_gn_nnn[i] ? e_fe_rsp_pkt_nnn[i] : '0;
-            fb_fe_rsp_nxt_nnn.id |= e_fe_rsp_gn_nnn[i] ? t_memid'(i)         : '0;
+            fb_fe_rsp_nxt_nnn.id |= e_fe_rsp_gn_nnn[i] ? t_mem_id'(i)        : '0;
         end
     end
 end
@@ -188,7 +188,7 @@ always_comb begin
     fb_ic_req_nnn = '0;
     fb_ic_req_nnn.valid = |e_ic_req_rq_nnn;
     fb_ic_req_nnn.addr  = e_static_nnn[c_ic_req_sl_nnn].req.addr;
-    fb_ic_req_nnn.id    = t_memid'(c_ic_req_sl_nnn);
+    fb_ic_req_nnn.id    = t_mem_id'(c_ic_req_sl_nnn);
 end
 
 // IC rsp
@@ -196,7 +196,7 @@ end
 always_comb begin
     for (int i=0; i<FE_FB_NUM_ENTS; i++) begin
         e_ic_rsp_pkt_nnn[i]        = ic_fb_rsp_nnn;
-        e_ic_rsp_pkt_nnn[i].valid &= ic_fb_rsp_nnn.id == t_memid'(i);
+        e_ic_rsp_pkt_nnn[i].valid &= ic_fb_rsp_nnn.id == t_mem_id'(i);
     end
 end
 

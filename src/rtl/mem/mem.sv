@@ -30,14 +30,11 @@ module mem
 // Nets
 //
 
-logic            ld_req_mm0;
-t_mempipe_arb    ld_req_pkt_mm0;
-logic            ld_gnt_mm0;
+logic ld_req_mm0; t_mempipe_arb ld_req_pkt_mm0; logic ld_gnt_mm0;
+logic st_req_mm0; t_mempipe_arb st_req_pkt_mm0; logic st_gnt_mm0;
+logic fl_req_mm0; t_mempipe_arb fl_req_pkt_mm0; logic fl_gnt_mm0;
 
-logic            st_req_mm0;
-t_mempipe_arb    st_req_pkt_mm0;
-logic            st_gnt_mm0;
-
+logic            flq_alloc_mm5;
 logic            pipe_valid_mm5;
 t_mempipe_arb    pipe_req_pkt_mm5;
 t_mempipe_action pipe_action_mm5;
@@ -97,6 +94,23 @@ storeq storeq (
     .pipe_action_mm5
 );
 
+// Fills
+
+fillq fillq (
+    .clk,
+    .reset,
+
+    .flq_alloc_mm5,
+
+    .pipe_req_mm0     ( fl_req_mm0     ) ,
+    .pipe_req_pkt_mm0 ( fl_req_pkt_mm0 ) ,
+    .pipe_gnt_mm0     ( fl_gnt_mm0     ) ,
+
+    .pipe_valid_mm5,
+    .pipe_req_pkt_mm5,
+    .pipe_action_mm5
+);
+
 // MemPipe
 
 t_mesi           state_rd_ways_mm2 [L1_NUM_WAYS-1:0];
@@ -128,6 +142,7 @@ mempipe mempipe (
 
     .ld_req_mm0, .ld_req_pkt_mm0, .ld_gnt_mm0,
     .st_req_mm0, .st_req_pkt_mm0, .st_gnt_mm0,
+    .fl_req_mm0, .fl_req_pkt_mm0, .fl_gnt_mm0,
 
     .set_addr_mm1,
 
@@ -143,6 +158,7 @@ mempipe mempipe (
     .valid_mm5    ( pipe_valid_mm5   ) ,
     .req_pkt_mm5  ( pipe_req_pkt_mm5 ) ,
     .action_mm5   ( pipe_action_mm5  ) ,
+    .flq_alloc_mm5,
 
     .iprf_wr_en_mm5,
     .iprf_wr_pkt_mm5,

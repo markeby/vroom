@@ -49,6 +49,13 @@ package mem_defs;
     } t_ldq_static;
 
     typedef struct packed {
+        `SIMID_STRUCT
+        t_vaddr        paddr;
+        t_mem_id       alloc_id;
+        t_mem_arb_type alloc_type;
+    } t_flq_static;
+
+    typedef struct packed {
         logic complete;
         logic recycle;
     } t_mempipe_action;

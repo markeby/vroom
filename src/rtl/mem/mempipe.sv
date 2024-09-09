@@ -23,6 +23,10 @@ module mempipe
     input  t_mempipe_arb    st_req_pkt_mm0,
     output logic            st_gnt_mm0,
 
+    input  logic            fl_req_mm0,
+    input  t_mempipe_arb    fl_req_pkt_mm0,
+    output logic            fl_gnt_mm0,
+
     output t_l1_set_addr    set_addr_mm1,
     output logic            tag_rd_en_mm1,
     output logic            tag_wr_en_mm1,
@@ -36,6 +40,7 @@ module mempipe
     output logic            valid_mm5,
     output t_mempipe_arb    req_pkt_mm5,
     output t_mempipe_action action_mm5,
+    output logic            flq_alloc_mm5,
 
     output t_rob_complete_pkt complete_mm5,
     output logic              iprf_wr_en_mm5,
@@ -88,12 +93,12 @@ logic         data_rd_en_mm1;
     // - Arbitration
     //
 
-gen_arbiter #(.POLICY("FIND_FIRST"), .NREQS(2), .T(t_mempipe_arb)) pipe_arb (
+gen_arbiter #(.POLICY("FIND_FIRST"), .NREQS(3), .T(t_mempipe_arb)) pipe_arb (
     .clk,
     .reset,
-    .int_req_valids ( {ld_req_mm0,     st_req_mm0    } ) ,
-    .int_req_pkts   ( {ld_req_pkt_mm0, st_req_pkt_mm0} ) ,
-    .int_gnts       ( {ld_gnt_mm0,     st_gnt_mm0    } ) ,
+    .int_req_valids ( {ld_req_mm0,     st_req_mm0,     fl_req_mm0    } ) ,
+    .int_req_pkts   ( {ld_req_pkt_mm0, st_req_pkt_mm0, fl_req_pkt_mm0} ) ,
+    .int_gnts       ( {ld_gnt_mm0,     st_gnt_mm0,     fl_gnt_mm0    } ) ,
     .ext_req_valid  ( valid_mm0          ) ,
     .ext_req_pkt    ( req_pkt_mm0        ) ,
     .ext_gnt        ( 1'b1               )
@@ -166,6 +171,9 @@ end
 
 assign valid_mm5   = valid_mmx[MM5];
 assign req_pkt_mm5 = req_pkt_mmx[MM5];
+assign flq_alloc_mm5 = valid_mm5
+                     & req_pkt_mmx[MM5].arb_type inside {MEM_LOAD, MEM_STORE}
+                     & ~hit_mmx[MM5];
 
 always_comb begin
     action_mm5.complete = valid_mmx[MM5];

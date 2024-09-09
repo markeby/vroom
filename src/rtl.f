@@ -25,6 +25,8 @@ src/rtl/mem/loadq.sv
 src/rtl/mem/loadq_entry.sv
 src/rtl/mem/storeq.sv
 src/rtl/mem/storeq_entry.sv
+src/rtl/mem/fillq.sv
+src/rtl/mem/fillq_entry.sv
 
 src/rtl/mem/l1tag.sv
 

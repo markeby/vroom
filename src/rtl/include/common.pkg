@@ -127,10 +127,14 @@ package common;
     localparam STQ_NUM_ENTRIES = 8;
     localparam STQ_NUM_ENTRIES_LG2 = $clog2(STQ_NUM_ENTRIES);
 
+    localparam FLQ_NUM_ENTRIES = 8;
+    localparam FLQ_NUM_ENTRIES_LG2 = $clog2(FLQ_NUM_ENTRIES);
+
     localparam MEM_ID_WIDTH = LDQ_NUM_ENTRIES_LG2; // FIXME: should be MAX of all IDs
 
     typedef logic[LDQ_NUM_ENTRIES_LG2-1:0] t_ldq_id;
     typedef logic[STQ_NUM_ENTRIES_LG2-1:0] t_stq_id;
+    typedef logic[FLQ_NUM_ENTRIES_LG2-1:0] t_flq_id;
     typedef logic[MEM_ID_WIDTH-1:0] t_mem_id;
 
     //////////////////////////////

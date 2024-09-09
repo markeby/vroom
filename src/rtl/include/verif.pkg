@@ -9,12 +9,15 @@ package verif;
 
         typedef enum logic[2:0] {
             FETCH,
-            UOP
+            UOP,
+            FILL
         } t_simid_spawn_point;
+
+        typedef logic[95:0] t_simid_record;
 
         typedef struct packed {
             t_simid_spawn_point spawn;
-            logic[95:0]         record;
+            t_simid_record      record;
         } t_simid_key;
 
         typedef struct packed {
@@ -35,10 +38,10 @@ package verif;
             '{fid:FID, pc:PC, txid:t_simid_key'(FID), pid: t_simid_key'('0), lid: t_simid_key'(FID)}
 
         `define SIMID_SPAWN_RHS(PARENT,SPAWN,RECORD) \
-            '{fid:PARENT.fid, pc:PARENT.pc, txid: PARENT.txid, pid: PARENT.lid, lid: '{spawn_point:SPAWN, record:RECORD}}
+            '{fid:PARENT.fid, pc:PARENT.pc, txid: PARENT.txid, pid: PARENT.lid, lid: '{spawn:SPAWN, record:RECORD}}
 
         `define SIMID_SPAWN_CNTR(NAME,SPAWN_NOW,CLK,PARENT,SPAWN) \
-            int __simid_cntr_``NAME``; \
+            t_simid_record __simid_cntr_``NAME``; \
             initial __simid_cntr_``NAME`` = '0; \
             always_ff @(posedge CLK) if (SPAWN_NOW) __simid_cntr_``NAME`` <= __simid_cntr_``NAME`` + 1; \
             t_simid NAME; \

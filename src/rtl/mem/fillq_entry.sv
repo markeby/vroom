@@ -46,6 +46,8 @@ logic e_action_valid_mm5;
 
 logic e_mem_rsp_valid;
 
+t_cl e_data;
+
 //
 // FSM
 //
@@ -98,6 +100,8 @@ always_comb begin
     e_pipe_req_pkt_mm0          = '0;
     e_pipe_req_pkt_mm0.id       = id;
     e_pipe_req_pkt_mm0.arb_type = MEM_FILL;
+    e_pipe_req_pkt_mm0.arb_way  = t_l1_way'('0);
+    e_pipe_req_pkt_mm0.arb_data = e_data;
     e_pipe_req_pkt_mm0.addr     = e_static.paddr;
     e_pipe_req_pkt_mm0.robid    = '0;
     e_pipe_req_pkt_mm0.pdst     = '0;
@@ -116,6 +120,8 @@ always_comb begin
 end
 
 assign e_mem_rsp_valid = q_mem_rsp_pkt.valid & q_mem_rsp_pkt.id == id;
+
+`DFF_EN(e_data, q_mem_rsp_pkt.data, clk, e_mem_rsp_valid)
 
 //
 // Debug

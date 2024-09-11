@@ -199,8 +199,8 @@ package instr;
 
     function automatic string f_describe_gpr_data(t_rv_reg_data data, logic hide_zeros);
         if (hide_zeros && data == 0)
-            return $sformatf("..........");
-        return $sformatf("0x%08h", data);
+            return $sformatf("..................");
+        return $sformatf("0x%016h", data);
     endfunction
 
     `endif

@@ -28,20 +28,30 @@ module mempipe
     output logic            fl_gnt_mm0,
 
     output t_l1_set_addr    set_addr_mm1,
+
     output logic            tag_rd_en_mm1,
     output logic            tag_wr_en_mm1,
     output t_l1_tag         tag_wr_tag_mm1,
     output t_l1_way         tag_wr_way_mm1,
+    input  t_l1_tag         tag_rd_ways_mm2   [L1_NUM_WAYS-1:0],
+
+    output logic            state_rd_en_mm1,
+    output logic            state_wr_en_mm1,
+    output t_mesi           state_wr_state_mm1,
+    output t_l1_way         state_wr_way_mm1,
+    input  t_mesi           state_rd_ways_mm2 [L1_NUM_WAYS-1:0],
+
+    output logic            data_rd_en_mm1,
+    output logic            data_wr_en_mm1,
+    output t_cl             data_wr_data_mm1,
+    output t_l1_way         data_wr_way_mm1,
+    input  t_cl             data_rd_ways_mm2 [L1_NUM_WAYS-1:0],
 
     // FLQ CAM
     output t_mempipe_arb    req_pkt_mm1,
 
     // FLQ CAM
     input  logic            flq_addr_mat_mm2,
-
-    input  t_l1_tag         tag_rd_ways_mm2   [L1_NUM_WAYS-1:0],
-    input  t_mesi           state_rd_ways_mm2 [L1_NUM_WAYS-1:0],
-    input  t_cl             data_rd_ways_mm2  [L1_NUM_WAYS-1:0],
 
     output logic            valid_mm5,
     output t_mempipe_arb    req_pkt_mm5,
@@ -90,10 +100,6 @@ logic valid_mm0;
 `MKPIPE     (t_cl,                    rd_cl_data_mmx,                       MM3, NUM_MM_STAGES)
 `MKPIPE     (t_rv_reg_data,           rd_cl_data_rot_mmx,                   MM4, NUM_MM_STAGES)
 
-// SHOULD BE PORTS!
-logic         state_rd_en_mm1;
-logic         data_rd_en_mm1;
-
 //
 // Logic
 //
@@ -128,14 +134,22 @@ assign cacheable_mmx[MM0] = valid_mm0;
     //
 
 assign paddr_mmx[MM1]   = req_pkt_mmx[MM1].addr;
-assign state_rd_en_mm1  = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
-assign data_rd_en_mm1   = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1]                  );
 assign set_addr_mm1     = req_pkt_mmx[MM1].addr[L1_SET_HI:L1_SET_LO];
 
 assign tag_rd_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
 assign tag_wr_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_fl_mmx[MM1] );
 assign tag_wr_tag_mm1   = req_pkt_mmx[MM1].addr[L1_TAG_HI:L1_TAG_LO];
-assign tag_wr_way_mm1   = '0;
+assign tag_wr_way_mm1   = req_pkt_mmx[MM1].arb_way;
+
+assign state_rd_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
+assign state_wr_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_fl_mmx[MM1] );
+assign state_wr_state_mm1 = MESI_E; // FIXME
+assign state_wr_way_mm1   = req_pkt_mmx[MM1].arb_way;
+
+assign data_rd_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
+assign data_wr_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_fl_mmx[MM1] );
+assign data_wr_data_mm1  = req_pkt_mmx[MM1].arb_data;
+assign data_wr_way_mm1   = req_pkt_mmx[MM1].arb_way;
 
 assign req_pkt_mm1 = req_pkt_mmx[MM1];
 

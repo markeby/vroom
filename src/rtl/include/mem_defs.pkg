@@ -28,10 +28,12 @@ package mem_defs;
         `SIMID_STRUCT
         t_mem_id       id;
         t_mem_arb_type arb_type;
+        t_cl           arb_data;
+        t_l1_way       arb_way;
+        t_stq_id       yost;
         t_vaddr        addr;
         t_rob_id       robid;
         t_prf_id       pdst;
-        t_stq_id       yost;
     } t_mempipe_arb;
 
     typedef struct packed {

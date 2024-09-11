@@ -39,12 +39,25 @@ logic fl_req_mm0; t_mempipe_arb fl_req_pkt_mm0; logic fl_gnt_mm0;
 
 t_mempipe_arb    pipe_pkt_mm1;
 
+t_l1_set_addr    set_addr_mm1;
+
 logic            tag_rd_en_mm1;
 logic            tag_wr_en_mm1;
-t_l1_set_addr    set_addr_mm1;
 t_l1_tag         tag_wr_tag_mm1;
 t_l1_way         tag_wr_way_mm1;
 t_l1_tag         tag_rd_ways_mm2[L1_NUM_WAYS-1:0];
+
+logic            state_rd_en_mm1;
+logic            state_wr_en_mm1;
+t_mesi           state_wr_state_mm1;
+t_l1_way         state_wr_way_mm1;
+t_mesi           state_rd_ways_mm2[L1_NUM_WAYS-1:0];
+
+logic            data_rd_en_mm1;
+logic            data_wr_en_mm1;
+t_cl             data_wr_data_mm1;
+t_l1_way         data_wr_way_mm1;
+t_cl             data_rd_ways_mm2[L1_NUM_WAYS-1:0];
 
 logic            flq_addr_mat_mm2;
 
@@ -124,15 +137,6 @@ fillq fillq (
     .pipe_action_mm5
 );
 
-// MemPipe
-
-t_mesi           state_rd_ways_mm2 [L1_NUM_WAYS-1:0];
-t_cl             data_rd_ways_mm2  [L1_NUM_WAYS-1:0];
-for (genvar w=0; w<L1_NUM_WAYS; w++) begin : g_garbage
-    assign state_rd_ways_mm2[w] = t_mesi'('0);
-    assign data_rd_ways_mm2[w] = '0;
-end
-
 // Arrays 
 
 l1tag l1tag (
@@ -147,6 +151,34 @@ l1tag l1tag (
 
     .tag_rd_ways_mm2
 );
+
+l1state l1state (
+    .clk,
+    .reset,
+
+    .state_rd_en_mm1,
+    .state_wr_en_mm1,
+    .set_addr_mm1,
+    .state_wr_state_mm1,
+    .state_wr_way_mm1,
+
+    .state_rd_ways_mm2
+);
+
+l1data l1data (
+    .clk,
+    .reset,
+
+    .data_rd_en_mm1,
+    .data_wr_en_mm1,
+    .set_addr_mm1,
+    .data_wr_data_mm1,
+    .data_wr_way_mm1,
+
+    .data_rd_ways_mm2
+);
+
+// Pipeline 
 
 mempipe mempipe (
     .clk,
@@ -164,12 +196,21 @@ mempipe mempipe (
     .tag_wr_en_mm1,
     .tag_wr_tag_mm1,
     .tag_wr_way_mm1,
+    .tag_rd_ways_mm2,
+
+    .state_rd_en_mm1,
+    .state_wr_en_mm1,
+    .state_wr_state_mm1,
+    .state_wr_way_mm1,
+    .state_rd_ways_mm2,
+
+    .data_rd_en_mm1,
+    .data_wr_en_mm1,
+    .data_wr_data_mm1,
+    .data_wr_way_mm1,
+    .data_rd_ways_mm2,
 
     .flq_addr_mat_mm2,
-
-    .tag_rd_ways_mm2,
-    .state_rd_ways_mm2,
-    .data_rd_ways_mm2,
 
     .valid_mm5    ( pipe_valid_mm5   ) ,
     .req_pkt_mm5  ( pipe_req_pkt_mm5 ) ,

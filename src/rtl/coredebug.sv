@@ -275,7 +275,7 @@ function automatic void dump_gprs();
     `PMSG(CDBG, ("GPR State"))
     `PMSG(CDBG, ("---------"))
     for (int g=0; g<(RV_NUM_REGS/4); g++) begin
-        `PMSG(CDBG, ("%28s  %28s  %28s  %28s",
+        `PMSG(CDBG, ("%34s  %34s  %34s  %34s",
             f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*0), 1'b1),
             f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*1), 1'b1),
             f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*2), 1'b1),

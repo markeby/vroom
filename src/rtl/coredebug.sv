@@ -8,12 +8,13 @@
 `include "vroom_macros.sv"
 `include "rob_defs.pkg"
 `include "verif.pkg"
+`include "mem_defs.pkg"
 
 `ifdef SIMULATION
 
 /* verilator lint_off BLKSEQ */
 module coredebug
-    import instr::*, instr_decode::*, mem_common::*, common::*, rob_defs::*, verif::*;
+    import instr::*, instr_decode::*, mem_common::*, common::*, rob_defs::*, verif::*, mem_defs::*;
 (
     input  logic clk,
     input  logic reset
@@ -49,7 +50,6 @@ typedef struct packed {
     int          clk;
     t_iss_pkt    iss_pkt_rs2;
     logic        mm_iss_rs2;
-    t_vaddr      vaddr;
 } t_cd_rs;
 
 typedef struct packed {
@@ -65,12 +65,22 @@ typedef struct packed {
 } t_cd_retire;
 
 typedef struct packed {
+    logic        valid;
+    int          clk;
+    logic        ldq_alloc_mm0;
+    logic        stq_alloc_mm0;
+    t_ldq_static ldq_alloc_static_mm0;
+    t_stq_static stq_alloc_static_mm0;
+} t_cd_mem;
+
+typedef struct packed {
     t_simid       SIMID;
     t_cd_fetch    FETCH;
     t_cd_decode   DECODE;
     t_cd_rename   RENAME;
     t_cd_alloc    ALLOC;
     t_cd_rs       RS;
+    t_cd_mem      MEM;
     t_cd_result   RESULT;
     t_cd_retire   RETIRE;
 } t_cd_inst;
@@ -87,19 +97,27 @@ function automatic string f_describe_src_dst(t_optype optype, t_rv_reg_addr opre
     endcase
 endfunction
 
+function automatic void cd_print_mem_rec(t_cd_inst rec);
+    if (rec.MEM.ldq_alloc_mm0) begin
+        `PMSG(CDBG, ($sformatf("Ld VA:%08h DATA:%016h", rec.MEM.ldq_alloc_static_mm0.vaddr, rec.RESULT.iprf_wr_pkt_ro0.data)))
+    end else begin
+        `PMSG(CDBG, ($sformatf("St VA:%08h", rec.MEM.stq_alloc_static_mm0.vaddr)))
+    end
+endfunction
+
 task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ("---------------------[ %4d @%-4t ]---------------------", top.cclk_count, $time()));
     `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
     `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.ALLOC.disp_pkt_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
     `PMSG(CDBG, (""))
+    if (rec.RS.mm_iss_rs2) begin
+        cd_print_mem_rec(rec);
+        `PMSG(CDBG, (""))
+    end
     `PMSG(CDBG, ($sformatf(" src1 %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.src1.optype, rec.RS.iss_pkt_rs2.uinstr.src1.opreg, rec.RENAME.rename_rn1.psrc1, rec.RS.iss_pkt_rs2.src1_val))))
     `PMSG(CDBG, ($sformatf(" src2 %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.src2.optype, rec.RS.iss_pkt_rs2.uinstr.src2.opreg, rec.RENAME.rename_rn1.psrc2, rec.RS.iss_pkt_rs2.src2_val))))
     `PMSG(CDBG, ($sformatf("  dst %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.dst .optype, rec.RS.iss_pkt_rs2.uinstr.dst .opreg, rec.RENAME.rename_rn1.pdst , rec.RESULT.iprf_wr_pkt_ro0.data))))
     `PMSG(CDBG, (""))
-    if (rec.RS.mm_iss_rs2) begin
-        `PMSG(CDBG, ($sformatf("vaddr %08h", rec.RS.vaddr)))
-        `PMSG(CDBG, (""))
-    end
     `PMSG(CDBG, ("    Fetch  -> Decode @ %-d", rec.FETCH.clk))
     `PMSG(CDBG, ("    Decode -> Rename @ %-d", rec.DECODE.clk))
     `PMSG(CDBG, ("    Rename -> Alloc  @ %-d", rec.RENAME.clk))
@@ -192,7 +210,28 @@ task cd_rs();
     INSTQ[i].RS.clk = top.cclk_count;
     INSTQ[i].RS.iss_pkt_rs2 = top.core.rs.iss_pkt_rs2;
     INSTQ[i].RS.mm_iss_rs2 = top.core.rs.mm_iss_rs2;
-    INSTQ[i].RS.vaddr      = top.core.mem.loadq.q_alloc_static_mm0.vaddr;
+endtask
+
+task cd_mem_ld();
+    int i; i = f_instq_find_match(top.core.mem.loadq.q_alloc_static_mm0.SIMID);
+    if (INSTQ[i].MEM.valid) begin
+        $error("Trying to add mem to a record that is already valid!");
+    end
+    INSTQ[i].MEM.ldq_alloc_mm0 = top.core.mem.loadq.q_alloc_mm0;
+    INSTQ[i].MEM.ldq_alloc_static_mm0 = top.core.mem.loadq.q_alloc_static_mm0;
+    INSTQ[i].MEM.stq_alloc_mm0 = '0;
+    INSTQ[i].MEM.stq_alloc_static_mm0 = '0;
+endtask
+
+task cd_mem_st();
+    int i; i = f_instq_find_match(top.core.mem.storeq.q_alloc_static_mm0.SIMID);
+    if (INSTQ[i].MEM.valid) begin
+        $error("Trying to add mem to a record that is already valid!");
+    end
+    INSTQ[i].MEM.ldq_alloc_mm0 = '0;
+    INSTQ[i].MEM.ldq_alloc_static_mm0 = '0;
+    INSTQ[i].MEM.stq_alloc_mm0 = top.core.mem.storeq.q_alloc_mm0;
+    INSTQ[i].MEM.stq_alloc_static_mm0 = top.core.mem.storeq.q_alloc_static_mm0;
 endtask
 
 task cd_result_mm();
@@ -251,6 +290,8 @@ always_ff @(posedge clk) begin
     if (core.alloc.disp_valid_rs0) cd_alloc();
 
     if (core.rs.iss_rs2  ) cd_rs();
+    if (core.mem.loadq.q_alloc_mm0) cd_mem_ld();
+    if (core.mem.storeq.q_alloc_mm0) cd_mem_st();
     if (core.exe.complete_ex1.valid) cd_result_eint();
     if (core.mem.complete_mm5.valid) cd_result_mm();
 

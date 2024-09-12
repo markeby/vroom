@@ -203,6 +203,22 @@ package instr;
         return $sformatf("0x%016h", data);
     endfunction
 
+    function automatic string f_format_vaddr(t_vaddr addr);
+        return $sformatf("%08h", addr);
+    endfunction
+
+    function automatic string f_format_paddr(t_paddr addr);
+        return $sformatf("%08h", addr);
+    endfunction
+
+    function automatic string f_format_set(t_l1_set_addr addr);
+        return $sformatf("%02h", addr);
+    endfunction
+
+    function automatic string f_format_way(t_l1_way addr);
+        return $sformatf("%01h", addr);
+    endfunction
+
     `endif
 
 endpackage

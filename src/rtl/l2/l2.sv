@@ -1,15 +1,13 @@
 `ifndef __L2_SV
 `define __L2_SV
 
-`include "instr.pkg"
 `include "vroom_macros.sv"
-`include "rob_defs.pkg"
 `include "mem_common.pkg"
 `include "mem_defs.pkg"
 `include "gen_funcs.pkg"
 
 module l2
-    import instr::*, instr_decode::*, common::*, rob_defs::*, gen_funcs::*, mem_defs::*, mem_common::*;
+    import common::*, gen_funcs::*, mem_defs::*, mem_common::*;
 (
     input  logic            clk,
     input  logic            reset,

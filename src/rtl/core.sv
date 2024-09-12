@@ -256,6 +256,7 @@ rob rob (
 
 coredebug coredebug (.clk, .reset);
 preload preload (.clk, .reset);
+cdiff cdiff (.clk, .reset);
 
 `endif
 

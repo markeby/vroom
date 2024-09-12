@@ -52,3 +52,4 @@ src/rtl/gen/gen_arbiter.sv
 src/rtl/gen/gen_arbiter_ff.sv
 
 src/rtl/coredebug.sv
+src/rtl/sim/preload.sv

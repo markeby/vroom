@@ -76,6 +76,9 @@ t_rob_id          oldest_robid;
 t_rat_restore_pkt rat_restore_pkt_rbx;
 t_rat_reclaim_pkt rat_reclaim_pkt_rb1;
 
+t_mem_req_pkt  ic_l2_req_pkt;
+t_mem_rsp_pkt  l2_ic_rsp_pkt;
+
 //
 // Blocks
 //
@@ -83,6 +86,8 @@ t_rat_reclaim_pkt rat_reclaim_pkt_rb1;
 fe fe (
     .clk,
     .reset,
+    .ic_l2_req_pkt,
+    .l2_ic_rsp_pkt,
     .decode_ready_de0,
     .br_mispred_ex0,
     .valid_fe1,
@@ -216,8 +221,8 @@ l2 l2 (
     .dc_l2_req_pkt,
     .l2_dc_rsp_pkt,
 
-    .ic_l2_req_pkt ( '0 ),
-    .l2_ic_rsp_pkt (    )
+    .ic_l2_req_pkt,
+    .l2_ic_rsp_pkt
 );
 
 rob rob (
@@ -250,6 +255,7 @@ rob rob (
 `ifdef ASSERT
 
 coredebug coredebug (.clk, .reset);
+preload preload (.clk, .reset);
 
 `endif
 

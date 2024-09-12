@@ -66,7 +66,7 @@ always_comb begin
     `endif
     q_alloc_static_mm0.robid = iss_pkt_mm0.robid;
     q_alloc_static_mm0.pdst  = iss_pkt_mm0.pdst;
-    q_alloc_static_mm0.vaddr = '0;
+    q_alloc_static_mm0.vaddr = iss_pkt_mm0.src1_val + iss_pkt_mm0.src2_val;
     q_alloc_static_mm0.yost  = iss_pkt_mm0.meta.mem.stqid;
 end
 
@@ -119,7 +119,7 @@ end
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (iss_mm0) begin
-        `INFO(("unit:MM %s", describe_uinstr(iss_pkt_mm0.uinstr)))
+        `INFO(("unit:MM vaddr:%08h %s", q_alloc_static_mm0.vaddr, describe_uinstr(iss_pkt_mm0.uinstr)))
     end
 end
 `endif

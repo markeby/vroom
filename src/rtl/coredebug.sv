@@ -47,7 +47,9 @@ typedef struct packed {
 typedef struct packed {
     logic        valid;
     int          clk;
-    t_iss_pkt iss_pkt_rs2;
+    t_iss_pkt    iss_pkt_rs2;
+    logic        mm_iss_rs2;
+    t_vaddr      vaddr;
 } t_cd_rs;
 
 typedef struct packed {
@@ -94,6 +96,10 @@ task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ($sformatf(" src2 %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.src2.optype, rec.RS.iss_pkt_rs2.uinstr.src2.opreg, rec.RENAME.rename_rn1.psrc2, rec.RS.iss_pkt_rs2.src2_val))))
     `PMSG(CDBG, ($sformatf("  dst %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.dst .optype, rec.RS.iss_pkt_rs2.uinstr.dst .opreg, rec.RENAME.rename_rn1.pdst , rec.RESULT.iprf_wr_pkt_ro0.data))))
     `PMSG(CDBG, (""))
+    if (rec.RS.mm_iss_rs2) begin
+        `PMSG(CDBG, ($sformatf("vaddr %08h", rec.RS.vaddr)))
+        `PMSG(CDBG, (""))
+    end
     `PMSG(CDBG, ("    Fetch  -> Decode @ %-d", rec.FETCH.clk))
     `PMSG(CDBG, ("    Decode -> Rename @ %-d", rec.DECODE.clk))
     `PMSG(CDBG, ("    Rename -> Alloc  @ %-d", rec.RENAME.clk))
@@ -185,6 +191,8 @@ task cd_rs();
     INSTQ[i].RS.valid = 1'b1;
     INSTQ[i].RS.clk = top.cclk_count;
     INSTQ[i].RS.iss_pkt_rs2 = top.core.rs.iss_pkt_rs2;
+    INSTQ[i].RS.mm_iss_rs2 = top.core.rs.mm_iss_rs2;
+    INSTQ[i].RS.vaddr      = top.core.mem.loadq.q_alloc_static_mm0.vaddr;
 endtask
 
 task cd_result_mm();

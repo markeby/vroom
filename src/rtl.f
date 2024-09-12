@@ -53,3 +53,4 @@ src/rtl/gen/gen_arbiter_ff.sv
 
 src/rtl/coredebug.sv
 src/rtl/sim/preload.sv
+src/rtl/sim/cache_sim.pkg

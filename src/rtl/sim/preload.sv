@@ -5,9 +5,10 @@
 `include "asm.pkg"
 `include "mem_common.pkg"
 `include "vroom_macros.sv"
+`include "sim/cache_sim.pkg"
 
 module preload
-    import instr::*, asm::*, mem_common::*, common::*;
+    import instr::*, asm::*, mem_common::*, common::*, cache_sim::*;
 (
     input  logic      clk,
     input  logic      reset
@@ -179,56 +180,10 @@ initial begin
         for (int w=0; w<CL_SZ_BYTES/4; w++) begin
             cl.W[w] = IROM[byte_addr[IROM_SZ_LG2+1:2] + w];
         end
-        preload_l2_cl(cl, byte_addr, 1);
+        cache_sim::f_preload_l2_cl(cl, byte_addr, 1);
     end
 end
 /* verilator lint_on WIDTHEXPAND */
-
-function automatic void preload_l2_byte(t_byte b, t_paddr byte_addr, int display=0);
-    // $display("BYTE PRELOAD %0h %0h", byte_addr, b);
-    core.l2.MEMORY[byte_addr] = b;
-endfunction
-
-function automatic void preload_l2_word(t_word w, t_paddr byte_addr, int display=0);
-    if (byte_addr[1:0] != 0) begin
-        $error("preload_l2_word with misaligned addr");
-    end
-    for (logic[2:0] b=0; b<4; b++) begin
-        preload_l2_byte(w[8*b +: 8], byte_addr + t_paddr'(b), 0);
-    end
-endfunction
-
-function automatic t_word get_l2_word(t_paddr byte_addr);
-    logic[3:0][7:0] w;
-    w[0] = core.l2.MEMORY[byte_addr + 0];
-    w[1] = core.l2.MEMORY[byte_addr + 1];
-    w[2] = core.l2.MEMORY[byte_addr + 2];
-    w[3] = core.l2.MEMORY[byte_addr + 3];
-    get_l2_word = t_word'(w);
-endfunction
-
-function automatic void preload_l2_cl(t_cl c, t_paddr byte_addr, int display=0);
-    if (byte_addr[5:0] != 0) begin
-        $error("preload_l2_cl with misaligned addr");
-    end
-     // $display("PRELOAD %0h %0h", byte_addr, c);
-    for (t_paddr b=0; b<64; b++) begin
-        preload_l2_byte(c.B[b], byte_addr + b, 0);
-    end
-
-    // if (display) begin
-        `MEMLOG(("unit:PRELOAD pa:%08h / %016h %016h %016h %016h  %016h %016h %016h %016h ",
-            byte_addr,
-            {get_l2_word(byte_addr + 60), get_l2_word(byte_addr + 56)},
-            {get_l2_word(byte_addr + 52), get_l2_word(byte_addr + 48)},
-            {get_l2_word(byte_addr + 44), get_l2_word(byte_addr + 40)},
-            {get_l2_word(byte_addr + 36), get_l2_word(byte_addr + 32)},
-            {get_l2_word(byte_addr + 28), get_l2_word(byte_addr + 24)},
-            {get_l2_word(byte_addr + 20), get_l2_word(byte_addr + 16)},
-            {get_l2_word(byte_addr + 12), get_l2_word(byte_addr +  8)},
-            {get_l2_word(byte_addr +  4), get_l2_word(byte_addr     )}))
-    // end
-endfunction
 
 //
 // Displays

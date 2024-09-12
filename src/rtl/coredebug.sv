@@ -89,9 +89,9 @@ t_cd_inst  INSTQ[$];
 
 function automatic string f_describe_src_dst(t_optype optype, t_rv_reg_addr opreg, t_prf_id psrc, t_rv_reg_data value);
     unique casez(optype)
-        OP_REG:  f_describe_src_dst = $sformatf("reg %3s value:0x%08h prf:%s", $sformatf("x%0d",opreg), value, f_describe_prf(psrc));
-        OP_IMM:  f_describe_src_dst = $sformatf("imm     value:0x%08h",            value);
-        OP_ZERO: f_describe_src_dst = $sformatf("zero    value:0x%08h",            0);
+        OP_REG:  f_describe_src_dst = $sformatf("reg %3s value:0x%016h prf:%s", $sformatf("x%0d",opreg), value, f_describe_prf(psrc));
+        OP_IMM:  f_describe_src_dst = $sformatf("imm     value:0x%016h",            value);
+        OP_ZERO: f_describe_src_dst = $sformatf("zero    value:0x%016h",            0);
         OP_INVD: f_describe_src_dst = $sformatf("invalid",                      );
         OP_MEM:  f_describe_src_dst = $sformatf("mem",                          );
     endcase

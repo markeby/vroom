@@ -24,7 +24,7 @@ t_word IROM[IROM_SZ-1:0];
 //
 
 /* verilator lint_off WIDTHEXPAND */
-initial begin
+task preload_from_irom();
     automatic int a=0;
     for (int i=0; i<IROM_SZ; i++) begin
         IROM[i] = rvADDI(30,0,12'h666);
@@ -181,6 +181,47 @@ initial begin
             cl.W[w] = IROM[byte_addr[IROM_SZ_LG2+1:2] + w];
         end
         cache_sim::f_preload_l2_cl(cl, byte_addr, 1);
+    end
+endtask
+
+task read_disasm();
+    int fd;
+    string fn;
+    t_paddr addr;
+    t_word  word;
+    string line;
+
+    if (!$value$plusargs("disasm:%s", fn)) begin
+        $error("No +disasm:path/to/file.dis seen!");
+    end
+    fd = $fopen(fn, "r");
+    if (fd == 0) begin
+        $error("Could not open %s", fn);
+    end else begin
+        $display("Opened file %s", fn);
+    end
+
+    while (!$feof(fd)) begin
+        $fgets(line, fd);
+        if ($sscanf(line, "%h %h", addr, word) > 0) begin
+            //$display("Matched line: %s", line);
+            cache_sim::f_wr_l2data_word(word, addr);
+        end else begin
+            //$display("Skipping line: %s", line);
+        end
+    end
+    $display("Reached end of file");
+
+    $fclose(fd);
+endtask
+
+initial begin
+    if ($test$plusargs("load_disasm")) begin
+        $display("Loading from disassembly...");
+        read_disasm();
+    end else begin
+        $display("Loading from SV IROM...");
+        preload_from_irom();
     end
 end
 /* verilator lint_on WIDTHEXPAND */

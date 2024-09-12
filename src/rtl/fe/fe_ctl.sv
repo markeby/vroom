@@ -88,7 +88,13 @@ end
 assign incr_pc_nnn = fe_fb_req_nnn.valid;
 
 t_paddr PCNxt;
-always_comb PCNxt = reset          ? '0         :
+t_paddr PCRst;
+
+initial begin
+    PCRst = '0;
+    $value$plusargs("boot_vector:%h", PCRst);
+end
+always_comb PCNxt = reset          ? PCRst      :
                     br_mispred_ex0.valid ? br_mispred_ex0.target_addr :
                     incr_pc_nnn    ? PC + 4     :
                                      PC;

@@ -37,6 +37,7 @@ function automatic void f_wr_l2data_byte(t_byte b, t_paddr byte_addr);
 endfunction
 
 function automatic void f_wr_l2data_word(t_word w, t_paddr byte_addr);
+    $display("Preloading %h -> %h", byte_addr, w);
     if (byte_addr[1:0] != 0) begin
         $error("preload_l2_word with misaligned addr");
     end

@@ -1,0 +1,11 @@
+
+start.elf:     file format elf64-littleriscv
+
+
+Disassembly of section .text:
+
+0000000080000000 <_start>:
+    80000000:	00100293          	li	t0,1
+    80000004:	00000317          	auipc	t1,0x0
+    80000008:	00533623          	sd	t0,12(t1) # 80000010 <tohost>
+    8000000c:	0000006f          	j	8000000c <_start+0xc>

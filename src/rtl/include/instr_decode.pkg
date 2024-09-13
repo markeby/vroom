@@ -220,6 +220,13 @@ package instr_decode;
                 endcase
             end
             RV_FMT_S: begin
+                unique casez(instr.opcode)
+                    RV_OP_ST    : begin
+                        //t_rv_st_op_funct3 st_op = t_rv_st_op_funct3'(instr.d.I.funct3);
+                        rv_instr_to_uop = U_STORE;
+                    end
+                    default:     rv_instr_to_uop = U_INVALID;
+                endcase
             end
             RV_FMT_B: begin
                 unique casez(instr.opcode)

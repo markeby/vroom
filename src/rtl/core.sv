@@ -198,6 +198,7 @@ mem mem (
     .clk,
     .reset,
     .nuke_rb1,
+    .oldest_robid,
 
     .disp_valid_rs0,
     .disp_pkt_rs0,

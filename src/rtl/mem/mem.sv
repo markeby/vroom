@@ -13,6 +13,7 @@ module mem
     input  logic              clk,
     input  logic              reset,
     input  t_nuke_pkt         nuke_rb1,
+    input  t_rob_id           oldest_robid,
 
     output t_mem_req_pkt      flq_mem_req_pkt,
     input  t_mem_rsp_pkt      flq_mem_rsp_pkt,
@@ -98,6 +99,7 @@ storeq storeq (
     .clk,
     .reset,
     .nuke_rb1,
+    .oldest_robid,
 
     .disp_valid_rs0,
     .disp_pkt_rs0,

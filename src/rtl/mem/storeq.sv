@@ -14,6 +14,7 @@ module storeq
     input  logic            clk,
     input  logic            reset,
     input  t_nuke_pkt       nuke_rb1,
+    input  t_rob_id         oldest_robid,
 
     input  logic            disp_valid_rs0,
     input  t_disp_pkt       disp_pkt_rs0,
@@ -97,6 +98,7 @@ for (genvar e=0; e<STQ_NUM_ENTRIES; e++) begin : g_stq_entries
         .reset,
         .id                 ( t_stq_id'(e)          ) ,
         .nuke_rb1,
+        .oldest_robid,
         .e_valid            ( e_valid[e]            ) ,
         .e_alloc_mm0        ( e_alloc_mm0[e]        ) ,
         .q_alloc_static_mm0,

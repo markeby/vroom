@@ -16,6 +16,8 @@ module storeq_entry
     input  t_stq_id         id,
     input  t_nuke_pkt       nuke_rb1,
 
+    input  t_rob_id         oldest_robid,
+
     output logic            e_valid,
 
     input  logic            e_alloc_mm0,
@@ -38,16 +40,21 @@ module storeq_entry
 logic e_complete_mm5;
 logic e_recycle_mm5;
 logic e_action_valid_mm5;
+logic e_senior;
 
 //
 // FSM
 //
 
-typedef enum logic[2:0] {
+typedef enum logic[3:0] {
     STQ_IDLE,
     STQ_REQ_PIPE,
     STQ_PDG_PIPE,
-    STQ_WAIT
+    STQ_WAIT,
+    STQ_PEND_RET,
+    STQ_REQ_PIPE_FINAL,
+    STQ_PDG_PIPE_FINAL,
+    STQ_WAIT_FINAL
 } t_stq_fsm;
 t_stq_fsm fsm, fsm_nxt;
 
@@ -57,22 +64,40 @@ always_comb begin
         fsm_nxt = STQ_IDLE;
     end else begin
         unique casez(fsm)
-            STQ_IDLE:     if ( e_alloc_mm0      ) fsm_nxt = STQ_REQ_PIPE;
-            STQ_REQ_PIPE: if ( e_pipe_gnt_mm0   ) fsm_nxt = STQ_PDG_PIPE;
-            STQ_PDG_PIPE: if ( e_complete_mm5   ) fsm_nxt = STQ_IDLE;
-                     else if ( e_recycle_mm5    ) fsm_nxt = STQ_WAIT;
-            STQ_WAIT:     if ( 1'b1             ) fsm_nxt = STQ_REQ_PIPE;
+            STQ_IDLE:           if ( e_alloc_mm0      ) fsm_nxt = STQ_REQ_PIPE;
+            STQ_REQ_PIPE:       if ( e_pipe_gnt_mm0   ) fsm_nxt = STQ_PDG_PIPE;
+            STQ_PDG_PIPE:       if ( e_complete_mm5   ) fsm_nxt = STQ_PEND_RET;
+                           else if ( e_recycle_mm5    ) fsm_nxt = STQ_WAIT;
+            STQ_WAIT:           if ( 1'b1             ) fsm_nxt = STQ_REQ_PIPE;
+
+            STQ_PEND_RET:       if ( e_senior         ) fsm_nxt = STQ_REQ_PIPE_FINAL;
+            STQ_REQ_PIPE_FINAL: if ( e_pipe_gnt_mm0   ) fsm_nxt = STQ_PDG_PIPE_FINAL;
+            STQ_PDG_PIPE_FINAL: if ( e_complete_mm5   ) fsm_nxt = STQ_IDLE;
+                           else if ( e_recycle_mm5    ) fsm_nxt = STQ_WAIT_FINAL;
+            STQ_WAIT_FINAL:     if ( 1'b1             ) fsm_nxt = STQ_REQ_PIPE_FINAL;
         endcase
     end
 end
 `DFF(fsm, fsm_nxt, clk)
 
 assign e_valid        = (fsm != STQ_IDLE);
-assign e_pipe_req_mm0 = (fsm == STQ_REQ_PIPE);
+assign e_pipe_req_mm0 = fsm inside {STQ_REQ_PIPE,STQ_REQ_PIPE_FINAL};
 
 //
 // Logic
 //
+
+// Senior calc
+
+t_rob_id oldest_robid_dly;
+`DFF(oldest_robid_dly, oldest_robid, clk)
+
+logic e_retiring_now;
+assign e_retiring_now = e_static.robid == oldest_robid_dly
+                      & e_static.robid != oldest_robid;
+`DFF(e_senior, ~e_alloc_mm0 & (e_senior | e_retiring_now), clk)
+
+// Static storage
 
 `DFF_EN(e_static, q_alloc_static_mm0, clk, e_alloc_mm0)
 
@@ -88,6 +113,7 @@ always_comb begin
     e_pipe_req_pkt_mm0.robid    = e_static.robid;
     e_pipe_req_pkt_mm0.pdst     = '0;
     e_pipe_req_pkt_mm0.yost     = '0;
+    e_pipe_req_pkt_mm0.phase.st = (fsm == STQ_REQ_PIPE_FINAL) ? MEM_ST_FINAL : MEM_ST_INITIAL;
     `ifdef SIMULATION
     e_pipe_req_pkt_mm0.SIMID    = e_static.SIMID;
     `endif

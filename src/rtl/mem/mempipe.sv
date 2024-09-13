@@ -207,6 +207,7 @@ always_comb begin
     action_mm5.complete = valid_mmx[MM5]
                         & ( (req_pkt_mmx[MM5].arb_type inside {MEM_LOAD} & hit_mmx[MM5])
                           | (req_pkt_mmx[MM5].arb_type inside {MEM_FILL}               )
+                          | (req_pkt_mmx[MM5].arb_type inside {MEM_STORE} & req_pkt_mmx[MM5].phase.st == MEM_ST_INITIAL)
                           );
     action_mm5.recycle  = valid_mmx[MM5] & ~action_mm5.complete;
 end

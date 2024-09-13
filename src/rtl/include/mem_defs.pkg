@@ -24,6 +24,15 @@ package mem_defs;
         MEM_FILL
     } t_mem_arb_type;
 
+    typedef enum logic {
+        MEM_ST_INITIAL,
+        MEM_ST_FINAL
+    } t_mem_st_phase;
+
+    typedef union packed {
+        t_mem_st_phase st;
+    } t_mem_phase;
+
     typedef struct packed {
         `SIMID_STRUCT
         t_mem_id       id;
@@ -34,6 +43,7 @@ package mem_defs;
         t_vaddr        addr;
         t_rob_id       robid;
         t_prf_id       pdst;
+        t_mem_phase    phase;
     } t_mempipe_arb;
 
     typedef struct packed {

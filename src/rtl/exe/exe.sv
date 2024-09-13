@@ -45,6 +45,7 @@ t_rv_reg_data ialu_result_ex0;
 
 logic         ibr_resvld_ex0;
 t_paddr       ibr_tgt_ex0;
+t_rv_reg_data ibr_result_ex0;
 t_br_mispred_pkt ibr_mispred_ex0;
 
 `MKPIPE_INIT(logic,          iss_exx,    iss_ex0,            EX0, NUM_EX_STAGES)
@@ -96,6 +97,7 @@ ibr ibr (
     .src2val_ex0,
 
     .resvld_ex0     ( ibr_resvld_ex0  ),
+    .result_ex0     ( ibr_result_ex0  ),
     .br_mispred_ex0 ( ibr_mispred_ex0 )
 );
 assign br_mispred_ex0 = ibr_mispred_ex0;
@@ -104,7 +106,7 @@ assign br_mispred_ex0 = ibr_mispred_ex0;
 
 always_comb begin
     result_exx[EX0]  = '0;
-    result_exx[EX0] |= ialu_resvld_ex0 ? ialu_result_ex0 : '0;
+    result_exx[EX0] |= ialu_resvld_ex0 ? ialu_result_ex0 : ibr_result_ex0;
 end
 
 `ifdef ASSERT

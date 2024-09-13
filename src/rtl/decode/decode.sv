@@ -117,6 +117,17 @@ always_comb begin
             uinstr_de0.uop    = rv_instr_to_uop(rv_instr_fe1);
         end
         RV_FMT_J: begin
+            uinstr_de0.funct7 = '0;
+            uinstr_de0.funct3 = '0;
+            uinstr_de0.dst    = '{opreg: rv_instr_fe1.d.J.rd,  optype: OP_REG, opsize: SZ_4B};
+            uinstr_de0.src1   = '{opreg: '0,                   optype: OP_INVD, opsize: SZ_4B};
+            uinstr_de0.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_4B};
+            uinstr_de0.imm64  = sext_funcs#(.IWIDTH(21), .OWIDTH(64))::sext({rv_instr_fe1.d.J.imm_20,
+                                                                             rv_instr_fe1.d.J.imm_19_12,
+                                                                             rv_instr_fe1.d.J.imm_11,
+                                                                             rv_instr_fe1.d.J.imm_10_1,
+                                                                             1'b0});
+            uinstr_de0.uop    = rv_instr_to_uop(rv_instr_fe1);
         end
         RV_FMT_B: begin
             uinstr_de0.funct7 = '0;

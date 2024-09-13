@@ -18,6 +18,7 @@ module ibr
     input  t_rv_reg_data src2val_ex0,
 
     output logic         resvld_ex0,
+    output t_rv_reg_data result_ex0,
     output t_br_mispred_pkt br_mispred_ex0
 );
 
@@ -46,22 +47,28 @@ always_comb begin
     resvld_ex0 = uinstr_ex0.valid;
     unique case (uinstr_ex0.uop)
         U_BR:    resvld_ex0 = 1'b1;
+        U_JAL:   resvld_ex0 = 1'b1;
+        U_JALR:  resvld_ex0 = 1'b1;
         default: resvld_ex0 = 1'b0;
     endcase
 end
 
-always_comb pcnxt_ex0   = uinstr_ex0.pc + 4;
-always_comb tkn_tgt_ex0 = uinstr_ex0.pc + uinstr_ex0.imm64;
+assign pcnxt_ex0   = uinstr_ex0.pc + 4;
+assign tkn_tgt_ex0 = uinstr_ex0.pc + uinstr_ex0.imm64;
+assign result_ex0  = pcnxt_ex0;
 
 always_comb begin
     tkn_ex0 = 1'b0;
-    unique casez(uinstr_ex0.funct3.br)
-        RV_BR_BEQ : tkn_ex0 = src1val_ex0 == src2val_ex0;
-        RV_BR_BNE : tkn_ex0 = src1val_ex0 != src2val_ex0;
-        RV_BR_BLT : tkn_ex0 = int'(src1val_ex0) <  int'(src2val_ex0);
-        RV_BR_BGE : tkn_ex0 = int'(src1val_ex0) >= int'(src2val_ex0);
-        RV_BR_BLTU: tkn_ex0 = src1val_ex0 <  src2val_ex0;
-        RV_BR_BGEU: tkn_ex0 = src1val_ex0 >= src2val_ex0;
+    unique casez({uinstr_ex0.uop, uinstr_ex0.funct3.br})
+        {U_BR,   RV_BR_BEQ }: tkn_ex0 = src1val_ex0 == src2val_ex0;
+        {U_BR,   RV_BR_BNE }: tkn_ex0 = src1val_ex0 != src2val_ex0;
+        {U_BR,   RV_BR_BLT }: tkn_ex0 = int'(src1val_ex0) <  int'(src2val_ex0);
+        {U_BR,   RV_BR_BGE }: tkn_ex0 = int'(src1val_ex0) >= int'(src2val_ex0);
+        {U_BR,   RV_BR_BLTU}: tkn_ex0 = src1val_ex0 <  src2val_ex0;
+        {U_BR,   RV_BR_BGEU}: tkn_ex0 = src1val_ex0 >= src2val_ex0;
+        {U_JAL,  3'b???    }: tkn_ex0 = 1'b1;
+        {U_JALR, 3'b???    }: tkn_ex0 = 1'b1;
+        default: tkn_ex0 = 1'b0;
     endcase
 end
 

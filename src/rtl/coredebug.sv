@@ -166,7 +166,7 @@ function automatic int f_instq_find_match(t_simid THIS_SIMID);
         end
     end
     if (f_instq_find_match == -1) begin
-        $error("Found no instq matches!");
+        $error("Found no instq matches! %s", format_simid(THIS_SIMID));
     end
 endfunction
 

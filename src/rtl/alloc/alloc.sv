@@ -20,7 +20,6 @@ module alloc
 
     output logic         alloc_ready_ra0,
     output logic         alloc_ra0,
-    input  t_rob_id      next_robid_ra0,
 
     output t_rv_reg_addr src_addr_ra0          [NUM_SOURCES-1:0],
     input  logic         rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0],
@@ -51,7 +50,6 @@ assign src_addr_ra0[SRC2] = uinstr_ra0.src2.opreg;
 
 always_comb begin
    disp_pkt_ra0.uinstr       = uinstr_ra0;
-   disp_pkt_ra0.robid        = next_robid_ra0;
    disp_pkt_ra0.rename       = rename_ra0;
    disp_pkt_ra0.meta         = '0;
 end
@@ -61,7 +59,7 @@ end
 logic stall_ra1;
 
 assign disp_pkt_rs0   = disp_pkt_ra1;
-assign disp_valid_rs0 = disp_pkt_ra1.uinstr.valid & ~stall_ra1;
+assign disp_valid_rs0 = disp_pkt_ra1.uinstr.valid & ~stall_ra1 & ~nuke_rb1.valid;
 
 // Stall
 
@@ -78,7 +76,7 @@ assign alloc_ra0 = uinstr_ra0.valid & alloc_ready_ra0;
     always @(posedge clk) begin
         if (disp_valid_rs0) begin
             `UINFO(disp_pkt_rs0.uinstr.SIMID, ("unit:RA robid:0x%0x pdst:0x%0x psrc1:0x%0x psrc2:0x%0x %s", 
-                disp_pkt_rs0.robid, disp_pkt_rs0.rename.pdst, disp_pkt_rs0.rename.psrc1, disp_pkt_rs0.rename.psrc2, 
+                disp_pkt_rs0.rename.robid, disp_pkt_rs0.rename.pdst, disp_pkt_rs0.rename.psrc1, disp_pkt_rs0.rename.psrc2, 
                 describe_uinstr(disp_pkt_rs0.uinstr)))
         end
     end

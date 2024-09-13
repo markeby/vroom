@@ -5,9 +5,10 @@
 `include "mem_common.pkg"
 `include "mem_defs.pkg"
 `include "gen_funcs.pkg"
+`include "sim/cache_sim.pkg"
 
 module l2
-    import common::*, gen_funcs::*, mem_defs::*, mem_common::*;
+    import common::*, gen_funcs::*, mem_defs::*, mem_common::*, cache_sim::*;
 (
     input  logic            clk,
     input  logic            reset,
@@ -47,15 +48,11 @@ always @(posedge clk) begin
                 all_rsp_pkts[p].valid <= 1'b1;
                 all_rsp_pkts[p].id    <= all_req_pkts[p].id;
                 for (t_paddr b=0; b<CL_SZ_BYTES; b++) begin
-                    if (MEMORY.exists(t_paddr'(all_req_pkts[p].addr + b))) begin
-                        all_rsp_pkts[p].data.B[b] <= MEMORY[t_paddr'(all_req_pkts[p].addr + b)];
-                    end else begin
-                        all_rsp_pkts[p].data.B[b] <= 8'hFF;
-                    end
+                    all_rsp_pkts[p].data.B[b] <= cache_sim::f_rd_l2data_byte(t_paddr'(all_req_pkts[p].addr + b));
                 end
             end else if (all_req_pkts[p].op inside {MEM_OP_WRITE}) begin
                 for (t_paddr b=0; b<CL_SZ_BYTES; b++) begin
-                    MEMORY[t_paddr'(all_req_pkts[p].addr + b)] <= all_req_pkts[p].data.B[b];
+                    cache_sim::f_wr_l2data_byte_blkng(all_req_pkts[p].data.B[b], t_paddr'(all_req_pkts[p].addr + b));
                 end
             end
         end else begin

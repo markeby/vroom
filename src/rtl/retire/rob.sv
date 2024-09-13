@@ -17,10 +17,11 @@ module rob
     output logic             rob_ready_ra0,
     output t_rob_id          oldest_robid,
 
+    input  logic             rob_alloc_rn0,
+    output t_rob_id          next_robid_rn0,
     input  logic             alloc_ra0,
     input  t_uinstr          uinstr_ra0,
     input  t_rename_pkt      rename_ra0,
-    output t_rob_id          next_robid_ra0,
 
     input  t_rob_complete_pkt ex_complete_rb0,
     input  t_rob_complete_pkt mm_complete_rb0,
@@ -75,12 +76,12 @@ if(1) begin : g_rob_tail_ptr
    t_rob_id tail_id_nxt;
    assign tail_id_nxt = reset          ? '0                    :
                         nuke_rb1.valid ? f_incr_robid(head_id) :
-                        q_alloc_ra0    ? f_incr_robid(tail_id) :
+                        rob_alloc_rn0  ? f_incr_robid(tail_id) :
                                          tail_id;
    `DFF(tail_id, tail_id_nxt, clk)
 end : g_rob_tail_ptr
 
-assign next_robid_ra0 = tail_id;
+assign next_robid_rn0 = tail_id;
 
 assign rob_empty_ra0 = f_rob_empty(head_id, tail_id);
 assign rob_full_ra0  = f_rob_full(head_id, tail_id);
@@ -112,7 +113,7 @@ assign rat_reclaim_pkt_rb1.SIMID = head_entry.s.uinstr.SIMID;
 //
 
 assign q_alloc_ra0 = alloc_ra0;
-assign e_alloc_ra0 = q_alloc_ra0 ? (1<<tail_id.idx) : '0;
+assign e_alloc_ra0 = q_alloc_ra0 ? (1<<rename_ra0.robid.idx) : '0;
 
 //
 // ROB Entries

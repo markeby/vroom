@@ -14,9 +14,11 @@ module rename
     input  logic         clk,
     input  logic         reset,
     input  t_nuke_pkt    nuke_rb1,
+    input  t_rob_id      next_robid_rn0,
 
     input  logic         valid_rn0,
     input  t_uinstr      uinstr_rn0,
+    output logic         rob_alloc_rn0,
 
     output logic         rename_ready_rn0,
     input  logic         alloc_ready_ra0,
@@ -45,14 +47,16 @@ localparam NUM_RN_STAGES = 1;
 //
 
 logic         alloc_pdst_rn0;
+`MKPIPE(t_rob_id, robid_rnx, RN0, NUM_RN_STAGES)
 
 //
 // Logic
 //
 
-assign alloc_pdst_rn0 = valid_rn0 & uinstr_rn0.dst.optype == OP_REG;
+assign alloc_pdst_rn0 = valid_rn0 & ~nuke_rb1.valid & uinstr_rn0.dst.optype == OP_REG;
+assign rob_alloc_rn0  = valid_rn0 & ~nuke_rb1.valid;
 
-`DFF(valid_rn1,  valid_rn0,  clk)
+`DFF(valid_rn1,  valid_rn0 & ~nuke_rb1.valid,  clk)
 `DFF(uinstr_rn1, uinstr_rn0, clk)
 
 // PRFs
@@ -93,6 +97,9 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
     .pdst_rn1       ( rename_rn1.pdst                                ) ,
     .pdst_old_rn1   ( rename_rn1.pdst_old                            )
 );
+
+assign robid_rnx[RN0] = next_robid_rn0;
+assign rename_rn1.robid = robid_rnx[RN1];
 
 //
 // Debug

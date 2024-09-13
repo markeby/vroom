@@ -108,7 +108,7 @@ endfunction
 task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ("---------------------[ %4d @%-4t ]---------------------", top.cclk_count, $time()));
     `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
-    `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.ALLOC.disp_pkt_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
+    `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.RENAME.rename_rn1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
     `PMSG(CDBG, (""))
     if (rec.RS.mm_iss_rs2) begin
         cd_print_mem_rec(rec);
@@ -165,13 +165,15 @@ function automatic int f_instq_find_match(t_simid THIS_SIMID);
             f_instq_find_match = i;
         end
     end
-    if (f_instq_find_match == -1) begin
-        $error("Found no instq matches! %s", format_simid(THIS_SIMID));
-    end
 endfunction
+
+`define CHK_INSTQ_MATCH(VAL,NAME) \
+    if (VAL == -1) $error("Died in %s trying to find INSTQ match!", `"NAME`");
 
 task cd_decode();
     int i; i = f_instq_find_match(top.core.uinstr_de1.SIMID);
+    `CHK_INSTQ_MATCH(i,cd_decode)
+
     if (INSTQ[i].DECODE.valid) begin
         $error("Trying to add a decode to a record that is already valid!");
     end
@@ -182,6 +184,8 @@ endtask
 
 task cd_rename();
     int i; i = f_instq_find_match(top.core.uinstr_rn1.SIMID);
+    `CHK_INSTQ_MATCH(i,cd_rename)
+
     if (INSTQ[i].RENAME.valid) begin
         $error("Trying to add a rename to a record that is already valid!");
     end
@@ -192,6 +196,8 @@ endtask
 
 task cd_alloc();
     int i; i = f_instq_find_match(top.core.alloc.disp_pkt_rs0.uinstr.SIMID);
+    `CHK_INSTQ_MATCH(i,cd_alloc)
+
     if (INSTQ[i].ALLOC.valid) begin
         $error("Trying to add an alloc to a record that is already valid!");
     end
@@ -202,6 +208,7 @@ endtask
 
 task cd_rs();
     int i; i = f_instq_find_match(top.core.rs.iss_pkt_rs2.uinstr.SIMID);
+    `CHK_INSTQ_MATCH(i,cd_rs)
 
     if (INSTQ[i].RS.valid) begin
         $error("Trying to add an rs to a record that is already valid!");
@@ -214,6 +221,7 @@ endtask
 
 task cd_mem_ld();
     int i; i = f_instq_find_match(top.core.mem.loadq.q_alloc_static_mm0.SIMID);
+    `CHK_INSTQ_MATCH(i,cd_mem_ld)
     if (INSTQ[i].MEM.valid) begin
         $error("Trying to add mem to a record that is already valid!");
     end
@@ -225,6 +233,7 @@ endtask
 
 task cd_mem_st();
     int i; i = f_instq_find_match(top.core.mem.storeq.q_alloc_static_mm0.SIMID);
+    `CHK_INSTQ_MATCH(i,cd_mem_st)
     if (INSTQ[i].MEM.valid) begin
         $error("Trying to add mem to a record that is already valid!");
     end
@@ -236,6 +245,7 @@ endtask
 
 task cd_result_mm();
     int i; i = f_instq_find_match(top.core.iprf_wr_pkt_mm5.SIMID);
+    `CHK_INSTQ_MATCH(i,cd_result_mm)
 
     if (INSTQ[i].RESULT.valid) begin
         $error("Trying to add a result to a record that is already valid!");
@@ -247,6 +257,7 @@ endtask
 
 task cd_result_eint();
     int i; i = f_instq_find_match(top.core.iprf_wr_pkt_ex1.SIMID);
+    `CHK_INSTQ_MATCH(i,cd_result_eint)
 
     if (INSTQ[i].RESULT.valid) begin
         $error("Trying to add a result to a record that is already valid!");
@@ -262,6 +273,7 @@ endtask
 
 task cd_retire();
     int i; i = f_instq_find_match(top.core.rob.head_entry.s.uinstr.SIMID);
+    `CHK_INSTQ_MATCH(i,cd_retire)
 
     if (INSTQ[i].RETIRE.valid) begin
         $error("Trying to retire a record that is already retired!");
@@ -340,7 +352,7 @@ task cd_print_rec_unretired(t_cd_inst rec);
     `PMSG(CDBG, ("-------------------------------------------------------"));
     if (rec.ALLOC.valid) begin
         `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
-        `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.ALLOC.disp_pkt_ra1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
+        `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.RENAME.rename_rn1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
     end else if (rec.DECODE.valid) begin
         `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
         `PMSG(CDBG, ("PC 0x%04h -- %s", rec.FETCH.instr_fe1.SIMID.pc, format_simid(rec.FETCH.instr_fe1.SIMID)))

@@ -110,7 +110,7 @@ end
 assign e_req_issue_rs1 = e_valid & (&src_ready_rs1);
 always_comb begin
     e_issue_pkt_rs1.uinstr   = e_static.uinstr_disp.uinstr;
-    e_issue_pkt_rs1.robid    = e_static.uinstr_disp.robid;
+    e_issue_pkt_rs1.robid    = e_static.uinstr_disp.rename.robid;
     e_issue_pkt_rs1.pdst     = e_static.uinstr_disp.rename.pdst;
     e_issue_pkt_rs1.src1_val = '0;
     e_issue_pkt_rs1.src2_val = '0;

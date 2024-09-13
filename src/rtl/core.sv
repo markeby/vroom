@@ -46,7 +46,7 @@ logic            resume_fetch_rbx;
 t_nuke_pkt       nuke_rb1;
 t_br_mispred_pkt br_mispred_ex0;
 
-t_rob_id next_robid_ra0;
+t_rob_id next_robid_rn0;
 
 logic         rs_stall_rs0;
 logic         disp_valid_rs0;
@@ -110,13 +110,16 @@ decode decode (
     .uinstr_de1
 );
 
+logic rob_alloc_rn0;
 rename rename (
     .clk,
     .reset,
     .nuke_rb1,
+    .next_robid_rn0,
 
     .alloc_ready_ra0,
     .rename_ready_rn0,
+    .rob_alloc_rn0,
 
     .valid_rn0 ( uinstr_de1.valid ) ,
     .uinstr_rn0 ( uinstr_de1 ) ,
@@ -145,7 +148,6 @@ alloc alloc (
     .uinstr_ra0 ( uinstr_rn1 ),
     .rename_ra0 ( rename_rn1 ),
     .rob_ready_ra0,
-    .next_robid_ra0,
     .rs_stall_rs0,
     .src_addr_ra0,
     .rob_src_reg_pdg_ra0,
@@ -231,6 +233,7 @@ rob rob (
     .reset,
     .oldest_robid,
     .rob_ready_ra0,
+    .rob_alloc_rn0,
     .uinstr_ra0 ( uinstr_rn1 ),
     .rename_ra0 ( rename_rn1 ),
     .alloc_ra0,
@@ -245,7 +248,7 @@ rob rob (
     .rat_reclaim_pkt_rb1,
     .rat_restore_pkt_rbx,
 
-    .next_robid_ra0,
+    .next_robid_rn0,
 
     .uinstr_rb1 ( ),
 

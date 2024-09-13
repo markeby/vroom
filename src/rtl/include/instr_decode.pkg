@@ -69,6 +69,7 @@ package instr_decode;
         logic    psrc2_pend;
         t_prf_id pdst;
         t_prf_id pdst_old;
+        t_rob_id robid;
     } t_rename_pkt;
 
     typedef struct packed {
@@ -82,7 +83,6 @@ package instr_decode;
 
     typedef struct packed {
        t_uinstr     uinstr;
-       t_rob_id     robid;
        t_rename_pkt rename;
        t_disp_meta  meta;
     } t_disp_pkt;

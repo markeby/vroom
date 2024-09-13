@@ -13,24 +13,37 @@ package cache_sim;
     // Data getters ////////
     ////////////////////////
 
-function automatic t_word f_rd_l2_word(t_paddr byte_addr);
-    logic[3:0][7:0] w;
-    w[0] = top.core.l2.MEMORY[byte_addr + 0];
-    w[1] = top.core.l2.MEMORY[byte_addr + 1];
-    w[2] = top.core.l2.MEMORY[byte_addr + 2];
-    w[3] = top.core.l2.MEMORY[byte_addr + 3];
-    f_rd_l2_word = t_word'(w);
+`define L2MEM top.core.l2.MEMORY
+
+function automatic logic[7:0] f_rd_l2data_byte(t_paddr byte_addr);
+    f_rd_l2data_byte = 8'hEE;
+    if(top.core.l2.MEMORY.exists(byte_addr) != 0) begin
+        f_rd_l2data_byte = top.core.l2.MEMORY[byte_addr];
+    end
 endfunction
 
-function automatic t_cl f_rd_l2_cl(t_paddr byte_addr);
+function automatic t_word f_rd_l2data_word(t_paddr byte_addr);
+    logic[3:0][7:0] w;
+    w[0] = f_rd_l2data_byte(byte_addr + 0);
+    w[1] = f_rd_l2data_byte(byte_addr + 1);
+    w[2] = f_rd_l2data_byte(byte_addr + 2);
+    w[3] = f_rd_l2data_byte(byte_addr + 3);
+    f_rd_l2data_word = t_word'(w);
+endfunction
+
+function automatic t_cl f_rd_l2data_cl(t_paddr byte_addr);
     for (t_paddr i=0; i<16; i++) begin
-        f_rd_l2_cl.W[i] = f_rd_l2_word(byte_addr + i);
+        f_rd_l2data_cl.W[i] = f_rd_l2data_word(byte_addr + i*4);
     end
 endfunction
 
     ////////////////////////
     // Data putters ////////
     ////////////////////////
+
+task f_wr_l2data_byte_blkng(t_byte b, t_paddr byte_addr);
+    top.core.l2.MEMORY[byte_addr] <= b;
+endtask
 
 function automatic void f_wr_l2data_byte(t_byte b, t_paddr byte_addr);
     top.core.l2.MEMORY[byte_addr] = b;
@@ -87,9 +100,29 @@ function automatic void f_preload_l2_cl(t_cl c, t_paddr byte_addr, logic display
     if (display) begin
         `MEMLOG(("unit:PRELOAD pa:%08h / %s ",
             byte_addr,
-            f_format_cl_data(f_rd_l2_cl(byte_addr))))
+            f_format_cl_data(f_rd_l2data_cl(byte_addr))))
     end
 endfunction
+
+    /* verilator lint_off UNDRIVEN */
+function automatic void f_dump_whole_l2();
+    t_paddr key;
+    t_paddr key_cl;
+    logic cache_lines [t_paddr];
+
+    `L2MEM.first(key);
+    do begin
+        key_cl = key & ~(t_paddr'(64'h3F));
+        if (cache_lines.exists(key_cl) == 0) begin
+            cache_lines[key_cl] = 1'b1;
+            `MEMLOG(("unit:PRELOAD pa:%08h / %s ",
+                key_cl,
+                f_format_cl_data(f_rd_l2data_cl(key_cl))))
+            end
+        end
+    while(`L2MEM.next(key) != 0);
+endfunction
+    /* verilator lint_on UNDRIVEN */
 
 endpackage
 

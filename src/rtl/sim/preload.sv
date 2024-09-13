@@ -184,35 +184,31 @@ task preload_from_irom();
     end
 endtask
 
+localparam MAX_PRELOAD_WORDS = 128;
+
 task read_disasm();
-    int fd;
     string fn;
-    t_paddr addr;
-    t_word  word;
-    string line;
+    t_word preload_read_buffer [MAX_PRELOAD_WORDS*2-1:0];
 
-    if (!$value$plusargs("disasm:%s", fn)) begin
-        $error("No +disasm:path/to/file.dis seen!");
-    end
-    fd = $fopen(fn, "r");
-    if (fd == 0) begin
-        $error("Could not open %s", fn);
-    end else begin
-        $display("Opened file %s", fn);
+    for (int i=0; i<MAX_PRELOAD_WORDS*2; i+=2) begin
+        preload_read_buffer[i] = t_word'(1); // addresses must be even, so this is our "stop preloading" sentinal
     end
 
-    while (!$feof(fd)) begin
-        $fgets(line, fd);
-        if ($sscanf(line, "%h %h", addr, word) > 0) begin
-            //$display("Matched line: %s", line);
-            cache_sim::f_wr_l2data_word(word, addr);
-        end else begin
-            //$display("Skipping line: %s", line);
+    if (!$value$plusargs("preload:%s", fn)) begin
+        $error("No +preload:path/to/file.preload seen!");
+    end
+    $readmemh(fn, preload_read_buffer);
+
+    begin : preload_loop
+        for (int i=0; i<MAX_PRELOAD_WORDS*2; i+=2) begin
+            if(preload_read_buffer[i][0]) begin
+                disable preload_loop;
+            end
+            cache_sim::f_wr_l2data_word(preload_read_buffer[i+1], preload_read_buffer[i]);
         end
     end
-    $display("Reached end of file");
 
-    $fclose(fd);
+    cache_sim::f_dump_whole_l2();
 endtask
 
 initial begin

@@ -47,6 +47,8 @@ always_comb begin
         U_SRA:     result_ex0 = src1val_signed_ex0 >>> src2val_ex0[4:0];
         U_SLT:     result_ex0 = src1val_signed_ex0 < src2val_signed_ex0 ? t_rv_reg_data'(1) : t_rv_reg_data'(0);
         U_SLTU:    result_ex0 = src1val_ex0 < src2val_ex0 ? t_rv_reg_data'(1) : t_rv_reg_data'(0);
+        U_LUI:     result_ex0 = src2val_ex0;
+        U_AUIPC:   result_ex0 = src2val_ex0 + uinstr_ex0.pc;
         default: begin
             resvld_ex0 = 1'b0;
             result_ex0 = '0;

@@ -123,6 +123,13 @@ always_comb begin
             uinstr_de0.uop    = rv_instr_to_uop(rv_instr_fe1);
         end
         RV_FMT_U: begin
+            uinstr_de0.funct7 = '0;
+            uinstr_de0.funct3 = '0;
+            uinstr_de0.dst    = '{opreg: rv_instr_fe1.d.U.rd,  optype: OP_REG, opsize: SZ_4B};
+            uinstr_de0.src1   = '{opreg: '0, optype: OP_INVD, opsize: SZ_4B};
+            uinstr_de0.src2   = '{opreg: '0, optype: OP_IMM,  opsize: SZ_4B};
+            uinstr_de0.imm64  = sext_funcs#(.IWIDTH(32), .OWIDTH(64))::sext({rv_instr_fe1.d.U.imm_31_12, 12'd0});
+            uinstr_de0.uop    = rv_instr_to_uop(rv_instr_fe1);
         end
         default: begin
         end

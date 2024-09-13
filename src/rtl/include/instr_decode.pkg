@@ -31,7 +31,9 @@ package instr_decode;
         U_LOAD,
         U_STORE,
         U_EBREAK,
-        U_ECALL
+        U_ECALL,
+        U_AUIPC,
+        U_LUI
     } t_uop;
 
     typedef struct packed {
@@ -210,6 +212,12 @@ package instr_decode;
             RV_FMT_J: begin
             end
             RV_FMT_U: begin
+                // opcode = RV_OP_ALU_R
+                unique casez(instr.opcode)
+                    RV_OP_LUI:   rv_instr_to_uop = U_LUI;
+                    RV_OP_AUIPC: rv_instr_to_uop = U_AUIPC;
+                    default:     rv_instr_to_uop = U_INVALID;
+                endcase
             end
             RV_FMT_S: begin
             end
@@ -270,6 +278,8 @@ package instr_decode;
             U_STORE:   uop_to_fu = FU_MEM;
             U_EBREAK:  uop_to_fu = FU_EXE;
             U_ECALL:   uop_to_fu = FU_EXE;
+            U_AUIPC:   uop_to_fu = FU_EXE;
+            U_LUI:     uop_to_fu = FU_EXE;
         endcase
     endfunction
 

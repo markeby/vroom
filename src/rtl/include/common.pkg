@@ -47,6 +47,17 @@ package common;
        t_rob_ptr idx;
     } t_rob_id;
 
+    function logic f_robid_a_older_b(t_rob_id robid_a, t_rob_id robid_b, t_rob_id oldest_robid);
+        unique casez ({robid_a.wrap, robid_b.wrap, oldest_robid.wrap})
+            3'b00?: f_robid_a_older_b = robid_a.idx < robid_b.idx;
+            3'b010: f_robid_a_older_b = 1'b1;
+            3'b011: f_robid_a_older_b = 1'b0;
+            3'b100: f_robid_a_older_b = 1'b0;
+            3'b101: f_robid_a_older_b = 1'b1;
+            3'b11?: f_robid_a_older_b = robid_a.idx < robid_b.idx;
+        endcase
+    endfunction
+
     //////////////////////////////
     // Branch recovery ///////////
     //////////////////////////////

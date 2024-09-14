@@ -16,23 +16,25 @@ module rs
     input  logic          clk,
     input  logic          reset,
     input  t_nuke_pkt     nuke_rb1,
+    input  logic          ldq_idle,
+    input  logic          stq_idle,
 
     input  logic          iprf_wr_en_ro0   [IPRF_NUM_WRITES-1:0],
     input  t_prf_wr_pkt   iprf_wr_pkt_ro0  [IPRF_NUM_WRITES-1:0],
 
     output logic          rs_stall_rs0,
     input  logic          disp_valid_rs0,
-    input  t_disp_pkt  disp_pkt_rs0,
+    input  t_disp_pkt     disp_pkt_rs0,
 
     output logic          prf_rdens_rd0   [1:0],
     output t_prf_id       prf_rdaddrs_rd0 [1:0],
     input  t_rv_reg_data  prf_rddatas_rd1 [1:0],
 
     output logic          ex_iss_rs2,
-    output t_iss_pkt   ex_iss_pkt_rs2,
+    output t_iss_pkt      ex_iss_pkt_rs2,
 
     output logic          mm_iss_rs2,
-    output t_iss_pkt   mm_iss_pkt_rs2
+    output t_iss_pkt      mm_iss_pkt_rs2
 );
 
 localparam RS0 = 0;
@@ -142,6 +144,8 @@ for (genvar i=0; i<NUM_RS_ENTS; i++) begin : g_entries
        .clk,
        .reset,
        .nuke_rb1,
+       .ldq_idle,
+       .stq_idle,
 
        .iprf_wr_en_ro0,
        .iprf_wr_pkt_ro0,

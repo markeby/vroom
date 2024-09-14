@@ -14,6 +14,7 @@ module loadq
     input  logic            clk,
     input  logic            reset,
     input  t_nuke_pkt       nuke_rb1,
+    output logic            idle,
 
     input  logic            disp_valid_rs0,
     input  t_disp_pkt       disp_pkt_rs0,
@@ -111,6 +112,8 @@ for (genvar e=0; e<LDQ_NUM_ENTRIES; e++) begin : g_ldq_entries
         .pipe_action_mm5
     );
 end
+
+assign idle = ~|e_valid;
 
 //
 // Debug

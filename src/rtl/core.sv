@@ -78,6 +78,9 @@ t_rat_reclaim_pkt rat_reclaim_pkt_rb1;
 t_mem_req_pkt  ic_l2_req_pkt;
 t_mem_rsp_pkt  l2_ic_rsp_pkt;
 
+logic ldq_idle;
+logic stq_idle;
+
 //
 // Blocks
 //
@@ -85,6 +88,7 @@ t_mem_rsp_pkt  l2_ic_rsp_pkt;
 fe fe (
     .clk,
     .reset,
+    .oldest_robid,
     .ic_l2_req_pkt,
     .l2_ic_rsp_pkt,
     .decode_ready_de0,
@@ -160,6 +164,9 @@ rs #(.NUM_RS_ENTS(8), .RS_NAME("RS0")) rs (
     .clk,
     .reset,
     .nuke_rb1,
+    .ldq_idle,
+    .stq_idle,
+
     .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1, iprf_wr_en_mm5} ),
     .iprf_wr_pkt_ro0  ( '{iprf_wr_pkt_ex1, iprf_wr_pkt_mm5} ),
 
@@ -201,6 +208,8 @@ mem mem (
     .reset,
     .nuke_rb1,
     .oldest_robid,
+    .ldq_idle,
+    .stq_idle,
 
     .disp_valid_rs0,
     .disp_pkt_rs0,

@@ -189,14 +189,14 @@ t_uinstr uinstr_nq_de1;
 logic ebreak_seen;
 `DFF(ebreak_seen, ~reset & ~nuke_rb1.valid & (ebreak_seen | uopq_push_de0 & uinstr_de0.uop == U_EBREAK), clk)
 
-assign uopq_push_de0 = uinstr_de0.valid & ~ebreak_seen;
+assign uopq_push_de0 = uinstr_de0.valid & ~ebreak_seen & ~nuke_rb1.valid;
 
 logic uopq_valid_de1;
 gen_fifo #(
     .NPUSH(1), .NPOP(1), .DEPTH(2), .T(t_uinstr), .NAME("UOP_QUEUE")
 ) uop_queue (
     .clk,
-    .reset,
+    .reset          ( reset | nuke_rb1.valid ) ,
     .full           ( uopq_full         ) ,
     .empty          (                   ) ,
     .push_front_xw0 ( '{uopq_push_de0}  ) ,

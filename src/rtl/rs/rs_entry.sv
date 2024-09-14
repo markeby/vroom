@@ -17,6 +17,8 @@ module rs_entry
     input  logic          clk,
     input  logic          reset,
     input  t_nuke_pkt     nuke_rb1,
+    input  logic          ldq_idle,
+    input  logic          stq_idle,
 
     input  logic          iprf_wr_en_ro0   [IPRF_NUM_WRITES-1:0],
     input  t_prf_wr_pkt   iprf_wr_pkt_ro0  [IPRF_NUM_WRITES-1:0],
@@ -27,7 +29,7 @@ module rs_entry
     output logic          e_valid,
     output t_rs_entry_static
                           e_static,
-    output t_iss_pkt   e_issue_pkt_rs1,
+    output t_iss_pkt      e_issue_pkt_rs1,
 
     output logic          e_req_issue_rs1,
     input  logic          e_gnt_issue_rs1
@@ -108,7 +110,10 @@ for (genvar srcx=0; srcx<NUM_SOURCES; srcx++) begin : g_src_trk
    );
 end
 
-assign e_req_issue_rs1 = e_valid & (&src_ready_rs1);
+assign e_req_issue_rs1 = e_valid & (&src_ready_rs1)
+                       & ~(rv_opcode_is_ld(e_static.uinstr_disp.uinstr.opcode) & (~stq_idle            ))
+                       & ~(rv_opcode_is_st(e_static.uinstr_disp.uinstr.opcode) & (~stq_idle | ~ldq_idle))
+                       ;
 always_comb begin
     e_issue_pkt_rs1.uinstr   = e_static.uinstr_disp.uinstr;
     e_issue_pkt_rs1.robid    = e_static.uinstr_disp.rename.robid;

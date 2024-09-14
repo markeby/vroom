@@ -14,6 +14,7 @@ module fe_ctl
     input  logic       reset,
     input  t_nuke_pkt  nuke_rb1,
     input  logic       resume_fetch_rbx,
+    input  t_rob_id    oldest_robid,
 
     output t_fe_fb_req fe_fb_req_nnn,
     input  t_fb_fe_rsp fb_fe_rsp_nnn,
@@ -83,6 +84,17 @@ always_comb begin
 end
 `DFF(state, state_nxt, clk)
 
+// Misprediction
+
+logic    br_mispred_ql_ex0;
+logic    br_mispred_pdg;
+t_rob_id br_mispred_robid;
+
+assign br_mispred_ql_ex0 = br_mispred_ex0.valid & (~br_mispred_pdg | f_robid_a_older_b(br_mispred_ex0.robid, br_mispred_robid, oldest_robid));
+
+`DFF(br_mispred_pdg, ~reset & ~nuke_rb1.valid & (br_mispred_pdg | br_mispred_ex0.valid), clk)
+`DFF_EN(br_mispred_robid, br_mispred_ex0.robid, clk, br_mispred_ql_ex0)
+
 // PC
 
 assign incr_pc_nnn = fe_fb_req_nnn.valid;
@@ -95,7 +107,7 @@ initial begin
     $value$plusargs("boot_vector:%h", PCRst);
 end
 always_comb PCNxt = reset          ? PCRst      :
-                    br_mispred_ex0.valid ? br_mispred_ex0.target_addr :
+                    br_mispred_ql_ex0 ? br_mispred_ex0.target_addr :
                     incr_pc_nnn    ? PC + 4     :
                                      PC;
 `DFF(PC, PCNxt, clk)

@@ -15,6 +15,9 @@ module mem
     input  t_nuke_pkt         nuke_rb1,
     input  t_rob_id           oldest_robid,
 
+    output logic              ldq_idle,
+    output logic              stq_idle,
+
     output t_mem_req_pkt      flq_mem_req_pkt,
     input  t_mem_rsp_pkt      flq_mem_rsp_pkt,
 
@@ -80,6 +83,7 @@ loadq loadq (
     .clk,
     .reset,
     .nuke_rb1,
+    .idle ( ldq_idle ),
 
     .disp_valid_rs0,
     .disp_pkt_rs0,
@@ -103,6 +107,7 @@ storeq storeq (
     .reset,
     .nuke_rb1,
     .oldest_robid,
+    .idle ( stq_idle ),
 
     .disp_valid_rs0,
     .disp_pkt_rs0,

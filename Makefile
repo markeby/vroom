@@ -17,7 +17,8 @@ VL_WAIVER_OUT := --waiver-output new_waivers.txt
 
 .PHONY: run
 run: Vtop
-	obj_dir/Vtop +load_disasm +preload:start.preload +boot_vector:0000000080000000 | tee run.log
+	obj_dir/Vtop +load_disasm +preload:hello.preload +boot_vector:0000000080000000 | tee run.log
+	#obj_dir/Vtop +load_disasm +preload:start.preload +boot_vector:0000000080000000 | tee run.log
 	#obj_dir/Vtop +stall_after_n_instr:3 | tee run.log
 	@echo
 	@echo "Splitting run.log"

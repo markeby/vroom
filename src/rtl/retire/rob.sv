@@ -214,7 +214,7 @@ if (1) begin : g_rr_robid
     always_comb begin
         rr_robid_nxt = rr_robid;
         if (q_flush_now_rb1) begin
-            rr_robid_nxt = tail_id;
+            rr_robid_nxt = f_decr_robid(tail_id);
         end else if (rr_fsm == RR_WALK) begin
             rr_robid_nxt = f_decr_robid(rr_robid);
         end

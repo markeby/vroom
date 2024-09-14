@@ -14,12 +14,11 @@ module alloc
     input  logic         reset,
     input  t_nuke_pkt    nuke_rb1,
 
-    input  logic         rob_ready_ra0,
+    input  logic         valid_ra0,
     input  t_uinstr      uinstr_ra0,
     input  t_rename_pkt  rename_ra0,
 
     output logic         alloc_ready_ra0,
-    output logic         alloc_ra0,
 
     output t_rv_reg_addr src_addr_ra0          [NUM_SOURCES-1:0],
     input  logic         rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0],
@@ -56,17 +55,21 @@ end
 
 `DFF(disp_pkt_ra1, disp_pkt_ra0, clk)
 
+logic valid_nq_ra1;
+logic valid_ra1;
+`DFF(valid_nq_ra1, valid_ra0, clk);
+assign valid_ra1 = valid_nq_ra1 & ~nuke_rb1.valid;
+
 logic stall_ra1;
 
 assign disp_pkt_rs0   = disp_pkt_ra1;
-assign disp_valid_rs0 = disp_pkt_ra1.uinstr.valid & ~stall_ra1 & ~nuke_rb1.valid;
+assign disp_valid_rs0 = valid_ra1 & ~stall_ra1 & ~nuke_rb1.valid;
 
 // Stall
 
-assign stall_ra1 = rs_stall_rs0 | ~rob_ready_ra0;
+assign stall_ra1 = rs_stall_rs0;
 
-assign alloc_ready_ra0 = rob_ready_ra0 & ~stall_ra1;
-assign alloc_ra0 = uinstr_ra0.valid & alloc_ready_ra0;
+assign alloc_ready_ra0 = ~stall_ra1;
 
 //
 // Debug

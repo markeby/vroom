@@ -43,7 +43,8 @@ package instr;
     typedef enum logic[2:0] {
         MEM_SB  = 3'b000,
         MEM_SH  = 3'b001,
-        MEM_SW  = 3'b010
+        MEM_SW  = 3'b010,
+        MEM_SD  = 3'b011
     } t_rv_st_op_funct3;
 
     typedef enum logic[2:0] {

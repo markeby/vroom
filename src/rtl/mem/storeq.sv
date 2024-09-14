@@ -66,7 +66,9 @@ always_comb begin
     q_alloc_static_mm0.SIMID = iss_pkt_mm0.uinstr.SIMID;
     `endif
     q_alloc_static_mm0.robid = iss_pkt_mm0.robid;
-    q_alloc_static_mm0.vaddr = '0;
+    q_alloc_static_mm0.vaddr = iss_pkt_mm0.src1_val + iss_pkt_mm0.imm64;
+    q_alloc_static_mm0.data  = iss_pkt_mm0.src2_val;
+    q_alloc_static_mm0.osize = iss_pkt_mm0.uinstr.dst.opsize;
 end
 
 //

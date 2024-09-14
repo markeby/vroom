@@ -105,8 +105,45 @@ assign e_action_valid_mm5 = pipe_valid_mm5 & pipe_req_pkt_mm5.arb_type == MEM_ST
 assign e_complete_mm5     = e_action_valid_mm5 & pipe_action_mm5.complete;
 assign e_recycle_mm5      = e_action_valid_mm5 & pipe_action_mm5.recycle;
 
+t_cl e_st_data_repl;
+always_comb begin
+    unique casez (e_static.osize)
+        SZ_1B: e_st_data_repl = {(CL_SZ_BYTES/1){e_static.data[ 7:0]}};
+        SZ_2B: e_st_data_repl = {(CL_SZ_BYTES/2){e_static.data[15:0]}};
+        SZ_4B: e_st_data_repl = {(CL_SZ_BYTES/4){e_static.data[31:0]}};
+        SZ_8B: e_st_data_repl = {(CL_SZ_BYTES/8){e_static.data[63:0]}};
+        default: e_st_data_repl = {16{32'hDEADBEEF}};
+    endcase
+end
+
+logic[CL_SZ_BYTES-1+7:0] e_byte_en_full;
+always_comb begin
+    logic[7:0] be_unshft;
+    be_unshft = '0;
+    unique casez (e_static.osize)
+        SZ_1B: be_unshft = 8'h01;
+        SZ_2B: be_unshft = 8'h03;
+        SZ_4B: be_unshft = 8'h0f;
+        SZ_8B: be_unshft = 8'hff;
+        default: be_unshft = 8'h00;
+    endcase
+    e_byte_en_full = '0;
+    for (logic[6:0] b=0; b<8; b++) begin
+        e_byte_en_full[{1'b0,e_static.vaddr[5:0]} + b] = be_unshft[b[2:0]];
+    end
+end
+
+`ifdef SIMULATION
+    `VASSERT(alloc_at_align_1B, e_alloc_mm0 & q_alloc_static_mm0.vaddr[0], q_alloc_static_mm0.osize inside {SZ_1B            }, "MEM instr not naturally aligned")
+    `VASSERT(alloc_at_align_2B, e_alloc_mm0 & q_alloc_static_mm0.vaddr[1], q_alloc_static_mm0.osize inside {SZ_1B,SZ_2B      }, "MEM instr not naturally aligned")
+    `VASSERT(alloc_at_align_4B, e_alloc_mm0 & q_alloc_static_mm0.vaddr[2], q_alloc_static_mm0.osize inside {SZ_1B,SZ_2B,SZ_4B}, "MEM instr not naturally aligned")
+`endif
+
 always_comb begin
     e_pipe_req_pkt_mm0          = '0;
+    `ifdef SIMULATION
+    e_pipe_req_pkt_mm0.SIMID    = e_static.SIMID;
+    `endif
     e_pipe_req_pkt_mm0.id       = id;
     e_pipe_req_pkt_mm0.arb_type = MEM_STORE;
     e_pipe_req_pkt_mm0.addr     = e_static.vaddr;
@@ -114,9 +151,8 @@ always_comb begin
     e_pipe_req_pkt_mm0.pdst     = '0;
     e_pipe_req_pkt_mm0.yost     = '0;
     e_pipe_req_pkt_mm0.phase.st = (fsm == STQ_REQ_PIPE_FINAL) ? MEM_ST_FINAL : MEM_ST_INITIAL;
-    `ifdef SIMULATION
-    e_pipe_req_pkt_mm0.SIMID    = e_static.SIMID;
-    `endif
+    e_pipe_req_pkt_mm0.arb_data = e_st_data_repl;
+    e_pipe_req_pkt_mm0.byte_en  = e_byte_en_full[63:0];
 end
 
 //

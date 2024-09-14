@@ -102,6 +102,7 @@ always_comb begin
     e_pipe_req_pkt_mm0.arb_type = MEM_FILL;
     e_pipe_req_pkt_mm0.arb_way  = t_l1_way'('0);
     e_pipe_req_pkt_mm0.arb_data = e_data;
+    e_pipe_req_pkt_mm0.byte_en  = '1;
     e_pipe_req_pkt_mm0.addr     = e_static.paddr;
     e_pipe_req_pkt_mm0.robid    = '0;
     e_pipe_req_pkt_mm0.pdst     = '0;

@@ -58,6 +58,9 @@ always_comb valid_dex[DE0] = valid_fe1 & ~reset;
 always_comb ifmt_de0       = get_instr_format(rv_instr_fe1.opcode);
 
 always_comb begin
+    t_size tmp_osize;
+    tmp_osize = SZ_INV;
+
     uinstr_de0 = '0;
     uinstr_de0.opcode = rv_instr_fe1.opcode;
     uinstr_de0.valid  = valid_dex[DE0];
@@ -108,10 +111,18 @@ always_comb begin
         RV_FMT_S: begin
             uinstr_de0.funct7 = '0;
             uinstr_de0.funct3 = rv_instr_fe1.d.S.funct3;
+
             if (rv_opcode_is_st(rv_instr_fe1.opcode)) begin
-                uinstr_de0.dst    = '{opreg: '0,                   optype: OP_INVD, opsize: SZ_4B};
-                uinstr_de0.src1   = '{opreg: rv_instr_fe1.d.S.rs1, optype: OP_REG, opsize: SZ_4B};
-                uinstr_de0.src2   = '{opreg: rv_instr_fe1.d.S.rs2, optype: OP_REG, opsize: SZ_4B};
+                unique casez (t_rv_st_op_funct3'(rv_instr_fe1.d.S.funct3))
+                    MEM_SB:  tmp_osize = SZ_1B;
+                    MEM_SH:  tmp_osize = SZ_2B;
+                    MEM_SW:  tmp_osize = SZ_4B;
+                    MEM_SD:  tmp_osize = SZ_8B;
+                    default: tmp_osize = SZ_INV;
+                endcase
+                uinstr_de0.dst    = '{opreg: '0,                   optype: OP_MEM, opsize: tmp_osize};
+                uinstr_de0.src1   = '{opreg: rv_instr_fe1.d.S.rs1, optype: OP_REG, opsize: SZ_8B};
+                uinstr_de0.src2   = '{opreg: rv_instr_fe1.d.S.rs2, optype: OP_REG, opsize: tmp_osize};
             end
             uinstr_de0.imm64  = sext_funcs#(.IWIDTH(12), .OWIDTH(64))::sext({rv_instr_fe1.d.S.imm_11_5, rv_instr_fe1.d.S.imm_4_0});
             uinstr_de0.uop    = rv_instr_to_uop(rv_instr_fe1);
@@ -145,9 +156,9 @@ always_comb begin
         RV_FMT_U: begin
             uinstr_de0.funct7 = '0;
             uinstr_de0.funct3 = '0;
-            uinstr_de0.dst    = '{opreg: rv_instr_fe1.d.U.rd,  optype: OP_REG, opsize: SZ_4B};
+            uinstr_de0.dst    = '{opreg: rv_instr_fe1.d.U.rd,  optype: OP_REG, opsize: SZ_8B};
             uinstr_de0.src1   = '{opreg: '0, optype: OP_INVD, opsize: SZ_4B};
-            uinstr_de0.src2   = '{opreg: '0, optype: OP_IMM,  opsize: SZ_4B};
+            uinstr_de0.src2   = '{opreg: '0, optype: OP_IMM,  opsize: SZ_8B};
             uinstr_de0.imm64  = sext_funcs#(.IWIDTH(32), .OWIDTH(64))::sext({rv_instr_fe1.d.U.imm_31_12, 12'd0});
             uinstr_de0.uop    = rv_instr_to_uop(rv_instr_fe1);
         end

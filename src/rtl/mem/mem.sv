@@ -41,6 +41,7 @@ logic fl_req_mm0; t_mempipe_arb fl_req_pkt_mm0; logic fl_gnt_mm0;
 t_mempipe_arb    pipe_pkt_mm1;
 
 t_l1_set_addr    set_addr_mm1;
+t_l1_set_addr    set_addr_mm3;
 
 logic            tag_rd_en_mm1;
 logic            tag_wr_en_mm1;
@@ -55,10 +56,12 @@ t_l1_way         state_wr_way_mm1;
 t_mesi           state_rd_ways_mm2[L1_NUM_WAYS-1:0];
 
 logic            data_rd_en_mm1;
-logic            data_wr_en_mm1;
-t_cl             data_wr_data_mm1;
-t_l1_way         data_wr_way_mm1;
 t_cl             data_rd_ways_mm2[L1_NUM_WAYS-1:0];
+
+logic            data_wr_en_mm3;
+t_cl             data_wr_data_mm3;
+t_cl_be          data_wr_be_mm3;
+t_l1_way         data_wr_way_mm3;
 
 logic            flq_addr_mat_mm2;
 
@@ -171,13 +174,16 @@ l1data l1data (
     .clk,
     .reset,
 
-    .data_rd_en_mm1,
-    .data_wr_en_mm1,
     .set_addr_mm1,
-    .data_wr_data_mm1,
-    .data_wr_way_mm1,
+    .set_addr_mm3,
 
-    .data_rd_ways_mm2
+    .data_rd_en_mm1,
+    .data_rd_ways_mm2,
+
+    .data_wr_en_mm3,
+    .data_wr_data_mm3,
+    .data_wr_be_mm3,
+    .data_wr_way_mm3
 );
 
 // Pipeline 
@@ -193,6 +199,7 @@ mempipe mempipe (
 
     .req_pkt_mm1 ( pipe_pkt_mm1 ) ,
     .set_addr_mm1,
+    .set_addr_mm3,
 
     .tag_rd_en_mm1,
     .tag_wr_en_mm1,
@@ -207,10 +214,12 @@ mempipe mempipe (
     .state_rd_ways_mm2,
 
     .data_rd_en_mm1,
-    .data_wr_en_mm1,
-    .data_wr_data_mm1,
-    .data_wr_way_mm1,
     .data_rd_ways_mm2,
+
+    .data_wr_en_mm3,
+    .data_wr_data_mm3,
+    .data_wr_be_mm3,
+    .data_wr_way_mm3,
 
     .flq_addr_mat_mm2,
 

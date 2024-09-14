@@ -38,6 +38,7 @@ package mem_defs;
         t_mem_id       id;
         t_mem_arb_type arb_type;
         t_cl           arb_data;
+        logic[CL_SZ_BYTES-1:0] byte_en;
         t_l1_way       arb_way;
         t_stq_id       yost;
         t_vaddr        addr;
@@ -48,8 +49,10 @@ package mem_defs;
 
     typedef struct packed {
         `SIMID_STRUCT
-        t_vaddr  vaddr;
-        t_rob_id robid;
+        t_vaddr       vaddr;
+        t_rob_id      robid;
+        t_rv_reg_data data;
+        t_size        osize;
     } t_stq_static;
 
     typedef struct packed {

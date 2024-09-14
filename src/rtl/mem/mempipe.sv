@@ -28,6 +28,7 @@ module mempipe
     output logic            fl_gnt_mm0,
 
     output t_l1_set_addr    set_addr_mm1,
+    output t_l1_set_addr    set_addr_mm3,
 
     output logic            tag_rd_en_mm1,
     output logic            tag_wr_en_mm1,
@@ -42,10 +43,12 @@ module mempipe
     input  t_mesi           state_rd_ways_mm2 [L1_NUM_WAYS-1:0],
 
     output logic            data_rd_en_mm1,
-    output logic            data_wr_en_mm1,
-    output t_cl             data_wr_data_mm1,
-    output t_l1_way         data_wr_way_mm1,
     input  t_cl             data_rd_ways_mm2 [L1_NUM_WAYS-1:0],
+
+    output logic            data_wr_en_mm3,
+    output t_cl             data_wr_data_mm3,
+    output t_cl_be          data_wr_be_mm3,
+    output t_l1_way         data_wr_way_mm3,
 
     // FLQ CAM
     output t_mempipe_arb    req_pkt_mm1,
@@ -74,6 +77,7 @@ MM1 - TLB (curently a passthru stage)
 MM2 - Calculate hit/miss
       FLQ CAM Match
 MM3 - Data mux
+      Write data
 MM4 - Data rotate
 MM5 - Result valid
 
@@ -147,9 +151,6 @@ assign state_wr_state_mm1 = MESI_E; // FIXME
 assign state_wr_way_mm1   = req_pkt_mmx[MM1].arb_way;
 
 assign data_rd_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
-assign data_wr_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_fl_mmx[MM1] );
-assign data_wr_data_mm1  = req_pkt_mmx[MM1].arb_data;
-assign data_wr_way_mm1   = req_pkt_mmx[MM1].arb_way;
 
 assign req_pkt_mm1 = req_pkt_mmx[MM1];
 
@@ -172,9 +173,19 @@ assign hit_mmx[MM2] = |hit_vec_mmx[MM2];
     //
     // MM3
     // - Data mux
+    // - Data write
     //
 
 assign rd_cl_data_mmx[MM3] = mux_funcs#(.IWIDTH(L1_NUM_WAYS), .T(t_cl))::aomux(rd_cl_data_set_mmx[MM3], hit_vec_mmx[MM3]);
+
+assign set_addr_mm3     = req_pkt_mmx[MM3].addr[L1_SET_HI:L1_SET_LO];
+
+assign data_wr_en_mm3    = valid_mmx[MM3] & cacheable_mmx[MM3]
+                         & ( is_fl_mmx[MM3]
+                           | is_st_mmx[MM3] & req_pkt_mmx[MM3].phase.st == MEM_ST_FINAL & hit_mmx[MM3]);
+assign data_wr_data_mm3  = req_pkt_mmx[MM3].arb_data;
+assign data_wr_way_mm3   = req_pkt_mmx[MM3].arb_way;
+assign data_wr_be_mm3    = req_pkt_mmx[MM3].byte_en;
 
     //
     // MM4
@@ -204,16 +215,29 @@ assign flq_alloc_mm5 = valid_mm5
                      & ~flq_addr_mat_mmx[MM5];
 
 always_comb begin
-    action_mm5.complete = valid_mmx[MM5]
-                        & ( (req_pkt_mmx[MM5].arb_type inside {MEM_LOAD} & hit_mmx[MM5])
-                          | (req_pkt_mmx[MM5].arb_type inside {MEM_FILL}               )
-                          | (req_pkt_mmx[MM5].arb_type inside {MEM_STORE} & req_pkt_mmx[MM5].phase.st == MEM_ST_INITIAL)
-                          );
+    action_mm5.complete = 1'b0;
+    unique casez ({valid_mmx[MM5], req_pkt_mmx[MM5].arb_type})
+        {1'b1, MEM_LOAD }: action_mm5.complete = hit_mmx[MM5];
+
+        {1'b1, MEM_FILL }: action_mm5.complete = 1'b1;
+
+        {1'b1, MEM_STORE}: unique casez(req_pkt_mmx[MM5].phase.st)
+            MEM_ST_INITIAL: action_mm5.complete = 1'b1;
+            MEM_ST_FINAL:   action_mm5.complete = hit_mmx[MM5];
+        endcase
+
+        default:           action_mm5.complete = 1'b0;
+    endcase
     action_mm5.recycle  = valid_mmx[MM5] & ~action_mm5.complete;
 end
 
 always_comb begin
-    complete_mm5.valid   = valid_mmx[MM5] & action_mm5.complete & req_pkt_mmx[MM5].arb_type inside {MEM_LOAD, MEM_STORE};
+    complete_mm5.valid   = 1'b0;
+    unique casez (req_pkt_mmx[MM5].arb_type)
+        MEM_LOAD:  complete_mm5.valid = action_mm5.complete;
+        MEM_STORE: complete_mm5.valid = action_mm5.complete & req_pkt_mmx[MM5].phase.st == MEM_ST_INITIAL;
+        default:   complete_mm5.valid = 1'b0;
+    endcase
     complete_mm5.mispred = 1'b0;
     complete_mm5.robid   = req_pkt_mmx[MM5].robid;
 

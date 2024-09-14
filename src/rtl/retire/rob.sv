@@ -14,14 +14,15 @@ module rob
     input  logic             clk,
     input  logic             reset,
 
-    output logic             rob_ready_ra0,
+    output logic             rob_ready_rn0,
     output t_rob_id          oldest_robid,
+
+    input  logic             valid_nq_rn1,
+    input  t_rename_pkt      rename_rn1,
 
     input  logic             rob_alloc_rn0,
     output t_rob_id          next_robid_rn0,
-    input  logic             alloc_ra0,
-    input  t_uinstr          uinstr_ra0,
-    input  t_rename_pkt      rename_ra0,
+    input  t_uinstr          uinstr_rn0,
 
     input  t_rob_complete_pkt ex_complete_rb0,
     input  t_rob_complete_pkt mm_complete_rb0,
@@ -50,10 +51,10 @@ logic                  q_retire_rb1;
 logic[RB_NUM_ENTS-1:0] e_retire_rb1;
 
 logic[RB_NUM_ENTS-1:0] e_valid;
-logic                  q_alloc_ra0;
-logic[RB_NUM_ENTS-1:0] e_alloc_ra0;
-logic                  rob_full_ra0;
-logic                  rob_empty_ra0;
+logic                  q_alloc_rn0;
+logic[RB_NUM_ENTS-1:0] e_alloc_rn0;
+logic                  rob_full_rn0;
+logic                  rob_empty_rn0;
 
 logic                  q_flush_now_rb1;
 
@@ -83,27 +84,27 @@ end : g_rob_tail_ptr
 
 assign next_robid_rn0 = tail_id;
 
-assign rob_empty_ra0 = f_rob_empty(head_id, tail_id);
-assign rob_full_ra0  = f_rob_full(head_id, tail_id);
-assign rob_ready_ra0 = ~rob_full_ra0;
+assign rob_empty_rn0 = f_rob_empty(head_id, tail_id);
+assign rob_full_rn0  = f_rob_full(head_id, tail_id);
+assign rob_ready_rn0 = ~rob_full_rn0;
 
 // Retire
 
 t_rob_ent head_entry;
 assign head_entry = entries[head_id.idx];
 
-assign q_retire_rb1 = ~rob_empty_ra0 & head_entry.d.ready;
+assign q_retire_rb1 = ~rob_empty_rn0 & head_entry.d.ready;
 assign e_retire_rb1 = q_retire_rb1 ? (1 << head_id.idx) : '0;
 
 assign uinstr_rb1 = head_entry.s.uinstr;
 
-assign q_flush_now_rb1 = ~rob_empty_ra0 & head_entry.d.flush_needed;
+assign q_flush_now_rb1 = ~rob_empty_rn0 & head_entry.d.flush_needed;
 
 assign nuke_rb1.valid     = q_flush_now_rb1;
 assign nuke_rb1.nuke_type = uinstr_rb1.mispred ? NUKE_BR_MISPRED : NUKE_EXCEPTION;
 
 assign rat_reclaim_pkt_rb1.valid = q_retire_rb1 & uinstr_rb1.dst.optype == OP_REG;
-assign rat_reclaim_pkt_rb1.prfid = head_entry.s.pdst_old;
+assign rat_reclaim_pkt_rb1.prfid = head_entry.d.pdst_old;
 `ifdef SIMULATION
 assign rat_reclaim_pkt_rb1.SIMID = head_entry.s.uinstr.SIMID;
 `endif
@@ -112,17 +113,16 @@ assign rat_reclaim_pkt_rb1.SIMID = head_entry.s.uinstr.SIMID;
 // Alloc
 //
 
-assign q_alloc_ra0 = alloc_ra0;
-assign e_alloc_ra0 = q_alloc_ra0 ? (1<<rename_ra0.robid.idx) : '0;
+assign q_alloc_rn0 = rob_alloc_rn0;
+assign e_alloc_rn0 = q_alloc_rn0 ? (1<<tail_id.idx) : '0;
 
 //
 // ROB Entries
 //
 
-t_rob_ent_static rob_st_new_ra0;
+t_rob_ent_static rob_st_new_rn0;
 always_comb begin
-   rob_st_new_ra0.uinstr   = uinstr_ra0;
-   rob_st_new_ra0.pdst_old = rename_ra0.pdst_old;
+   rob_st_new_rn0.uinstr   = uinstr_rn0;
 end
 
 localparam COMPLETE_EINT = 0;
@@ -140,8 +140,10 @@ for (genvar i=0; i<RB_NUM_ENTS; i++) begin : g_rob_ents
       .e_valid       ( e_valid[i]      ),
       .robid         ( t_rob_id'(i)    ),
       .head_id,
-      .q_alloc_s_ra0 ( rob_st_new_ra0  ),
-      .e_alloc_ra0   ( e_alloc_ra0[i]  ),
+      .valid_nq_rn1,
+      .rename_rn1,
+      .q_alloc_s_rn0 ( rob_st_new_rn0  ),
+      .e_alloc_rn0   ( e_alloc_rn0[i]  ),
       .ro_complete_rb0,
       .q_flush_now_rb1,
       .e_retire_rb1  ( e_retire_rb1[i] ),
@@ -223,7 +225,7 @@ end
 assign rat_restore_pkt_rbx.valid = rr_fsm == RR_WALK
                                  & entries[rr_robid.idx].s.uinstr.dst.optype == OP_REG;
 assign rat_restore_pkt_rbx.gpr   = entries[rr_robid.idx].s.uinstr.dst.opreg;
-assign rat_restore_pkt_rbx.prfid = entries[rr_robid.idx].s.pdst_old;
+assign rat_restore_pkt_rbx.prfid = entries[rr_robid.idx].d.pdst_old;
 `ifdef SIMULATION
 assign rat_restore_pkt_rbx.SIMID = entries[rr_robid.idx].s.uinstr.SIMID;
 `endif
@@ -256,7 +258,7 @@ logic    last_retire_robid_valid;
 
 `VASSERT(chk_robid_adv, q_retire_rb1 & last_retire_robid_valid, head_id == f_incr_robid(last_retire_robid), $sformatf("ROB advanced from 0x%0h -> 0x%0h", last_retire_robid, head_id))
 
-`VASSERT(alloc_when_full, q_alloc_ra0, rob_ready_ra0, "ROB allocated when not ready!")
+`VASSERT(alloc_when_full, q_alloc_rn0, rob_ready_rn0, "ROB allocated when not ready!")
 
 `endif
 

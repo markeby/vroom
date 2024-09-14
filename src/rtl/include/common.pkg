@@ -154,6 +154,8 @@ package common;
         logic[CL_SZ-1:0]       flat;
     } t_cl;
 
+    typedef logic[63:0] t_cl_be;
+
     typedef logic[CL_ADDR_SZ-1:0] t_cl_offset;
 
     function t_paddr get_cl_addr(t_paddr pa);

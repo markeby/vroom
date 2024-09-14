@@ -36,13 +36,13 @@ module cdiff
     //`L1_MEMPIPE_PEEK(t_mesi   , state_rd_ways_mm2)
 
     `L1_MEMPIPE_PEEK(logic    , data_rd_en_mm1)
-    `L1_MEMPIPE_PEEK(logic    , data_wr_en_mm1)
-    `L1_MEMPIPE_PEEK(t_cl     , data_wr_data_mm1)
-    `L1_MEMPIPE_PEEK(t_l1_way , data_wr_way_mm1)
+    `L1_MEMPIPE_PEEK(logic    , data_wr_en_mm3)
+    `L1_MEMPIPE_PEEK(t_cl     , data_wr_data_mm3)
+    `L1_MEMPIPE_PEEK(t_l1_way , data_wr_way_mm3)
     //`L1_MEMPIPE_PEEK(t_cl     , data_rd_ways_mm2)
 
-    `L1_MEMPIPE_PEEK_RENAME(t_paddr, paddr_mm2, paddr_mmx[MM2])
-    `L1_MEMPIPE_PEEK_RENAME(t_mempipe_arb, req_pkt_mm2, req_pkt_mmx[MM2])
+    `L1_MEMPIPE_PEEK_RENAME(t_paddr, paddr_mm4, paddr_mmx[MM4])
+    `L1_MEMPIPE_PEEK_RENAME(t_mempipe_arb, req_pkt_mm4, req_pkt_mmx[MM4])
 
 function automatic void f_print_diff_set_way(string arb_type, t_l1_set_addr set, t_l1_way way);
     t_paddr paddr;
@@ -62,12 +62,12 @@ endfunction
 
 `MKPIPE_INIT(logic, tag_wr_en_mmx,   tag_wr_en_mm1,   MM1, NUM_MM_STAGES);
 `MKPIPE_INIT(logic, state_wr_en_mmx, state_wr_en_mm1, MM1, NUM_MM_STAGES);
-`MKPIPE_INIT(logic, data_wr_en_mmx,  data_wr_en_mm1,  MM1, NUM_MM_STAGES);
+`MKPIPE_INIT(logic, data_wr_en_mmx,  data_wr_en_mm3,  MM3, NUM_MM_STAGES);
 
 always @(posedge clk) begin
     if (!reset) begin
-        if (tag_wr_en_mmx[MM2] | state_wr_en_mmx[MM2] | data_wr_en_mmx[MM2]) begin
-            f_print_diff_set_way(req_pkt_mm2.arb_type.name(), paddr_mm2[L1_SET_HI:L1_SET_LO], req_pkt_mm2.arb_way);
+        if (tag_wr_en_mmx[MM4] | state_wr_en_mmx[MM4] | data_wr_en_mmx[MM4]) begin
+            f_print_diff_set_way(req_pkt_mm4.arb_type.name(), paddr_mm4[L1_SET_HI:L1_SET_LO], req_pkt_mm4.arb_way);
         end
     end
 end

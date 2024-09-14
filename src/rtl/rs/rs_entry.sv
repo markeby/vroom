@@ -16,6 +16,7 @@ module rs_entry
 (
     input  logic          clk,
     input  logic          reset,
+    input  t_nuke_pkt     nuke_rb1,
 
     input  logic          iprf_wr_en_ro0   [IPRF_NUM_WRITES-1:0],
     input  t_prf_wr_pkt   iprf_wr_pkt_ro0  [IPRF_NUM_WRITES-1:0],
@@ -75,9 +76,9 @@ assign e_valid = fsm == VALID;
 `DFF_EN(e_static, q_alloc_static_rs0, clk, e_alloc_rs0)
 
 // Will eventually need multiple dealloc causes since some uops will need to
-// replay... but for now, just dealloc when we successfully issue
+// replay... but for now, just dealloc when we successfully issue or get nuked
 
-assign e_dealloc_any = e_gnt_issue_rs1;
+assign e_dealloc_any = e_gnt_issue_rs1 | nuke_rb1.valid;
 
 //
 // Register tracking
@@ -114,6 +115,7 @@ always_comb begin
     e_issue_pkt_rs1.pdst     = e_static.uinstr_disp.rename.pdst;
     e_issue_pkt_rs1.src1_val = '0;
     e_issue_pkt_rs1.src2_val = '0;
+    e_issue_pkt_rs1.imm64    = e_static.uinstr_disp.uinstr.imm64;
     e_issue_pkt_rs1.meta     = e_static.uinstr_disp.meta;
 end
 

@@ -93,6 +93,7 @@ package instr_decode;
        t_prf_id      pdst;
        t_rv_reg_data src1_val;
        t_rv_reg_data src2_val;
+       logic[63:0]   imm64;
        t_disp_meta   meta;
     } t_iss_pkt;
 
@@ -299,11 +300,32 @@ package instr_decode;
     endfunction
 
     `ifdef SIMULATION
+    function string f_describe_opnd_descr(t_uopnd_descr op);
+        string opsize_char;
+        unique casez(op.opsize)
+            SZ_1B: opsize_char = "B";
+            SZ_2B: opsize_char = "H";
+            SZ_4B: opsize_char = "W";
+            SZ_8B: opsize_char = "D";
+            default: opsize_char = "?";
+        endcase
+        unique casez(op.optype)
+            OP_REG:  f_describe_opnd_descr = $sformatf("%s.%s", $sformatf("x%0d",op.opreg), opsize_char);
+            OP_IMM:  f_describe_opnd_descr = $sformatf("imm");
+            OP_ZERO: f_describe_opnd_descr = $sformatf("zero");
+            OP_INVD: f_describe_opnd_descr = $sformatf("invalid");
+            OP_MEM:  f_describe_opnd_descr = $sformatf("mem.%s", opsize_char);
+        endcase
+    endfunction
+
     function string describe_uinstr(t_uinstr uinstr);
         describe_uinstr = $sformatf("opcode:%s uop:%s ifmt:%s", uinstr.opcode.name(), uinstr.uop.name(), uinstr.ifmt.name());
         case (uinstr.ifmt)
-            RV_FMT_I: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d imm64:0x%h funct3:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.imm64, uinstr.funct3);
-            RV_FMT_R: describe_uinstr = $sformatf("%s rd:x%-d rs1:x%-d rs2:x%-d funct3:%-d funct7:%-d", describe_uinstr, uinstr.dst.opreg, uinstr.src1.opreg, uinstr.src2.opreg, uinstr.funct3, uinstr.funct7);
+            RV_FMT_I: describe_uinstr = $sformatf("%s dst:%s src1:%s imm64:0x%h funct3:%-d", describe_uinstr, f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), uinstr.imm64, uinstr.funct3);
+            RV_FMT_R: describe_uinstr = $sformatf("%s dst:%s src1:%s src2:%s funct3:%-d funct7:%-d", describe_uinstr, f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), f_describe_opnd_descr(uinstr.src2), uinstr.funct3, uinstr.funct7);
+            RV_FMT_S: describe_uinstr = $sformatf("%s dst:%s src1:%s src2:%s imm64:0x%h", describe_uinstr, f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), f_describe_opnd_descr(uinstr.src2), uinstr.imm64);
+            RV_FMT_U: describe_uinstr = $sformatf("%s dst:%s imm64:0x%h", describe_uinstr, f_describe_opnd_descr(uinstr.dst), uinstr.imm64);
+            RV_FMT_J: describe_uinstr = $sformatf("%s dst:%s imm64:0x%h", describe_uinstr, f_describe_opnd_descr(uinstr.dst), uinstr.imm64);
             default:  describe_uinstr = describe_uinstr;
         endcase
     endfunction

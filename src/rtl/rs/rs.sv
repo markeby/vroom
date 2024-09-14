@@ -74,7 +74,7 @@ assign e_alloc_rs0 = q_alloc_rs0 ? gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first0
 
 assign q_req_issue_rs1 = |e_req_issue_rs1;
 assign e_sel_issue_rs1 = gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first1(e_req_issue_rs1);
-assign q_gnt_issue_rs1 = q_req_issue_rs1;
+assign q_gnt_issue_rs1 = q_req_issue_rs1 & ~nuke_rb1.valid;
 assign e_gnt_issue_rs1 = q_gnt_issue_rs1 ? e_sel_issue_rs1 : '0;
 
 assign q_sel_static_rs1 = mux_funcs#(.IWIDTH(NUM_RS_ENTS),.T(t_rs_entry_static))::uaomux(e_static, e_sel_issue_rs1);
@@ -98,7 +98,9 @@ end
 // Issue staging
 
 logic iss_rs2;
-`DFF(iss_rs2,        iss_rs1,     clk)
+logic iss_nq_rs2;
+`DFF(iss_nq_rs2,        iss_rs1,     clk)
+assign iss_rs2 = iss_nq_rs2 & ~nuke_rb1.valid;
 
 t_iss_pkt   iss_pkt_nq_rs2;
 `DFF(iss_pkt_nq_rs2, iss_pkt_rs1, clk)
@@ -139,6 +141,7 @@ for (genvar i=0; i<NUM_RS_ENTS; i++) begin : g_entries
    rs_entry entry (
        .clk,
        .reset,
+       .nuke_rb1,
 
        .iprf_wr_en_ro0,
        .iprf_wr_pkt_ro0,

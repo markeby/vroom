@@ -19,6 +19,7 @@ module rename
     input  logic         valid_rn0,
     input  t_uinstr      uinstr_rn0,
     output logic         rob_alloc_rn0,
+    input  logic         rob_ready_rn0,
 
     output logic         rename_ready_rn0,
     input  logic         alloc_ready_ra0,
@@ -34,6 +35,7 @@ module rename
     input  t_rat_restore_pkt rat_restore_pkt_rbx,
 
     output logic         valid_rn1,
+    output logic         valid_nq_rn1,
     output t_uinstr      uinstr_rn1,
     output t_rename_pkt  rename_rn1
 );
@@ -53,10 +55,12 @@ logic         alloc_pdst_rn0;
 // Logic
 //
 
-assign alloc_pdst_rn0 = valid_rn0 & ~nuke_rb1.valid & uinstr_rn0.dst.optype == OP_REG;
-assign rob_alloc_rn0  = valid_rn0 & ~nuke_rb1.valid;
+assign alloc_pdst_rn0 = valid_rn0 & ~nuke_rb1.valid & rob_ready_rn0 & uinstr_rn0.dst.optype == OP_REG;
+assign rob_alloc_rn0  = valid_rn0 & ~nuke_rb1.valid & rob_ready_rn0;
 
-`DFF(valid_rn1,  valid_rn0 & ~nuke_rb1.valid,  clk)
+`DFF(valid_nq_rn1,  valid_rn0 & ~nuke_rb1.valid,  clk)
+assign valid_rn1 = valid_nq_rn1 & ~nuke_rb1.valid;
+
 `DFF(uinstr_rn1, uinstr_rn0, clk)
 
 // PRFs

@@ -23,15 +23,14 @@ module core
 logic         decode_ready_de0;
 logic         rename_ready_rn0;
 logic         alloc_ready_ra0;
-logic         rob_ready_ra0;
+logic         rob_ready_rn0;
 
 logic         valid_fe1;
 t_instr_pkt   instr_fe1;
 t_uinstr      uinstr_de0;
 
-logic         alloc_ra0;
-
 logic         valid_rn1;
+logic         valid_nq_rn1;
 t_uinstr      uinstr_rn1;
 t_rename_pkt  rename_rn1;
 
@@ -119,6 +118,7 @@ rename rename (
 
     .alloc_ready_ra0,
     .rename_ready_rn0,
+    .rob_ready_rn0,
     .rob_alloc_rn0,
 
     .valid_rn0 ( uinstr_de1.valid ) ,
@@ -135,6 +135,7 @@ rename rename (
     .rat_reclaim_pkt_rb1,
 
     .valid_rn1,
+    .valid_nq_rn1,
     .uinstr_rn1,
     .rename_rn1
 );
@@ -144,10 +145,9 @@ alloc alloc (
     .reset,
     .nuke_rb1,
     .alloc_ready_ra0,
-    .alloc_ra0,
+    .valid_ra0  ( valid_rn1  ),
     .uinstr_ra0 ( uinstr_rn1 ),
     .rename_ra0 ( rename_rn1 ),
-    .rob_ready_ra0,
     .rs_stall_rs0,
     .src_addr_ra0,
     .rob_src_reg_pdg_ra0,
@@ -232,11 +232,12 @@ rob rob (
     .clk,
     .reset,
     .oldest_robid,
-    .rob_ready_ra0,
+    .rob_ready_rn0,
     .rob_alloc_rn0,
-    .uinstr_ra0 ( uinstr_rn1 ),
-    .rename_ra0 ( rename_rn1 ),
-    .alloc_ra0,
+    .uinstr_rn0 ( uinstr_de1 ),
+
+    .valid_nq_rn1,
+    .rename_rn1,
 
     .src_addr_ra0,
     .rob_src_reg_pdg_ra0,

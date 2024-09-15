@@ -40,6 +40,14 @@ localparam NUM_RA_STAGES = 1;
 t_disp_pkt disp_pkt_ra0;
 t_disp_pkt disp_pkt_ra1;
 
+logic    ldq_alloc_ra0;
+logic    ldq_full_ra0;
+t_ldq_id ldq_id_ra0;
+
+logic    stq_alloc_ra0;
+logic    stq_full_ra0;
+t_stq_id stq_id_ra0;
+
 //
 // Logic
 //
@@ -48,9 +56,11 @@ assign src_addr_ra0[SRC1] = uinstr_ra0.src1.opreg;
 assign src_addr_ra0[SRC2] = uinstr_ra0.src2.opreg;
 
 always_comb begin
-   disp_pkt_ra0.uinstr       = uinstr_ra0;
-   disp_pkt_ra0.rename       = rename_ra0;
-   disp_pkt_ra0.meta         = '0;
+    disp_pkt_ra0.uinstr       = uinstr_ra0;
+    disp_pkt_ra0.rename       = rename_ra0;
+    disp_pkt_ra0.meta         = '0;
+    unique if (rv_opcode_is_ldst(uinstr_ra0.opcode)) disp_pkt_ra0.meta.mem = '{ldqid: ldq_id_ra0, stqid: stq_id_ra0};
+                                                else disp_pkt_ra0.meta     = '0;
 end
 
 `DFF(disp_pkt_ra1, disp_pkt_ra0, clk)
@@ -70,6 +80,22 @@ assign disp_valid_rs0 = valid_ra1 & ~stall_ra1 & ~nuke_rb1.valid;
 assign stall_ra1 = rs_stall_rs0;
 
 assign alloc_ready_ra0 = ~stall_ra1;
+
+// MEM ID Tracking
+
+mem_id_trk mem_id_trk (
+    .clk,
+    .reset,
+    .stq_alloc_ra0,
+    .stq_id_ra0,
+    .stq_full_ra0,
+    .ldq_alloc_ra0,
+    .ldq_id_ra0,
+    .ldq_full_ra0
+);
+
+assign ldq_alloc_ra0 = valid_ra0 & rv_opcode_is_ld(uinstr_ra0.opcode);
+assign stq_alloc_ra0 = valid_ra0 & rv_opcode_is_st(uinstr_ra0.opcode);
 
 //
 // Debug

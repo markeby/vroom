@@ -16,6 +16,7 @@ module rs
     input  logic          clk,
     input  logic          reset,
     input  t_nuke_pkt     nuke_rb1,
+    input  t_rob_id       oldest_robid,
     input  logic          ldq_idle,
     input  logic          stq_idle,
 
@@ -47,11 +48,13 @@ localparam NUM_EX_STAGES = 1;
 
 logic                  q_alloc_rs0;
 logic[NUM_RS_ENTS-1:0] e_alloc_rs0;
+logic[NUM_RS_ENTS-1:0] e_first_avail_rs0;
 t_rs_entry_static      q_alloc_static_rs0;
 t_rs_entry_static      e_static               [NUM_RS_ENTS-1:0];
 t_rs_entry_static      q_sel_static_rs1;
 t_rename_pkt           q_sel_rename_rs1;
 logic[NUM_RS_ENTS-1:0] e_valid;
+logic[$clog2(NUM_RS_ENTS)-1:0] q_alloc_id_rs0;
 
 logic                  q_req_issue_rs1;
 logic[NUM_RS_ENTS-1:0] e_req_issue_rs1;
@@ -68,9 +71,11 @@ logic[NUM_SOURCES-1:0] src_from_prf_rs1;
 // Logic
 //
 
-assign rs_stall_rs0 = 1'b0;
-assign q_alloc_rs0 = disp_valid_rs0;
-assign e_alloc_rs0 = q_alloc_rs0 ? gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first0(e_valid) : '0;
+assign rs_stall_rs0      = 1'b0;
+assign q_alloc_rs0       = disp_valid_rs0;
+assign e_first_avail_rs0 = gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first0(e_valid);
+assign e_alloc_rs0       = q_alloc_rs0 ? e_first_avail_rs0 : '0;
+assign q_alloc_id_rs0    = gen_lg2_funcs#(.IWIDTH(NUM_RS_ENTS))::oh_encode(e_first_avail_rs0);
 
 // Issue arbitration
 
@@ -146,6 +151,7 @@ for (genvar i=0; i<NUM_RS_ENTS; i++) begin : g_entries
        .nuke_rb1,
        .ldq_idle,
        .stq_idle,
+       .oldest_robid,
 
        .iprf_wr_en_ro0,
        .iprf_wr_pkt_ro0,
@@ -168,6 +174,10 @@ end
 
 `ifdef SIMULATION
 always @(posedge clk) begin
+    if (q_alloc_rs0) begin
+        `UINFO(disp_pkt_rs0.uinstr.SIMID, ("unit:%s func:alloc rs_ent:0x%0h",
+            RS_NAME, q_alloc_id_rs0))
+    end
     if (ex_iss_rs2) begin
         `UINFO(ex_iss_pkt_rs2.uinstr.SIMID, ("unit:%s func:issue robid:0x%0x pdst:%s src1:0x%0x src2:0x%0x %s",
             RS_NAME, ex_iss_pkt_rs2.robid, f_describe_prf(ex_iss_pkt_rs2.pdst), ex_iss_pkt_rs2.src1_val, ex_iss_pkt_rs2.src2_val,

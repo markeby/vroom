@@ -27,7 +27,7 @@ localparam NUM_ENTS_LG2 = $clog2(NUM_ENTS);
 
 function automatic T f_incr_id(T id);
     f_incr_id = id;
-    if ({1'b0,f_incr_id.idx} == NUM_ENTS-1) begin
+    if ({1'b0,f_incr_id.idx} == (NUM_ENTS_LG2+1)'(NUM_ENTS-1)) begin
         f_incr_id.wrap ^= 1'b1;
         f_incr_id.idx   = '0;
     end else begin

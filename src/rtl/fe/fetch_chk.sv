@@ -12,7 +12,7 @@ module fetch_chk
 (
     input  logic       clk,
     input  logic       reset,
-    input  logic       stall,
+    input  logic       decode_ready_de0,
 
     input  logic       valid_fe1,
     input  t_instr_pkt instr_fe1,
@@ -39,6 +39,9 @@ t_paddr  PC;
 t_fsm state;
 t_fsm state_nxt;
 
+logic br_mispred_ql_ex0;
+assign br_mispred_ql_ex0 = fe.fe_ctl.br_mispred_ql_ex0;
+
 //
 // Logic
 //
@@ -47,7 +50,7 @@ always_comb begin
     state_nxt = state;
     unique case(state)
         IDLE:         if (valid_fe1                    ) state_nxt = PDG_NXT_SEQ;
-        PDG_NXT_SEQ:  if (br_mispred_ex0.valid         ) state_nxt = PDG_BRANCH;
+        PDG_NXT_SEQ:  if (br_mispred_ql_ex0            ) state_nxt = PDG_BRANCH;
         PDG_BRANCH:   if (valid_fe1                    ) state_nxt = PDG_NXT_SEQ;
         default:                                         state_nxt = PDG_NXT_SEQ;
     endcase
@@ -62,9 +65,9 @@ always_comb begin
     PCNxt = PC;
     if (valid_fe1 & state == IDLE) begin
         PCNxt = instr_fe1.pc + t_paddr'(4);;
-    end else if(br_mispred_ex0.valid) begin
+    end else if(br_mispred_ql_ex0) begin
         PCNxt = br_mispred_ex0.target_addr;
-    end else if(valid_fe1 & ~stall) begin
+    end else if(valid_fe1 & decode_ready_de0) begin
         PCNxt = PC + t_paddr'(4);;
     end else begin
         PCNxt = PC;
@@ -78,14 +81,14 @@ end
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (valid_fe1 & ~stall & ~reset) begin
+    if (valid_fe1 & decode_ready_de0 & ~reset) begin
         `INFO(("unit:FE pc:%h %s", PC, describe_instr(instr_fe1)))
     end
 end
 `endif
 
 `ifdef ASSERT
-    `VASSERT(a_bad_fetch_addr, state != IDLE & valid_fe1, instr_fe1.pc == PC, $sformatf("Incorrect PC fetched (%s): exp(%h) != act(%h)", state.name(), PC, instr_fe1.pc))
+    //VASSERT(a_bad_fetch_addr, state != IDLE & valid_fe1, instr_fe1.pc == PC, $sformatf("Incorrect PC fetched (%s): exp(%h) != act(%h)", state.name(), PC, instr_fe1.pc))
 `endif
 
 

@@ -56,11 +56,11 @@ t_mempipe_arb              q_pipe_req_pkt_mm0;
 logic                      q_pipe_gnt_mm0;
 
 logic[FLQ_NUM_ENTRIES-1:0] e_mem_req;
-t_mem_req_pkt                  e_mem_req_pkt [FLQ_NUM_ENTRIES-1:0];
+t_mem_req_pkt              e_mem_req_pkt [FLQ_NUM_ENTRIES-1:0];
 logic[FLQ_NUM_ENTRIES-1:0] e_mem_gnt;
 
 logic                      q_mem_req;
-t_mem_req_pkt                  q_mem_req_pkt;
+t_mem_req_pkt              q_mem_req_pkt;
 logic                      q_mem_gnt;
 
 //
@@ -78,6 +78,7 @@ always_comb begin
     q_alloc_static_mm5.SIMID      = FILL_SIMID;
     `endif
     q_alloc_static_mm5.paddr      = pipe_req_pkt_mm5.addr;
+    q_alloc_static_mm5.paddr[5:0] = '0;
     q_alloc_static_mm5.alloc_id   = pipe_req_pkt_mm5.id;
     q_alloc_static_mm5.alloc_type = pipe_req_pkt_mm5.arb_type;
 end

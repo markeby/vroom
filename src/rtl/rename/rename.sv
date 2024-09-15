@@ -69,6 +69,8 @@ logic rdmap_nq_rd0 [IPRF_NUM_MAP_READS-1:0];
 assign rdmap_nq_rd0[SRC1] = valid_rn0 & uinstr_rn0.src1.optype == OP_REG;
 assign rdmap_nq_rd0[SRC2] = valid_rn0 & uinstr_rn0.src2.optype == OP_REG;
 
+logic rename_ready_prf_rn0;
+
 prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRITES(IPRF_NUM_WRITES), .NUM_MAP_READS(IPRF_NUM_MAP_READS)) iprf
 (
     .clk,
@@ -91,7 +93,7 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
     .simid_rn0_inst ( uinstr_rn0.SIMID ) ,
     .simid_rd0_inst ( uinstr_rn0.SIMID ) ,
     `endif
-    .rename_ready_rn0,
+    .rename_ready_rn0 ( rename_ready_prf_rn0 ) ,
 
     .rat_reclaim_pkt_rb1,
     .rat_restore_pkt_rbx,
@@ -104,6 +106,8 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
 
 assign robid_rnx[RN0] = next_robid_rn0;
 assign rename_rn1.robid = robid_rnx[RN1];
+
+assign rename_ready_rn0 = rename_ready_prf_rn0 & rob_ready_rn0;
 
 //
 // Debug

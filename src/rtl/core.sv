@@ -166,6 +166,7 @@ rs #(.NUM_RS_ENTS(8), .RS_NAME("RS0")) rs (
     .nuke_rb1,
     .ldq_idle,
     .stq_idle,
+    .oldest_robid,
 
     .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1, iprf_wr_en_mm5} ),
     .iprf_wr_pkt_ro0  ( '{iprf_wr_pkt_ex1, iprf_wr_pkt_mm5} ),

@@ -19,6 +19,7 @@ module rs_entry
     input  t_nuke_pkt     nuke_rb1,
     input  logic          ldq_idle,
     input  logic          stq_idle,
+    input  t_rob_id       oldest_robid,
 
     input  logic          iprf_wr_en_ro0   [IPRF_NUM_WRITES-1:0],
     input  t_prf_wr_pkt   iprf_wr_pkt_ro0  [IPRF_NUM_WRITES-1:0],
@@ -111,8 +112,7 @@ for (genvar srcx=0; srcx<NUM_SOURCES; srcx++) begin : g_src_trk
 end
 
 assign e_req_issue_rs1 = e_valid & (&src_ready_rs1)
-                       & ~(rv_opcode_is_ld(e_static.uinstr_disp.uinstr.opcode) & (~stq_idle            ))
-                       & ~(rv_opcode_is_st(e_static.uinstr_disp.uinstr.opcode) & (~stq_idle | ~ldq_idle))
+                       & (~rv_opcode_is_ldst(e_static.uinstr_disp.uinstr.opcode) | e_static.uinstr_disp.rename.robid == oldest_robid)
                        ;
 always_comb begin
     e_issue_pkt_rs1.uinstr   = e_static.uinstr_disp.uinstr;

@@ -30,31 +30,46 @@ module mem_id_trk
 // Logic
 //
 
-gen_wrapped_id_trk #(.T(t_ldq_id), .NUM_ENTS(LDQ_NUM_ENTRIES)) gen_ldq_id (
+typedef struct packed {
+    logic    wrap;
+    t_ldq_id idx;
+} t_ldq_id_w;
+t_ldq_id_w ldq_id_w_ra0;
+
+typedef struct packed {
+    logic    wrap;
+    t_stq_id idx;
+} t_stq_id_w;
+t_stq_id_w stq_id_w_ra0;
+
+gen_wrapped_id_trk #(.T(t_ldq_id_w), .NUM_ENTS(LDQ_NUM_ENTRIES)) gen_ldq_id (
     .clk,
     .reset,
 
     .alloc   ( ldq_alloc_ra0 ) ,
     .dealloc ( 1'b0          ) ,
-    .head_id ( '0            ) ,
-    .tail_id ( ldq_id_ra0    ) ,
+    .head_id (               ) ,
+    .tail_id ( ldq_id_w_ra0  ) ,
 
     .empty   (               ) ,
     .full    ( ldq_full_ra0  )
 );
 
-gen_wrapped_id_trk #(.T(t_stq_id), .NUM_ENTS(STQ_NUM_ENTRIES)) gen_stq_id (
+gen_wrapped_id_trk #(.T(t_stq_id_w), .NUM_ENTS(STQ_NUM_ENTRIES)) gen_stq_id (
     .clk,
     .reset,
 
     .alloc   ( stq_alloc_ra0 ) ,
     .dealloc ( 1'b0          ) ,
-    .head_id ( '0            ) ,
-    .tail_id ( stq_id_ra0    ) ,
+    .head_id (               ) ,
+    .tail_id ( stq_id_w_ra0  ) ,
 
     .empty   (               ) ,
     .full    ( stq_full_ra0  )
 );
+
+assign ldq_id_ra0 = ldq_id_w_ra0.idx;
+assign stq_id_ra0 = stq_id_w_ra0.idx;
 
 //
 // Debug

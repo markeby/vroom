@@ -189,7 +189,7 @@ t_uinstr uinstr_nq_de1;
 logic ebreak_seen;
 `DFF(ebreak_seen, ~reset & ~nuke_rb1.valid & (ebreak_seen | uopq_push_de0 & uinstr_de0.uop == U_EBREAK), clk)
 
-assign uopq_push_de0 = uinstr_de0.valid & ~ebreak_seen & ~nuke_rb1.valid;
+assign uopq_push_de0 = uinstr_de0.valid & ~ebreak_seen & ~nuke_rb1.valid & decode_ready_de0;
 
 logic uopq_valid_de1;
 gen_fifo #(

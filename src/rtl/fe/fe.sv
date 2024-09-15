@@ -41,9 +41,6 @@ t_fb_fe_rsp fb_fe_rsp_nnn;
 t_mem_req_pkt   fb_ic_req_nnn;
 t_mem_rsp_pkt   ic_fb_rsp_nnn;
 
-logic stall;
-assign stall = ~decode_ready_de0;
-
 //
 // Logic
 //
@@ -62,7 +59,7 @@ fe_ctl fe_ctl (
 
     .valid_fe1,
     .instr_fe1,
-    .stall
+    .decode_ready_de0
 );
 
 fe_buf fe_buf (
@@ -99,7 +96,7 @@ fetch_chk fetch_chk (
     .clk,
     .reset,
     .nuke_rb1,
-    .stall,
+    .decode_ready_de0,
     .valid_fe1,
     .instr_fe1,
     .br_mispred_ex0

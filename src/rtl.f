@@ -43,6 +43,7 @@ src/rtl/rs/rs_entry.sv
 src/rtl/rs/rs.sv
 
 src/rtl/alloc/alloc.sv
+src/rtl/alloc/mem_id_trk.sv
 
 src/rtl/rename/rename.sv
 src/rtl/rename/prf.sv
@@ -50,6 +51,7 @@ src/rtl/rename/prf.sv
 src/rtl/gen/gen_fifo.sv
 src/rtl/gen/gen_arbiter.sv
 src/rtl/gen/gen_arbiter_ff.sv
+src/rtl/gen/gen_wrapped_id_trk.sv
 
 src/rtl/coredebug.sv
 src/rtl/sim/preload.sv

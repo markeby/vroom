@@ -9,16 +9,19 @@
 `include "rob_defs.pkg"
 `include "verif.pkg"
 `include "mem_defs.pkg"
+`include "gen_funcs.pkg"
 
 `ifdef SIMULATION
 
 /* verilator lint_off BLKSEQ */
 module coredebug
-    import instr::*, instr_decode::*, mem_common::*, common::*, rob_defs::*, verif::*, mem_defs::*;
+    import instr::*, instr_decode::*, mem_common::*, common::*, rob_defs::*, verif::*, mem_defs::*, gen_funcs::*;
 (
     input  logic clk,
     input  logic reset
 );
+
+localparam NUM_RS_ENTS = 8;
 
 typedef struct packed {
     logic       valid;
@@ -43,6 +46,7 @@ typedef struct packed {
     int           clk;
     int           port;
     t_disp_pkt    disp_pkt_ra1;
+    logic[$clog2(NUM_RS_ENTS)-1:0] rs_ent_ra1;
 } t_cd_alloc;
 
 typedef struct packed {
@@ -129,7 +133,7 @@ task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ("    Fetch  -> Decode @ %-d", rec.FETCH.clk))
     `PMSG(CDBG, ("    Decode -> Rename @ %-d", rec.DECODE.clk))
     `PMSG(CDBG, ("    Rename -> Alloc  @ %-d", rec.RENAME.clk))
-    `PMSG(CDBG, ("    Alloc  -> RS.%0d   @ %-d", rec.ALLOC.port, rec.ALLOC.clk))
+    `PMSG(CDBG, ("    Alloc  -> RS.%0d   @ %-d (%0d)", rec.ALLOC.port, rec.ALLOC.clk, rec.ALLOC.rs_ent_ra1))
     `PMSG(CDBG, ("              Result @ %-d", rec.RESULT.clk))
     `PMSG(CDBG, ("              Retire @ %-d %s", rec.RETIRE.clk, rec.RETIRE.nuke_rb1.valid ? "NUKE!!!" : ""))
     `PMSG(CDBG, (""))
@@ -168,7 +172,7 @@ function automatic int f_instq_find_match(t_simid THIS_SIMID);
     for (int i=0; i<INSTQ.size(); i++) begin
         if (INSTQ[i].SIMID == THIS_SIMID) begin
             if (f_instq_find_match != -1) begin
-                $error("Found multiple instq matches!");
+                $error("Found multiple instq matches! %s", format_simid(THIS_SIMID));
             end
             f_instq_find_match = i;
         end
@@ -183,7 +187,7 @@ task cd_decode();
     `CHK_INSTQ_MATCH(i,cd_decode)
 
     if (INSTQ[i].DECODE.valid) begin
-        $error("Trying to add a decode to a record that is already valid!");
+        $error("Trying to add a decode to a record that is already valid! %s", format_simid(top.core.uinstr_de1.SIMID));
     end
     INSTQ[i].DECODE.valid = 1'b1;
     INSTQ[i].DECODE.clk = top.cclk_count;
@@ -212,6 +216,7 @@ task cd_alloc();
     INSTQ[i].ALLOC.valid = 1'b1;
     INSTQ[i].ALLOC.clk = top.cclk_count;
     INSTQ[i].ALLOC.disp_pkt_ra1 = top.core.alloc.disp_pkt_rs0;
+    INSTQ[i].ALLOC.rs_ent_ra1   = top.core.rs.q_alloc_id_rs0;
 endtask
 
 task cd_rs();
@@ -303,8 +308,8 @@ task cd_retire();
 endtask
 
 always_ff @(posedge clk) begin
-    if (core.valid_fe1) cd_fetch();
-    if (core.valid_de1) cd_decode();
+    if (core.valid_fe1 & core.decode_ready_de0) cd_fetch();
+    if (core.valid_de1 & core.rename_ready_rn0) cd_decode();
     if (core.valid_rn1) cd_rename();
 
     if (core.alloc.disp_valid_rs0) cd_alloc();

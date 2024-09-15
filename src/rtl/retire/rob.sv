@@ -58,6 +58,14 @@ logic                  rob_empty_rn0;
 
 logic                  q_flush_now_rb1;
 
+typedef enum logic[1:0] {
+    RR_IDLE,
+    RR_QUIET,
+    RR_WALK,
+    RR_RESUME_FETCH
+} t_rat_restore_fsm;
+t_rat_restore_fsm rr_fsm, rr_fsm_nxt;
+
 //
 // Logic
 //
@@ -86,7 +94,7 @@ assign next_robid_rn0 = tail_id;
 
 assign rob_empty_rn0 = f_rob_empty(head_id, tail_id);
 assign rob_full_rn0  = f_rob_full(head_id, tail_id);
-assign rob_ready_rn0 = ~rob_full_rn0;
+assign rob_ready_rn0 = ~rob_full_rn0 & rr_fsm == RR_IDLE;
 
 // Retire
 
@@ -181,14 +189,6 @@ end
 //   3. walk from rr_robid - 1 to rob_head, backwards, restoring the RAT
 //   4. once we're at rob_head, send resume_fetch_rbx to fe_ctl
 
-typedef enum logic[1:0] {
-    RR_IDLE,
-    RR_QUIET,
-    RR_WALK,
-    RR_RESUME_FETCH
-} t_rat_restore_fsm;
-t_rat_restore_fsm rr_fsm, rr_fsm_nxt;
-
 localparam RR_QUIESCE_CYCLES = 5;
 
 t_rob_id rr_robid;
@@ -233,6 +233,8 @@ assign rat_restore_pkt_rbx.SIMID = entries[rr_robid.idx].s.uinstr.SIMID;
 assign resume_fetch_rbx = rr_fsm == RR_RESUME_FETCH;
 
 `DFF_EN(rr_cntr, (rr_fsm == RR_IDLE) ? (1+$clog2(RR_QUIESCE_CYCLES))'(RR_QUIESCE_CYCLES) : (rr_cntr - (1+$clog2(RR_QUIESCE_CYCLES))'(1)), clk, (rr_fsm == RR_IDLE | (|rr_cntr)))
+
+`VASSERT(a_alloc_while_correcting, q_alloc_rn0, rr_fsm inside {RR_IDLE, RR_QUIET}, "ROB alloc while RAT correction in progress")
 
 //
 // Debug

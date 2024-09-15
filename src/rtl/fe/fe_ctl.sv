@@ -23,7 +23,7 @@ module fe_ctl
 
     output logic       valid_fe1,
     output t_instr_pkt instr_fe1,
-    input  logic       stall
+    input  logic       decode_ready_de0
 );
 
 typedef enum logic[2:0] {
@@ -42,9 +42,9 @@ typedef enum logic[2:0] {
 `ifdef SIMULATION
 int instr_cnt_inst;
 int instr_cnt_inst_nxt;
-assign instr_cnt_inst_nxt = reset                ? '0                 :
-                            (valid_fe1 & ~stall) ? instr_cnt_inst + 1 :
-                                                   instr_cnt_inst;
+assign instr_cnt_inst_nxt = reset                          ? '0                 :
+                            (valid_fe1 & decode_ready_de0) ? instr_cnt_inst + 1 :
+                                                             instr_cnt_inst;
 
 `DFF(instr_cnt_inst, instr_cnt_inst_nxt, clk)
 `endif
@@ -74,9 +74,9 @@ always_comb begin
         FE_IDLE:      if (1'b1                                   ) state_nxt = FE_REQ_IC;
         FE_REQ_IC:    if (1'b1                                   ) state_nxt = FE_PDG_IC;
         FE_PDG_IC:    if (fb_fe_rsp_nnn.valid &  nuke_pdg        ) state_nxt = FE_PDG_NUKE;  // wait for nuke
-                 else if (fb_fe_rsp_nnn.valid &  stall           ) state_nxt = FE_PDG_STALL; // wait for stall to resolve
-                 else if (fb_fe_rsp_nnn.valid & ~stall           ) state_nxt = FE_PDG_IC;    // no stall or nuke -> early send
-        FE_PDG_STALL: if (~stall                                 ) state_nxt = FE_PDG_IC;
+                 else if (fb_fe_rsp_nnn.valid & ~decode_ready_de0) state_nxt = FE_PDG_STALL; // wait for stall to resolve
+                 else if (fb_fe_rsp_nnn.valid &  decode_ready_de0) state_nxt = FE_PDG_IC;    // no stall or nuke -> early send
+        FE_PDG_STALL: if (decode_ready_de0                       ) state_nxt = FE_PDG_IC;
         FE_PDG_NUKE:  if (resume_fetch_rbx                       ) state_nxt = FE_PDG_STALL; // after a nuke, head to FE_PDG_STALL state; we can request from thre
         default:                                                   state_nxt = state;
     endcase
@@ -122,8 +122,8 @@ t_fb_fe_rsp fb_fe_capture_nnn;
 always_comb begin
     fe_fb_req_nnn = '0;
     fe_fb_req_nnn.valid = state == FE_REQ_IC
-                        | state == FE_PDG_IC    & ~stall & fb_fe_rsp_nnn.valid
-                        | state == FE_PDG_STALL & ~stall;
+                        | state == FE_PDG_IC    & decode_ready_de0 & fb_fe_rsp_nnn.valid
+                        | state == FE_PDG_STALL & decode_ready_de0;
     fe_fb_req_nnn.addr  = PC;
     fe_fb_req_nnn.id    = 0;
 end
@@ -170,7 +170,7 @@ end
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (valid_fe1 & ~stall & ~reset) begin
+    if (valid_fe1 & decode_ready_de0 & ~reset) begin
         `UINFO(instr_fe1.SIMID, ("unit:FE pc:%h %s", PC, describe_instr(instr_fe1)))
     end
 end

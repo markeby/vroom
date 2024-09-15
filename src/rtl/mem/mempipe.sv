@@ -101,6 +101,7 @@ logic valid_mm0;
 `MKPIPE     (logic[L1_NUM_WAYS-1:0],  hit_vec_mmx,                          MM2, NUM_MM_STAGES)
 `MKPIPE     (t_cl[L1_NUM_WAYS-1:0],   rd_cl_data_set_mmx,                   MM2, NUM_MM_STAGES)
 `MKPIPE_INIT(logic,                   flq_addr_mat_mmx, flq_addr_mat_mm2,   MM2, NUM_MM_STAGES)
+`MKPIPE_INIT(logic,                   flq_alloc_mmx,    flq_alloc_mm6,      MM6, NUM_MM_STAGES)
 `MKPIPE     (t_cl,                    rd_cl_data_mmx,                       MM3, NUM_MM_STAGES)
 `MKPIPE     (t_rv_reg_data,           rd_cl_data_rot_mmx,                   MM4, NUM_MM_STAGES)
 
@@ -207,12 +208,20 @@ end
     // - Result valid
     //
 
+logic flq_alloc_mm6;
+`DFF(flq_alloc_mm6, flq_alloc_mm5, clk)
+// uh, verilator inferring circular path if I use MM5..MM8... so just stage directly to MM6 myself
+
 assign valid_mm5   = valid_mmx[MM5];
 assign req_pkt_mm5 = req_pkt_mmx[MM5];
 assign flq_alloc_mm5 = valid_mm5
                      & req_pkt_mmx[MM5].arb_type inside {MEM_LOAD, MEM_STORE}
                      & ~hit_mmx[MM5]
-                     & ~flq_addr_mat_mmx[MM5];
+                     & ~flq_addr_mat_mmx[MM5]
+                     & ~( valid_mmx[MM6] & flq_alloc_mmx[MM6] & req_pkt_mmx[MM5].addr[PA_SZ-1:6] == req_pkt_mmx[MM6].addr[PA_SZ-1:6]
+                        | valid_mmx[MM7] & flq_alloc_mmx[MM7] & req_pkt_mmx[MM5].addr[PA_SZ-1:6] == req_pkt_mmx[MM7].addr[PA_SZ-1:6]
+                        | valid_mmx[MM8] & flq_alloc_mmx[MM8] & req_pkt_mmx[MM5].addr[PA_SZ-1:6] == req_pkt_mmx[MM8].addr[PA_SZ-1:6]
+                        );
 
 always_comb begin
     action_mm5.complete = 1'b0;

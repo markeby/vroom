@@ -55,8 +55,14 @@ always_comb begin
 end
 
 assign pcnxt_ex0   = uinstr_ex0.pc + 4;
-assign tkn_tgt_ex0 = uinstr_ex0.pc + uinstr_ex0.imm64;
 assign result_ex0  = pcnxt_ex0;
+
+always_comb begin
+    unique casez (uinstr_ex0.uop)
+        U_JALR:  tkn_tgt_ex0 = (src1val_ex0 + uinstr_ex0.imm64) & ~64'h1;
+        default: tkn_tgt_ex0 = uinstr_ex0.pc + uinstr_ex0.imm64;
+    endcase
+end
 
 always_comb begin
     tkn_ex0 = 1'b0;

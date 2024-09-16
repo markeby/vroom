@@ -170,7 +170,7 @@ package instr_decode;
             end
             RV_FMT_I: begin
                 unique casez(instr.opcode)
-                    RV_OP_JALR  : rv_instr_to_uop = U_INVALID;
+                    RV_OP_JALR  : rv_instr_to_uop = U_JALR;
                     RV_OP_LD    : begin
                         //t_rv_ld_op_funct3 ld_op = t_rv_ld_op_funct3'(instr.d.I.funct3);
                         rv_instr_to_uop = U_LOAD;

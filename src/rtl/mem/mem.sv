@@ -53,10 +53,11 @@ t_l1_way         tag_wr_way_mm1;
 t_l1_tag         tag_rd_ways_mm2[L1_NUM_WAYS-1:0];
 
 logic            state_rd_en_mm1;
-logic            state_wr_en_mm1;
-t_mesi           state_wr_state_mm1;
-t_l1_way         state_wr_way_mm1;
 t_mesi           state_rd_ways_mm2[L1_NUM_WAYS-1:0];
+
+logic            state_wr_en_mm3;
+t_mesi           state_wr_state_mm3;
+t_l1_way         state_wr_way_mm3;
 
 logic            data_rd_en_mm1;
 t_cl             data_rd_ways_mm2[L1_NUM_WAYS-1:0];
@@ -167,12 +168,14 @@ l1state l1state (
     .reset,
 
     .state_rd_en_mm1,
-    .state_wr_en_mm1,
     .set_addr_mm1,
-    .state_wr_state_mm1,
-    .state_wr_way_mm1,
 
-    .state_rd_ways_mm2
+    .state_rd_ways_mm2,
+
+    .set_addr_mm3,
+    .state_wr_en_mm3,
+    .state_wr_state_mm3,
+    .state_wr_way_mm3
 );
 
 l1data l1data (
@@ -213,10 +216,11 @@ mempipe mempipe (
     .tag_rd_ways_mm2,
 
     .state_rd_en_mm1,
-    .state_wr_en_mm1,
-    .state_wr_state_mm1,
-    .state_wr_way_mm1,
     .state_rd_ways_mm2,
+
+    .state_wr_en_mm3,
+    .state_wr_state_mm3,
+    .state_wr_way_mm3,
 
     .data_rd_en_mm1,
     .data_rd_ways_mm2,

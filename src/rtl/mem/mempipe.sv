@@ -37,13 +37,14 @@ module mempipe
     input  t_l1_tag         tag_rd_ways_mm2   [L1_NUM_WAYS-1:0],
 
     output logic            state_rd_en_mm1,
-    output logic            state_wr_en_mm1,
-    output t_mesi           state_wr_state_mm1,
-    output t_l1_way         state_wr_way_mm1,
     input  t_mesi           state_rd_ways_mm2 [L1_NUM_WAYS-1:0],
 
     output logic            data_rd_en_mm1,
     input  t_cl             data_rd_ways_mm2 [L1_NUM_WAYS-1:0],
+
+    output logic            state_wr_en_mm3,
+    output t_mesi           state_wr_state_mm3,
+    output t_l1_way         state_wr_way_mm3,
 
     output logic            data_wr_en_mm3,
     output t_cl             data_wr_data_mm3,
@@ -98,6 +99,7 @@ logic valid_mm0;
 `MKPIPE     (logic,                   cacheable_mmx,                        MM0, NUM_MM_STAGES)
 `MKPIPE     (t_paddr,                 paddr_mmx,                            MM1, NUM_MM_STAGES)
 `MKPIPE     (logic,                   hit_mmx,                              MM2, NUM_MM_STAGES)
+`MKPIPE     (t_l1_way,                hit_way_mmx,                          MM2, NUM_MM_STAGES)
 `MKPIPE     (logic[L1_NUM_WAYS-1:0],  hit_vec_mmx,                          MM2, NUM_MM_STAGES)
 `MKPIPE     (t_cl[L1_NUM_WAYS-1:0],   rd_cl_data_set_mmx,                   MM2, NUM_MM_STAGES)
 `MKPIPE_INIT(logic,                   flq_addr_mat_mmx, flq_addr_mat_mm2,   MM2, NUM_MM_STAGES)
@@ -147,9 +149,6 @@ assign tag_wr_tag_mm1   = req_pkt_mmx[MM1].addr[L1_TAG_HI:L1_TAG_LO];
 assign tag_wr_way_mm1   = req_pkt_mmx[MM1].arb_way;
 
 assign state_rd_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
-assign state_wr_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_fl_mmx[MM1] );
-assign state_wr_state_mm1 = MESI_E; // FIXME
-assign state_wr_way_mm1   = req_pkt_mmx[MM1].arb_way;
 
 assign data_rd_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1] | is_st_mmx[MM1] );
 
@@ -170,6 +169,7 @@ for (genvar w=0; w<L1_NUM_WAYS; w++) begin : g_hit_vec
     assign rd_cl_data_set_mmx[MM2][w] = data_rd_ways_mm2[w];
 end
 assign hit_mmx[MM2] = |hit_vec_mmx[MM2];
+assign hit_way_mmx[MM2] = gen_lg2_funcs#(.IWIDTH(L1_NUM_WAYS))::oh_encode(hit_vec_mmx[MM2]);
 
     //
     // MM3
@@ -187,6 +187,12 @@ assign data_wr_en_mm3    = valid_mmx[MM3] & cacheable_mmx[MM3]
 assign data_wr_data_mm3  = req_pkt_mmx[MM3].arb_data;
 assign data_wr_way_mm3   = req_pkt_mmx[MM3].arb_way;
 assign data_wr_be_mm3    = req_pkt_mmx[MM3].byte_en;
+
+assign state_wr_en_mm3    = valid_mmx[MM3] & cacheable_mmx[MM3]
+                          & ( is_fl_mmx[MM3]
+                            | is_st_mmx[MM3] & req_pkt_mmx[MM3].phase.st == MEM_ST_FINAL & hit_mmx[MM3]);
+assign state_wr_state_mm3 = is_fl_mmx[MM3] ? MESI_E : MESI_M;
+assign state_wr_way_mm3   = is_fl_mmx[MM3] ? req_pkt_mmx[MM3].arb_way : hit_way_mmx[MM3];
 
     //
     // MM4

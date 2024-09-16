@@ -30,9 +30,9 @@ module cdiff
     //`L1_MEMPIPE_PEEK(t_l1_tag , tag_rd_ways_mm2)
 
     `L1_MEMPIPE_PEEK(logic    , state_rd_en_mm1)
-    `L1_MEMPIPE_PEEK(logic    , state_wr_en_mm1)
-    `L1_MEMPIPE_PEEK(t_mesi   , state_wr_state_mm1)
-    `L1_MEMPIPE_PEEK(t_l1_way , state_wr_way_mm1)
+    `L1_MEMPIPE_PEEK(logic    , state_wr_en_mm3)
+    `L1_MEMPIPE_PEEK(t_mesi   , state_wr_state_mm3)
+    `L1_MEMPIPE_PEEK(t_l1_way , state_wr_way_mm3)
     //`L1_MEMPIPE_PEEK(t_mesi   , state_rd_ways_mm2)
 
     `L1_MEMPIPE_PEEK(logic    , data_rd_en_mm1)
@@ -61,7 +61,7 @@ function automatic void f_print_diff_set_way(string arb_type, t_l1_set_addr set,
 endfunction
 
 `MKPIPE_INIT(logic, tag_wr_en_mmx,   tag_wr_en_mm1,   MM1, NUM_MM_STAGES);
-`MKPIPE_INIT(logic, state_wr_en_mmx, state_wr_en_mm1, MM1, NUM_MM_STAGES);
+`MKPIPE_INIT(logic, state_wr_en_mmx, state_wr_en_mm3, MM3, NUM_MM_STAGES);
 `MKPIPE_INIT(logic, data_wr_en_mmx,  data_wr_en_mm3,  MM3, NUM_MM_STAGES);
 
 always @(posedge clk) begin

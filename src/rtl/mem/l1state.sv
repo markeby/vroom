@@ -14,12 +14,14 @@ module l1state
     input  logic              reset,
 
     input  logic              state_rd_en_mm1,
-    input  logic              state_wr_en_mm1,
     input  t_l1_set_addr      set_addr_mm1,
-    input  t_mesi             state_wr_state_mm1,
-    input  t_l1_way           state_wr_way_mm1,
 
-    output t_mesi             state_rd_ways_mm2[L1_NUM_WAYS-1:0]
+    output t_mesi             state_rd_ways_mm2[L1_NUM_WAYS-1:0],
+
+    input  t_l1_set_addr      set_addr_mm3,
+    input  logic              state_wr_en_mm3,
+    input  t_mesi             state_wr_state_mm3,
+    input  t_l1_way           state_wr_way_mm3
 );
 
 //
@@ -33,8 +35,8 @@ t_mesi state_array [L1_NUM_SETS-1:0][L1_NUM_WAYS-1:0];
 //
 
 always_ff @(posedge clk) begin
-    if (state_wr_en_mm1) begin
-        state_array[set_addr_mm1][state_wr_way_mm1] <= state_wr_state_mm1;
+    if (state_wr_en_mm3) begin
+        state_array[set_addr_mm3][state_wr_way_mm3] <= state_wr_state_mm3;
     end
 end
 

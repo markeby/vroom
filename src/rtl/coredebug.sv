@@ -120,7 +120,7 @@ endfunction
 task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ("---------------------[ %4d @%-4t ]---------------------", top.cclk_count, $time()));
     `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
-    `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.RENAME.rename_rn1.robid, format_simid(rec.FETCH.instr_fe1.SIMID)))
+    `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h RS %d -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.RENAME.rename_rn1.robid, rec.ALLOC.rs_ent_ra1, format_simid(rec.FETCH.instr_fe1.SIMID)))
     `PMSG(CDBG, (""))
     if (rec.RS.mm_iss_rs2) begin
         cd_print_mem_rec(rec);
@@ -133,7 +133,7 @@ task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ("    Fetch  -> Decode @ %-d", rec.FETCH.clk))
     `PMSG(CDBG, ("    Decode -> Rename @ %-d", rec.DECODE.clk))
     `PMSG(CDBG, ("    Rename -> Alloc  @ %-d", rec.RENAME.clk))
-    `PMSG(CDBG, ("    Alloc  -> RS.%0d   @ %-d (%0d)", rec.ALLOC.port, rec.ALLOC.clk, rec.ALLOC.rs_ent_ra1))
+    `PMSG(CDBG, ("    Alloc  -> RS.%0d   @ %-d", rec.ALLOC.port, rec.ALLOC.clk))
     `PMSG(CDBG, ("              Result @ %-d", rec.RESULT.clk))
     `PMSG(CDBG, ("              Retire @ %-d %s", rec.RETIRE.clk, rec.RETIRE.nuke_rb1.valid ? "NUKE!!!" : ""))
     `PMSG(CDBG, (""))

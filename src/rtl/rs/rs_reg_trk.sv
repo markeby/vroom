@@ -23,6 +23,7 @@ module rs_reg_trk
    input  logic               e_alloc_rs0,
    input  t_rs_reg_trk_static e_alloc_static_rs0,
    output t_rs_reg_trk_static e_static,
+   input  logic               e_dealloc,
 
    input  logic               iprf_wr_en_ro0   [IPRF_NUM_WRITES-1:0],
    input  t_prf_wr_pkt        iprf_wr_pkt_ro0  [IPRF_NUM_WRITES-1:0],
@@ -30,9 +31,10 @@ module rs_reg_trk
    output logic               ready_rs1
 );
 
-typedef enum logic {
-   SRC_PDG_RSLT,
-   SRC_READY
+typedef enum logic[1:0] {
+    SRC_IDLE,
+    SRC_PDG_RSLT,
+    SRC_READY
 } t_fsm;
 t_fsm fsm, fsm_nxt;
 
@@ -69,13 +71,15 @@ assign wb_valid_data_ro0 = wb_valid_datas_ro0[0]; //gen_funcs#(.IWIDTH(IPRF_NUM_
 always_comb begin
    fsm_nxt = fsm;
    if (reset) begin
-      fsm_nxt = SRC_READY;
+      fsm_nxt = SRC_IDLE;
    end else begin
       unique casez (fsm)
-         SRC_READY:    if ( e_alloc_rs0 & ~e_alloc_static_rs0.psrc_pend                           ) fsm_nxt = SRC_READY;
+         SRC_IDLE:     if ( e_alloc_rs0 & ~e_alloc_static_rs0.psrc_pend                           ) fsm_nxt = SRC_READY;
                   else if ( e_alloc_rs0 &  e_alloc_static_rs0.psrc_pend &  wb_valid_match_any_ro0 ) fsm_nxt = SRC_READY;
                   else if ( e_alloc_rs0 &  e_alloc_static_rs0.psrc_pend & ~wb_valid_match_any_ro0 ) fsm_nxt = SRC_PDG_RSLT;
-         SRC_PDG_RSLT: if ( wb_valid_match_any_ro0                      ) fsm_nxt = SRC_READY;
+         SRC_PDG_RSLT: if ( wb_valid_match_any_ro0                                                ) fsm_nxt = SRC_READY;
+                  else if ( e_dealloc                                                             ) fsm_nxt = SRC_IDLE;
+         SRC_READY:    if ( e_dealloc                                                             ) fsm_nxt = SRC_IDLE;
       endcase
    end
 end

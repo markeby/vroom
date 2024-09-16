@@ -103,6 +103,7 @@ for (genvar srcx=0; srcx<NUM_SOURCES; srcx++) begin : g_src_trk
       .clk,
       .reset,
       .e_alloc_rs0,
+      .e_dealloc          ( e_dealloc_any            ) ,
       .e_alloc_static_rs0 ( e_alloc_static_rs0[srcx] ) ,
       .e_static           (                          ) ,
       .iprf_wr_en_ro0,

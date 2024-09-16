@@ -159,8 +159,8 @@ if(1) begin : g_pipe_cam
     logic                      q_pipe_pkt_addr_mat_mm1;
     logic                      q_pipe_pkt_addr_mat_mm2;
     for (genvar e=0; e<FLQ_NUM_ENTRIES; e++) begin : g_cam_loop
-        assign e_pipe_pkt_addr_mat_set_mm1[e] = e_valid[e] & e_static[e].paddr                      == pipe_pkt_mm1.addr;
-        assign e_pipe_pkt_addr_mat_ful_mm1[e] = e_valid[e] & e_static[e].paddr[L1_SET_HI:L1_SET_LO] == pipe_pkt_mm1.addr[L1_SET_HI:L1_SET_LO];
+        assign e_pipe_pkt_addr_mat_ful_mm1[e] = e_valid[e] & e_static[e].paddr[PA_SZ-1:6]           == pipe_pkt_mm1.addr[PA_SZ-1:6];
+        assign e_pipe_pkt_addr_mat_set_mm1[e] = e_valid[e] & e_static[e].paddr[L1_SET_HI:L1_SET_LO] == pipe_pkt_mm1.addr[L1_SET_HI:L1_SET_LO];
     end
     assign q_pipe_pkt_addr_mat_mm1 = (|e_pipe_pkt_addr_mat_set_mm1); // FIXME: too conservative
     `DFF(q_pipe_pkt_addr_mat_mm2, q_pipe_pkt_addr_mat_mm1, clk)

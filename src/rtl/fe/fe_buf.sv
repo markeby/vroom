@@ -16,7 +16,7 @@ module fe_buf
 
     // FE
     input  t_fe_fb_req fe_fb_req_fb0,
-    output t_fb_fe_rsp fb_fe_rsp_nnn,
+    output t_fb_fe_rsp fb_fe_rsp_fb0,
 
     // IC
     output t_mem_req_pkt   fb_ic_req_nnn,
@@ -153,26 +153,24 @@ end
 always_comb e_fe_rsp_gn_nnn = gen_funcs#(FE_FB_NUM_ENTS)::find_first1(e_fe_rsp_rq_nnn);
 always_comb c_fe_rsp_sl_nnn = gen_lg2_funcs#(FE_FB_NUM_ENTS)::oh_encode(e_fe_rsp_gn_nnn);
 
-t_fb_fe_rsp fb_fe_rsp_nxt_nnn;
 always_comb begin
-    fb_fe_rsp_nxt_nnn = '0;
+    fb_fe_rsp_fb0 = '0;
     if (fe_req_hit_fb0) begin
-        fb_fe_rsp_nxt_nnn.valid = 1'b1;
-        fb_fe_rsp_nxt_nnn.instr = instr_from_cl(ent_sel_fb0.data, get_cl_offset(fe_fb_req_fb0.addr));
-        fb_fe_rsp_nxt_nnn.id    = fe_fb_req_fb0.id;
-        fb_fe_rsp_nxt_nnn.pc    = fe_fb_req_fb0.addr;
+        fb_fe_rsp_fb0.valid = 1'b1;
+        fb_fe_rsp_fb0.instr = instr_from_cl(ent_sel_fb0.data, get_cl_offset(fe_fb_req_fb0.addr));
+        fb_fe_rsp_fb0.id    = fe_fb_req_fb0.id;
+        fb_fe_rsp_fb0.pc    = fe_fb_req_fb0.addr;
     end else begin
         for (int i=0; i<FE_FB_NUM_ENTS; i++) begin
-            fb_fe_rsp_nxt_nnn    |= e_fe_rsp_gn_nnn[i] ? e_fe_rsp_pkt_nnn[i] : '0;
-            fb_fe_rsp_nxt_nnn.id |= e_fe_rsp_gn_nnn[i] ? t_mem_id'(i)        : '0;
+            fb_fe_rsp_fb0    |= e_fe_rsp_gn_nnn[i] ? e_fe_rsp_pkt_nnn[i] : '0;
+            fb_fe_rsp_fb0.id |= e_fe_rsp_gn_nnn[i] ? t_mem_id'(i)        : '0;
         end
     end
 end
-`DFF(fb_fe_rsp_nnn, fb_fe_rsp_nxt_nnn, clk)
 
 `ifdef SIMULATION
-logic[RV_INSTR_WIDTH-1:0] f__fb_fe_rsp_nnn_data;
-assign f__fb_fe_rsp_nnn_data = fb_fe_rsp_nnn.instr;
+logic[RV_INSTR_WIDTH-1:0] f__fb_fe_rsp_fb0_data;
+assign f__fb_fe_rsp_fb0_data = fb_fe_rsp_fb0.instr;
 `endif
 
 //
@@ -235,8 +233,8 @@ always @(posedge clk) begin
     if (~reset & pf_fb_req_rq_pf0) begin
         `GENLOG(FE, ("type:pf_fb_req addr:%h", pf_fb_req_pkt_pf0.addr))
     end
-    if (~reset & fb_fe_rsp_nnn.valid) begin
-        `GENLOG(FE, ("type:fb_fe_rsp id:%d data:%0h", fb_fe_rsp_nnn.id, fb_fe_rsp_nnn.instr))
+    if (~reset & fb_fe_rsp_fb0.valid) begin
+        `GENLOG(FE, ("type:fb_fe_rsp id:%d data:%0h", fb_fe_rsp_fb0.id, fb_fe_rsp_fb0.instr))
     end
 end
 `endif

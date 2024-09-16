@@ -16,8 +16,8 @@ module fe_ctl
     input  logic       resume_fetch_rbx,
     input  t_rob_id    oldest_robid,
 
-    output t_fe_fb_req fe_fb_req_nnn,
-    input  t_fb_fe_rsp fb_fe_rsp_nnn,
+    output t_fe_fb_req fe_fb_req_fb0,
+    input  t_fb_fe_rsp fb_fe_rsp_fb0,
 
     input  t_br_mispred_pkt br_mispred_ex0,
 
@@ -29,9 +29,6 @@ module fe_ctl
 typedef enum logic[2:0] {
     FE_IDLE,
     FE_REQ_IC,
-    FE_PDG_IC,
-    FE_PDG_STALL,
-    FE_HALT,
     FE_PDG_NUKE
 } t_fsm_fe;
 
@@ -62,8 +59,8 @@ t_fsm_fe state_nxt;
 // Logic
 //
 
-t_rv_instr fb_fe_rsp_nnn_instr;
-assign fb_fe_rsp_nnn_instr = fb_fe_rsp_nnn.instr;
+t_rv_instr fb_fe_rsp_fb0_instr;
+assign fb_fe_rsp_fb0_instr = fb_fe_rsp_fb0.instr;
 
 logic nuke_pdg;
 `DFF(nuke_pdg, ~reset & (nuke_pdg & ~nuke_rb1.valid | br_mispred_ex0.valid), clk)
@@ -72,12 +69,8 @@ always_comb begin
     state_nxt = state;
     unique case(state)
         FE_IDLE:      if (1'b1                                   ) state_nxt = FE_REQ_IC;
-        FE_REQ_IC:    if (1'b1                                   ) state_nxt = FE_PDG_IC;
-        FE_PDG_IC:    if (fb_fe_rsp_nnn.valid &  nuke_pdg        ) state_nxt = FE_PDG_NUKE;  // wait for nuke
-                 else if (fb_fe_rsp_nnn.valid & ~decode_ready_de0) state_nxt = FE_PDG_STALL; // wait for stall to resolve
-                 else if (fb_fe_rsp_nnn.valid &  decode_ready_de0) state_nxt = FE_PDG_IC;    // no stall or nuke -> early send
-        FE_PDG_STALL: if (decode_ready_de0                       ) state_nxt = FE_PDG_IC;
-        FE_PDG_NUKE:  if (resume_fetch_rbx                       ) state_nxt = FE_PDG_STALL; // after a nuke, head to FE_PDG_STALL state; we can request from thre
+        FE_REQ_IC:    if (nuke_pdg                               ) state_nxt = FE_PDG_NUKE;
+        FE_PDG_NUKE:  if (resume_fetch_rbx | ~nuke_pdg           ) state_nxt = FE_REQ_IC; // after a nuke, start fetching again
         default:                                                   state_nxt = state;
     endcase
     if (reset) state_nxt = FE_IDLE;
@@ -97,7 +90,7 @@ assign br_mispred_ql_ex0 = br_mispred_ex0.valid & (~br_mispred_pdg | f_robid_a_o
 
 // PC
 
-assign incr_pc_nnn = fe_fb_req_nnn.valid;
+assign incr_pc_nnn = valid_fe1 & decode_ready_de0;
 
 t_paddr PCNxt;
 t_paddr PCRst;
@@ -112,20 +105,13 @@ always_comb PCNxt = reset          ? PCRst      :
                                      PC;
 `DFF(PC, PCNxt, clk)
 
-// Capture response
-
-t_fb_fe_rsp fb_fe_capture_nnn;
-`DFF_EN(fb_fe_capture_nnn, fb_fe_rsp_nnn, clk, fb_fe_rsp_nnn.valid)
-
 // IC req
 
 always_comb begin
-    fe_fb_req_nnn = '0;
-    fe_fb_req_nnn.valid = state == FE_REQ_IC
-                        | state == FE_PDG_IC    & decode_ready_de0 & fb_fe_rsp_nnn.valid
-                        | state == FE_PDG_STALL & decode_ready_de0;
-    fe_fb_req_nnn.addr  = PC;
-    fe_fb_req_nnn.id    = 0;
+    fe_fb_req_fb0 = '0;
+    fe_fb_req_fb0.valid = state == FE_REQ_IC;
+    fe_fb_req_fb0.addr  = PC;
+    fe_fb_req_fb0.id    = 0;
 end
 
 // Outputs to decode
@@ -150,17 +136,12 @@ assign fake_stall_now = stall_after_n_instr_en & (stall_after_n_instr == 0);
 `endif
 
 always_comb begin
-    automatic t_fb_fe_rsp ic_rsp;
-    ic_rsp = (state == FE_PDG_IC) ? fb_fe_rsp_nnn : fb_fe_capture_nnn;
-
-    valid_fe1           = ( state == FE_PDG_IC & fb_fe_rsp_nnn.valid
-                          | state == FE_PDG_STALL
-                          ) & ~nuke_pdg & ~fake_stall_now;
+    valid_fe1       = state == FE_REQ_IC & fb_fe_rsp_fb0.valid & ~nuke_pdg & ~fake_stall_now;
     instr_fe1       = t_instr_pkt'('0);
-    instr_fe1.instr = ic_rsp.instr;
-    instr_fe1.pc    = ic_rsp.pc;
+    instr_fe1.instr = fb_fe_rsp_fb0.instr;
+    instr_fe1.pc    = fb_fe_rsp_fb0.pc;
     `ifdef SIMULATION
-    instr_fe1.SIMID = `SIMID_CREATE_RHS(FETCH,instr_cnt_inst,ic_rsp.pc);
+    instr_fe1.SIMID = `SIMID_CREATE_RHS(FETCH,instr_cnt_inst,fb_fe_rsp_fb0.pc);
     `endif //SIMULATION
 end
 

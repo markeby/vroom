@@ -38,6 +38,9 @@
     `define DEBUG(msg)
 `endif
 
+`define VWARN(name, antecedent, consequent, msg) \
+    name: assert property (@(posedge clk) disable iff(reset) (antecedent) |-> (consequent)) else $warning(msg);
+
 `define VASSERT(name, antecedent, consequent, msg) \
     name: assert property (@(posedge clk) disable iff(reset) (antecedent) |-> (consequent)) else $error(msg);
 

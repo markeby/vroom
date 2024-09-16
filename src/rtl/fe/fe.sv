@@ -35,8 +35,8 @@ module fe
 // Nets
 //
 
-t_fe_fb_req fe_fb_req_nnn;
-t_fb_fe_rsp fb_fe_rsp_nnn;
+t_fe_fb_req fe_fb_req_fb0;
+t_fb_fe_rsp fb_fe_rsp_fb0;
 
 t_mem_req_pkt   fb_ic_req_nnn;
 t_mem_rsp_pkt   ic_fb_rsp_nnn;
@@ -54,8 +54,8 @@ fe_ctl fe_ctl (
 
     .br_mispred_ex0,
 
-    .fe_fb_req_nnn,
-    .fb_fe_rsp_nnn,
+    .fe_fb_req_fb0,
+    .fb_fe_rsp_fb0,
 
     .valid_fe1,
     .instr_fe1,
@@ -66,8 +66,8 @@ fe_buf fe_buf (
     .clk,
     .reset,
 
-    .fe_fb_req_fb0 ( fe_fb_req_nnn ),
-    .fb_fe_rsp_nnn,
+    .fe_fb_req_fb0,
+    .fb_fe_rsp_fb0,
 
     .fb_ic_req_nnn,
     .ic_fb_rsp_nnn

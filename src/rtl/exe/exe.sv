@@ -92,6 +92,7 @@ ibr ibr (
     .clk,
     .reset,
 
+    .iss_ex0,
     .iss_pkt_ex0,
     .src1val_ex0,
     .src2val_ex0,
@@ -146,7 +147,7 @@ end
 `endif
 
 `ifdef ASSERT
-//VASSERT(a_br_mispred, uinstr_rd1.valid & ibr_resvld_ex0, ~ibr_mispred_ex0, "Branch mispredictions not yet supported.")
+`VASSERT(a_illegal_mispred, br_mispred_ex0.valid, iss_exx[EX0], "Branch mispred without valid uop!")
 `endif
 
 endmodule

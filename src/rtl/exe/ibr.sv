@@ -13,7 +13,8 @@ module ibr
     input  logic         clk,
     input  logic         reset,
 
-    input  t_iss_pkt  iss_pkt_ex0,
+    input  logic         iss_ex0,
+    input  t_iss_pkt     iss_pkt_ex0,
     input  t_rv_reg_data src1val_ex0,
     input  t_rv_reg_data src2val_ex0,
 
@@ -44,12 +45,12 @@ logic   tkn_ex0;
 assign uinstr_ex0 = iss_pkt_ex0.uinstr;
 
 always_comb begin
-    resvld_ex0 = uinstr_ex0.valid;
+    resvld_ex0 = iss_ex0;
     unique case (uinstr_ex0.uop)
-        U_BR:    resvld_ex0 = 1'b1;
-        U_JAL:   resvld_ex0 = 1'b1;
-        U_JALR:  resvld_ex0 = 1'b1;
-        default: resvld_ex0 = 1'b0;
+        U_BR:    resvld_ex0 &= 1'b1;
+        U_JAL:   resvld_ex0 &= 1'b1;
+        U_JALR:  resvld_ex0 &= 1'b1;
+        default: resvld_ex0 &= 1'b0;
     endcase
 end
 

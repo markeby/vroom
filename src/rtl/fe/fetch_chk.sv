@@ -49,9 +49,9 @@ assign br_mispred_ql_ex0 = fe.fe_ctl.br_mispred_ql_ex0;
 always_comb begin
     state_nxt = state;
     unique case(state)
-        IDLE:         if (valid_fe1                    ) state_nxt = PDG_NXT_SEQ;
+        IDLE:         if (valid_fe1 & decode_ready_de0 ) state_nxt = PDG_NXT_SEQ;
         PDG_NXT_SEQ:  if (br_mispred_ql_ex0            ) state_nxt = PDG_BRANCH;
-        PDG_BRANCH:   if (valid_fe1                    ) state_nxt = PDG_NXT_SEQ;
+        PDG_BRANCH:   if (valid_fe1 & decode_ready_de0 ) state_nxt = PDG_NXT_SEQ;
         default:                                         state_nxt = PDG_NXT_SEQ;
     endcase
     if (reset) state_nxt = IDLE;
@@ -63,7 +63,7 @@ end
 t_paddr PCNxt;
 always_comb begin
     PCNxt = PC;
-    if (valid_fe1 & state == IDLE) begin
+    if (valid_fe1 & decode_ready_de0 & state == IDLE) begin
         PCNxt = instr_fe1.pc + t_paddr'(4);;
     end else if(br_mispred_ql_ex0) begin
         PCNxt = br_mispred_ex0.target_addr;
@@ -88,7 +88,7 @@ end
 `endif
 
 `ifdef ASSERT
-    //VASSERT(a_bad_fetch_addr, state != IDLE & valid_fe1, instr_fe1.pc == PC, $sformatf("Incorrect PC fetched (%s): exp(%h) != act(%h)", state.name(), PC, instr_fe1.pc))
+    `VASSERT(a_bad_fetch_addr, state != IDLE & valid_fe1 & decode_ready_de0, valid_fe1 & instr_fe1.pc == PC, $sformatf("Incorrect PC fetched (%s): exp(%h) != act(%h)", state.name(), PC, instr_fe1.pc))
 `endif
 
 

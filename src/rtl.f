@@ -49,6 +49,7 @@ src/rtl/rename/rename.sv
 src/rtl/rename/prf.sv
 
 src/rtl/gen/gen_fifo.sv
+src/rtl/gen/gen_fifo_cam.sv
 src/rtl/gen/gen_arbiter.sv
 src/rtl/gen/gen_arbiter_ff.sv
 src/rtl/gen/gen_wrapped_id_trk.sv

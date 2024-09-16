@@ -48,3 +48,19 @@ Presently, renaming is *super* basic.  In **ALLOC**, we scan the ROB for the you
 
 Branches are resolved in **EXE** but not taken until **RETIRE**.  Branches are currently always predicted NT.
 
+TODOs
+--------
+
+**Correctness**
+[ ] ldq/stq full not connected; dealloc not yet hooked up into ldq/stq id tracker in allocation unit
+[ ] no exceptions
+
+**New functionality**
+[ ] ucode rom not implemented (need renamed temp regs?)
+[ ] unaligned ld/st not implemented (ucode implementation first?)
+
+**IPC and other fun stuff**
+[ ] no compressed instruction support
+[ ] no BTB or nontrivial branch prediction
+[ ] no pipeline selective clears (just nukes)
+

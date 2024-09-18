@@ -51,6 +51,7 @@ logic         rs_stall_rs0;
 logic         disp_valid_rs0;
 t_disp_pkt    disp_pkt_rs0;
 t_stq_id      stqid_alloc_rs0;
+t_ldq_id      ldqid_alloc_rs0;
 
 logic        ex_iss_rs2;
 t_iss_pkt ex_iss_pkt_rs2;
@@ -163,6 +164,7 @@ alloc alloc (
     .rob_src_reg_pdg_ra0,
     .rob_src_reg_robid_ra0,
     .stqid_alloc_rs0,
+    .ldqid_alloc_rs0,
     .disp_valid_rs0,
     .disp_pkt_rs0
 );
@@ -224,6 +226,7 @@ mem mem (
     .disp_valid_rs0,
     .disp_pkt_rs0,
     .stqid_alloc_rs0,
+    .ldqid_alloc_rs0,
 
     .flq_mem_req_pkt ( dc_l2_req_pkt ) ,
     .flq_mem_rsp_pkt ( l2_dc_rsp_pkt ) ,

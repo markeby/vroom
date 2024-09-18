@@ -71,10 +71,10 @@ typedef struct packed {
 typedef struct packed {
     logic        valid;
     int          clk;
-    logic        ldq_alloc_mm0;
-    logic        stq_alloc_mm0;
-    t_ldq_static ldq_alloc_static_mm0;
-    t_stq_static stq_alloc_static_mm0;
+    logic        ldq_alloc_rs0;
+    logic        stq_alloc_rs0;
+    t_ldq_static ldq_alloc_static_rs0;
+    t_stq_static stq_alloc_static_rs0;
 } t_cd_mem;
 
 typedef struct packed {
@@ -110,8 +110,8 @@ function automatic string f_describe_src_dst(t_optype optype, t_rv_reg_addr opre
 endfunction
 
 function automatic void cd_print_mem_rec(t_cd_inst rec);
-    if (rec.MEM.ldq_alloc_mm0) begin
-        `PMSG(CDBG, ($sformatf("Ld VA:%08h DATA:%016h", rec.MEM.ldq_alloc_static_mm0.vaddr, rec.RESULT.iprf_wr_pkt_ro0.data)))
+    if (rec.MEM.ldq_alloc_rs0) begin
+        //`PMSG(CDBG, ($sformatf("Ld VA:%08h DATA:%016h", rec.MEM.ldq_alloc_static_mm0.vaddr, rec.RESULT.iprf_wr_pkt_ro0.data)))
     end else begin
         //`PMSG(CDBG, ($sformatf("St VA:%08h", rec.MEM.stq_alloc_static_mm0.vaddr)))
     end
@@ -233,15 +233,15 @@ task cd_rs();
 endtask
 
 task cd_mem_ld();
-    int i; i = f_instq_find_match(top.core.mem.loadq.q_alloc_static_mm0.SIMID);
-    `CHK_INSTQ_MATCH(i,cd_mem_ld,top.core.mem.loadq.q_alloc_static_mm0.SIMID)
+    int i; i = f_instq_find_match(top.core.mem.loadq.q_alloc_static_rs0.SIMID);
+    `CHK_INSTQ_MATCH(i,cd_mem_ld,top.core.mem.loadq.q_alloc_static_rs0.SIMID)
     if (INSTQ[i].MEM.valid) begin
         $error("Trying to add mem to a record that is already valid!");
     end
-    INSTQ[i].MEM.ldq_alloc_mm0 = top.core.mem.loadq.q_alloc_mm0;
-    INSTQ[i].MEM.ldq_alloc_static_mm0 = top.core.mem.loadq.q_alloc_static_mm0;
-    INSTQ[i].MEM.stq_alloc_mm0 = '0;
-    INSTQ[i].MEM.stq_alloc_static_mm0 = '0;
+    INSTQ[i].MEM.ldq_alloc_rs0 = top.core.mem.loadq.q_alloc_rs0;
+    INSTQ[i].MEM.ldq_alloc_static_rs0 = top.core.mem.loadq.q_alloc_static_rs0;
+    INSTQ[i].MEM.stq_alloc_rs0 = '0;
+    INSTQ[i].MEM.stq_alloc_static_rs0 = '0;
 endtask
 
 task cd_mem_st();
@@ -250,10 +250,10 @@ task cd_mem_st();
     if (INSTQ[i].MEM.valid) begin
         $error("Trying to add mem to a record that is already valid!");
     end
-    INSTQ[i].MEM.ldq_alloc_mm0 = '0;
-    INSTQ[i].MEM.ldq_alloc_static_mm0 = '0;
-    INSTQ[i].MEM.stq_alloc_mm0 = top.core.mem.storeq.q_alloc_rs0;
-    INSTQ[i].MEM.stq_alloc_static_mm0 = top.core.mem.storeq.q_alloc_static_rs0;
+    INSTQ[i].MEM.ldq_alloc_rs0 = '0;
+    INSTQ[i].MEM.ldq_alloc_static_rs0 = '0;
+    INSTQ[i].MEM.stq_alloc_rs0 = top.core.mem.storeq.q_alloc_rs0;
+    INSTQ[i].MEM.stq_alloc_static_rs0 = top.core.mem.storeq.q_alloc_static_rs0;
 endtask
 
 task cd_result_mm();
@@ -315,7 +315,7 @@ always_ff @(posedge clk) begin
     if (core.alloc.disp_valid_rs0) cd_alloc();
 
     if (core.rs.iss_rs2  ) cd_rs();
-    if (core.mem.loadq.q_alloc_mm0) cd_mem_ld();
+    if (core.mem.loadq.q_alloc_rs0) cd_mem_ld();
     if (core.mem.storeq.q_alloc_rs0) cd_mem_st();
     if (core.exe.complete_ex1.valid) cd_result_eint();
     if (core.mem.complete_mm5.valid) cd_result_mm();

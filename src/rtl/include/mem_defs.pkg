@@ -58,10 +58,9 @@ package mem_defs;
 
     typedef struct packed {
         `SIMID_STRUCT
-        t_vaddr  vaddr;
+        /* t_vaddr  vaddr; */
         t_rob_id robid;
-        t_prf_id pdst;
-        t_stq_id yost;
+        /* t_prf_id pdst; */
     } t_ldq_static;
 
     typedef struct packed {

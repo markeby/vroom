@@ -27,6 +27,7 @@ module mem
     input  logic              disp_valid_rs0,
     input  t_disp_pkt         disp_pkt_rs0,
     output t_stq_id           stqid_alloc_rs0,
+    output t_ldq_id           ldqid_alloc_rs0,
 
     input  logic              iss_mm0,
     input  t_iss_pkt          iss_pkt_mm0,
@@ -97,6 +98,7 @@ loadq loadq (
 
     .disp_valid_rs0,
     .disp_pkt_rs0,
+    .ldqid_alloc_rs0,
 
     .iss_mm0,
     .iss_pkt_mm0,

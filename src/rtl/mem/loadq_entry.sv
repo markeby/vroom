@@ -20,9 +20,12 @@ module loadq_entry
 
     output logic            e_valid,
 
-    input  logic            e_alloc_mm0,
-    input  t_ldq_static     q_alloc_static_mm0,
+    input  logic            e_alloc_rs0,
+    input  t_ldq_static     q_alloc_static_rs0,
     output t_ldq_static     e_static,
+
+    input  logic            iss_ql_mm0,
+    input  t_iss_pkt        iss_pkt_mm0,
 
     output logic            e_pipe_req_mm0,
     output t_mempipe_arb    e_pipe_req_pkt_mm0,
@@ -43,12 +46,18 @@ logic e_action_valid_mm5;
 
 logic[STQ_NUM_ENTRIES-1:0] e_stq_elders;
 
+t_vaddr  e_addr;
+t_prf_id e_pdst;
+logic    e_iss_mm0;
+logic    e_iss_seen;
+
 //
 // FSM
 //
 
 typedef enum logic[2:0] {
     LDQ_IDLE,
+    LDQ_PDG_ISS,
     LDQ_REQ_PIPE,
     LDQ_PDG_PIPE,
     LDQ_WAIT
@@ -61,7 +70,8 @@ always_comb begin
         fsm_nxt = LDQ_IDLE;
     end else begin
         unique casez(fsm)
-            LDQ_IDLE:     if ( e_alloc_mm0      ) fsm_nxt = LDQ_REQ_PIPE;
+            LDQ_IDLE:     if ( e_alloc_rs0      ) fsm_nxt = LDQ_PDG_ISS;
+            LDQ_PDG_ISS:  if ( e_iss_mm0        ) fsm_nxt = LDQ_REQ_PIPE;
             LDQ_REQ_PIPE: if ( e_pipe_gnt_mm0   ) fsm_nxt = LDQ_PDG_PIPE;
             LDQ_PDG_PIPE: if ( e_complete_mm5   ) fsm_nxt = LDQ_IDLE;
                      else if ( e_recycle_mm5    ) fsm_nxt = LDQ_WAIT;
@@ -78,7 +88,18 @@ assign e_pipe_req_mm0 = (fsm == LDQ_REQ_PIPE) & ~|e_stq_elders;
 // Logic
 //
 
-`DFF_EN(e_static, q_alloc_static_mm0, clk, e_alloc_mm0)
+// Static storage (alloc)
+
+`DFF_EN(e_static, q_alloc_static_rs0, clk, e_alloc_rs0)
+
+// Static storage (issue)
+
+assign e_iss_mm0 = iss_ql_mm0 & iss_pkt_mm0.meta.mem.ldqid == id;
+`DFF_EN(e_addr,     (iss_pkt_mm0.src1_val + iss_pkt_mm0.src2_val), clk, e_iss_mm0)
+`DFF_EN(e_pdst,     (iss_pkt_mm0.pdst                           ), clk, e_iss_mm0)
+`DFF   (e_iss_seen, ~e_alloc_rs0 & (e_iss_seen | e_iss_mm0      ), clk)
+
+// Decodes
 
 assign e_action_valid_mm5 = pipe_valid_mm5 & pipe_req_pkt_mm5.arb_type == MEM_LOAD & pipe_req_pkt_mm5.id == id;
 assign e_complete_mm5     = e_action_valid_mm5 & pipe_action_mm5.complete;
@@ -88,16 +109,16 @@ always_comb begin
     e_pipe_req_pkt_mm0          = '0;
     e_pipe_req_pkt_mm0.id       = id;
     e_pipe_req_pkt_mm0.arb_type = MEM_LOAD;
-    e_pipe_req_pkt_mm0.addr     = e_static.vaddr;
+    e_pipe_req_pkt_mm0.addr     = e_addr;
     e_pipe_req_pkt_mm0.robid    = e_static.robid;
-    e_pipe_req_pkt_mm0.pdst     = e_static.pdst;
-    e_pipe_req_pkt_mm0.yost     = e_static.yost;
+    e_pipe_req_pkt_mm0.pdst     = e_pdst;
+    e_pipe_req_pkt_mm0.yost     = '0;
     `ifdef SIMULATION
     e_pipe_req_pkt_mm0.SIMID    = e_static.SIMID;
     `endif
 end
 
-`DFF(e_stq_elders, e_alloc_mm0 ? stq_e_valid : (e_stq_elders & ~stq_e_valid), clk)
+`DFF(e_stq_elders, e_alloc_rs0 ? stq_e_valid : (e_stq_elders & ~stq_e_valid), clk)
 
 //
 // Debug
@@ -112,7 +133,9 @@ end
 `endif
 
 `ifdef ASSERT
-`VASSERT(a_alloc_when_valid, e_alloc_mm0, ~e_valid, "Allocated loadq entry while valid")
+`VASSERT(a_alloc_when_valid, e_alloc_rs0, ~e_valid, "Allocated loadq entry while valid")
+`VASSERT(a_untimely_issue,   e_iss_mm0, e_valid & fsm == LDQ_PDG_ISS, "Untimely storeq issue")
+`VASSERT(a_incorrect_issue, e_iss_mm0, iss_pkt_mm0.uinstr.SIMID == e_static.SIMID, "LdQ entry incorrect issue")
 `endif
 
 endmodule

@@ -29,6 +29,7 @@ module alloc
 
     input  logic         rs_stall_rs0,
     input  t_stq_id      stqid_alloc_rs0,
+    input  t_ldq_id      ldqid_alloc_rs0,
     output logic         disp_valid_rs0,
     output t_disp_pkt    disp_pkt_rs0
 );
@@ -45,8 +46,6 @@ t_disp_pkt disp_pkt_ra0;
 t_disp_pkt disp_pkt_ra1;
 
 logic    valid_ql_ra0;
-logic    ldq_alloc_ra0;
-t_ldq_id ldq_id_ra0;
 
 //
 // Logic
@@ -77,7 +76,7 @@ always_comb begin
 
     disp_pkt_rs0   = disp_pkt_ra1;
     if (rv_opcode_is_ldst(disp_pkt_ra1.uinstr.opcode)) begin
-        disp_pkt_rs0.meta.mem = '{ldqid: ldq_id_ra0, stqid: stqid_alloc_rs0};
+        disp_pkt_rs0.meta.mem = '{ldqid: ldqid_alloc_rs0, stqid: stqid_alloc_rs0};
     end
 end
 
@@ -86,21 +85,6 @@ end
 assign stall_ra1 = rs_stall_rs0 | ldq_full | stq_full;
 
 assign alloc_ready_ra0 = ~stall_ra1;
-
-// MEM ID Tracking
-
-mem_id_trk mem_id_trk (
-    .clk,
-    .reset,
-    .stq_alloc_ra0 ( '0 ),
-    .stq_id_ra0 (  ),
-    .stq_full_ra0 ( ),
-    .ldq_alloc_ra0,
-    .ldq_id_ra0,
-    .ldq_full_ra0 ( )
-);
-
-assign ldq_alloc_ra0 = valid_ql_ra0 & rv_opcode_is_ld(uinstr_ra0.opcode);
 
 //
 // Debug

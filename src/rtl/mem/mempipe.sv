@@ -227,6 +227,7 @@ assign flq_alloc_mm5 = valid_mm5
                      & ~( valid_mmx[MM6] & flq_alloc_mmx[MM6] & req_pkt_mmx[MM5].addr[PA_SZ-1:6] == req_pkt_mmx[MM6].addr[PA_SZ-1:6]
                         | valid_mmx[MM7] & flq_alloc_mmx[MM7] & req_pkt_mmx[MM5].addr[PA_SZ-1:6] == req_pkt_mmx[MM7].addr[PA_SZ-1:6]
                         | valid_mmx[MM8] & flq_alloc_mmx[MM8] & req_pkt_mmx[MM5].addr[PA_SZ-1:6] == req_pkt_mmx[MM8].addr[PA_SZ-1:6]
+                        | valid_mmx[MM9] & flq_alloc_mmx[MM9] & req_pkt_mmx[MM5].addr[PA_SZ-1:6] == req_pkt_mmx[MM9].addr[PA_SZ-1:6]
                         );
 
 always_comb begin

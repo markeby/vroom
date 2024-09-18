@@ -118,7 +118,7 @@ always_comb begin
     `endif
 end
 
-`DFF(e_stq_elders, e_alloc_rs0 ? stq_e_valid : (e_stq_elders & ~stq_e_valid), clk)
+`DFF(e_stq_elders, e_alloc_rs0 ? stq_e_valid : (e_stq_elders & stq_e_valid), clk)
 
 //
 // Debug

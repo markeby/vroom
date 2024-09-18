@@ -141,7 +141,7 @@ end
 `endif
 
 `ifdef ASSERT
-    // `VASSERT(push_when_full, push_front_xw0[0], ~full,  "Illegal FIFO push when full")
+    `VASSERT(a_push_when_full, push_front_xw0[0], ~full,  "Illegal FIFO push when full")
     // `VASSERT(pop_when_empty, pop_back_xr0[0],   ~empty, "Illegal FIFO pop when empty")
 `endif
 

@@ -57,7 +57,7 @@ gen_fifo #(.DEPTH(DEPTH), .NPUSH(1), .NPOP(1), .T(T), .NAME(NAME)) fifo (
     .dout_xr0       ( '{skid_dout_xr0} )
 );
 
-assign push_front_xw0 = valid_xw0 & hold_xr0;
+assign push_front_xw0 = valid_xw0 & (hold_xr0 | skid_valid_xr0);
 assign pop_back_xr0 = skid_valid_xr0 & ~hold_xr0;
 assign valid_xr0 = skid_valid_xr0 | valid_xw0;
 assign dout_xr0 = skid_valid_xr0 ? skid_dout_xr0 : din_xw0;

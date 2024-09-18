@@ -113,7 +113,7 @@ for (genvar srcx=0; srcx<NUM_SOURCES; srcx++) begin : g_src_trk
 end
 
 assign e_req_issue_rs1 = e_valid & (&src_ready_rs1)
-                       & (~rv_opcode_is_ldst(e_static.uinstr_disp.uinstr.opcode) | e_static.uinstr_disp.rename.robid == oldest_robid)
+                       //& (~rv_opcode_is_ldst(e_static.uinstr_disp.uinstr.opcode) | e_static.uinstr_disp.rename.robid == oldest_robid)
                        ;
 always_comb begin
     e_issue_pkt_rs1.uinstr   = e_static.uinstr_disp.uinstr;

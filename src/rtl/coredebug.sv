@@ -199,7 +199,7 @@ task cd_rename();
     `CHK_INSTQ_MATCH(i,cd_rename,top.core.uinstr_rn1.SIMID)
 
     if (INSTQ[i].RENAME.valid) begin
-        $error("Trying to add a rename to a record that is already valid!");
+        $error("Trying to add a rename to a record that is already valid! %s", format_simid(top.core.uinstr_rn1.SIMID));
     end
     INSTQ[i].RENAME.valid = 1'b1;
     INSTQ[i].RENAME.clk = top.cclk_count;

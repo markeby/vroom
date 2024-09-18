@@ -9,7 +9,7 @@ package mem_defs;
     import instr::*;
     import verif::*;
 
-    localparam NUM_MM_STAGES = 8;
+    localparam NUM_MM_STAGES = 9;
 
     localparam MM0 = 0;
     localparam MM1 = 1;
@@ -20,6 +20,7 @@ package mem_defs;
     localparam MM6 = 6;
     localparam MM7 = 7;
     localparam MM8 = 8;
+    localparam MM9 = 9;
 
     typedef enum logic[1:0] {
         MEM_LOAD,

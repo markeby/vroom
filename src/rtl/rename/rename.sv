@@ -55,6 +55,7 @@ logic hold_rn1;
 
 t_rename_pkt  rename_nq_rn1;
 logic skid_full_rn1;
+logic skid_empty_rn1;
 
 //
 // Logic
@@ -117,7 +118,7 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
 assign robid_rnx[RN0] = next_robid_rn0;
 assign rename_nq_rn1.robid = robid_rnx[RN1];
 
-assign rename_ready_rn0 = rename_ready_prf_rn0 & rob_ready_rn0 & ~skid_full_rn1;
+assign rename_ready_rn0 = rename_ready_prf_rn0 & rob_ready_rn0 & skid_empty_rn1;
 
 // Skid FIFO
 
@@ -138,7 +139,7 @@ gen_skid #(.DEPTH(2), .T(t_rn_skid_pkt)) skid (
     .clk,
     .reset     ( reset | nuke_rb1.valid ) ,
     .full      ( skid_full_rn1    ) ,
-    .empty     (                  ) ,
+    .empty     ( skid_empty_rn1   ) ,
     .valid_xw0 ( valid_nq_rn1     ) ,
     .din_xw0   ( rn_skid_in_rn1   ) ,
     .hold_xr0  ( ~alloc_ready_ra0 ) ,

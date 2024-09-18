@@ -113,7 +113,7 @@ function automatic void cd_print_mem_rec(t_cd_inst rec);
     if (rec.MEM.ldq_alloc_mm0) begin
         `PMSG(CDBG, ($sformatf("Ld VA:%08h DATA:%016h", rec.MEM.ldq_alloc_static_mm0.vaddr, rec.RESULT.iprf_wr_pkt_ro0.data)))
     end else begin
-        `PMSG(CDBG, ($sformatf("St VA:%08h", rec.MEM.stq_alloc_static_mm0.vaddr)))
+        //`PMSG(CDBG, ($sformatf("St VA:%08h", rec.MEM.stq_alloc_static_mm0.vaddr)))
     end
 endfunction
 
@@ -179,12 +179,12 @@ function automatic int f_instq_find_match(t_simid THIS_SIMID);
     end
 endfunction
 
-`define CHK_INSTQ_MATCH(VAL,NAME) \
-    if (VAL == -1) $error("Died in %s trying to find INSTQ match!", `"NAME`");
+`define CHK_INSTQ_MATCH(VAL,NAME,THIS_SIMID) \
+    if (VAL == -1) $error("Died in %s trying to find INSTQ match! %s", `"NAME`", format_simid(THIS_SIMID));
 
 task cd_decode();
     int i; i = f_instq_find_match(top.core.uinstr_de1.SIMID);
-    `CHK_INSTQ_MATCH(i,cd_decode)
+    `CHK_INSTQ_MATCH(i,cd_decode,top.core.uinstr_de1.SIMID)
 
     if (INSTQ[i].DECODE.valid) begin
         $error("Trying to add a decode to a record that is already valid! %s", format_simid(top.core.uinstr_de1.SIMID));
@@ -196,7 +196,7 @@ endtask
 
 task cd_rename();
     int i; i = f_instq_find_match(top.core.uinstr_rn1.SIMID);
-    `CHK_INSTQ_MATCH(i,cd_rename)
+    `CHK_INSTQ_MATCH(i,cd_rename,top.core.uinstr_rn1.SIMID)
 
     if (INSTQ[i].RENAME.valid) begin
         $error("Trying to add a rename to a record that is already valid!");
@@ -208,7 +208,7 @@ endtask
 
 task cd_alloc();
     int i; i = f_instq_find_match(top.core.alloc.disp_pkt_rs0.uinstr.SIMID);
-    `CHK_INSTQ_MATCH(i,cd_alloc)
+    `CHK_INSTQ_MATCH(i,cd_alloc,top.core.alloc.disp_pkt_rs0.uinstr.SIMID)
 
     if (INSTQ[i].ALLOC.valid) begin
         $error("Trying to add an alloc to a record that is already valid!");
@@ -221,7 +221,7 @@ endtask
 
 task cd_rs();
     int i; i = f_instq_find_match(top.core.rs.iss_pkt_rs2.uinstr.SIMID);
-    `CHK_INSTQ_MATCH(i,cd_rs)
+    `CHK_INSTQ_MATCH(i,cd_rs,top.core.rs.iss_pkt_rs2.uinstr.SIMID)
 
     if (INSTQ[i].RS.valid) begin
         $error("Trying to add an rs to a record that is already valid!");
@@ -234,7 +234,7 @@ endtask
 
 task cd_mem_ld();
     int i; i = f_instq_find_match(top.core.mem.loadq.q_alloc_static_mm0.SIMID);
-    `CHK_INSTQ_MATCH(i,cd_mem_ld)
+    `CHK_INSTQ_MATCH(i,cd_mem_ld,top.core.mem.loadq.q_alloc_static_mm0.SIMID)
     if (INSTQ[i].MEM.valid) begin
         $error("Trying to add mem to a record that is already valid!");
     end
@@ -245,20 +245,20 @@ task cd_mem_ld();
 endtask
 
 task cd_mem_st();
-    int i; i = f_instq_find_match(top.core.mem.storeq.q_alloc_static_mm0.SIMID);
-    `CHK_INSTQ_MATCH(i,cd_mem_st)
+    int i; i = f_instq_find_match(top.core.mem.storeq.q_alloc_static_rs0.SIMID);
+    `CHK_INSTQ_MATCH(i,cd_mem_st,top.core.mem.storeq.q_alloc_static_rs0.SIMID)
     if (INSTQ[i].MEM.valid) begin
         $error("Trying to add mem to a record that is already valid!");
     end
     INSTQ[i].MEM.ldq_alloc_mm0 = '0;
     INSTQ[i].MEM.ldq_alloc_static_mm0 = '0;
-    INSTQ[i].MEM.stq_alloc_mm0 = top.core.mem.storeq.q_alloc_mm0;
-    INSTQ[i].MEM.stq_alloc_static_mm0 = top.core.mem.storeq.q_alloc_static_mm0;
+    INSTQ[i].MEM.stq_alloc_mm0 = top.core.mem.storeq.q_alloc_rs0;
+    INSTQ[i].MEM.stq_alloc_static_mm0 = top.core.mem.storeq.q_alloc_static_rs0;
 endtask
 
 task cd_result_mm();
     int i; i = f_instq_find_match(top.core.iprf_wr_pkt_mm5.SIMID);
-    `CHK_INSTQ_MATCH(i,cd_result_mm)
+    `CHK_INSTQ_MATCH(i,cd_result_mm,top.core.iprf_wr_pkt_mm5.SIMID)
 
     if (INSTQ[i].RESULT.valid) begin
         $error("Trying to add a result to a record that is already valid!");
@@ -270,7 +270,7 @@ endtask
 
 task cd_result_eint();
     int i; i = f_instq_find_match(top.core.iprf_wr_pkt_ex1.SIMID);
-    `CHK_INSTQ_MATCH(i,cd_result_eint)
+    `CHK_INSTQ_MATCH(i,cd_result_eint,top.core.iprf_wr_pkt_ex1.SIMID)
 
     if (INSTQ[i].RESULT.valid) begin
         $error("Trying to add a result to a record that is already valid!");
@@ -286,7 +286,7 @@ endtask
 
 task cd_retire();
     int i; i = f_instq_find_match(top.core.rob.head_entry.s.uinstr.SIMID);
-    `CHK_INSTQ_MATCH(i,cd_retire)
+    `CHK_INSTQ_MATCH(i,cd_retire,top.core.rob.head_entry.s.uinstr.SIMID)
 
     if (INSTQ[i].RETIRE.valid) begin
         $error("Trying to retire a record that is already retired!");
@@ -310,13 +310,13 @@ endtask
 always_ff @(posedge clk) begin
     if (core.valid_fe1 & core.decode_ready_de0) cd_fetch();
     if (core.valid_de1 & core.rename_ready_rn0) cd_decode();
-    if (core.valid_rn1) cd_rename();
+    if (core.valid_rn1 & core.alloc_ready_ra0) cd_rename();
 
     if (core.alloc.disp_valid_rs0) cd_alloc();
 
     if (core.rs.iss_rs2  ) cd_rs();
     if (core.mem.loadq.q_alloc_mm0) cd_mem_ld();
-    if (core.mem.storeq.q_alloc_mm0) cd_mem_st();
+    if (core.mem.storeq.q_alloc_rs0) cd_mem_st();
     if (core.exe.complete_ex1.valid) cd_result_eint();
     if (core.mem.complete_mm5.valid) cd_result_mm();
 

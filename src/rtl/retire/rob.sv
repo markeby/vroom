@@ -17,7 +17,7 @@ module rob
     output logic             rob_ready_rn0,
     output t_rob_id          oldest_robid,
 
-    input  logic             valid_nq_rn1,
+    input  logic             rob_wr_rn1,
     input  t_rename_pkt      rename_rn1,
 
     input  logic             rob_alloc_rn0,
@@ -148,7 +148,7 @@ for (genvar i=0; i<RB_NUM_ENTS; i++) begin : g_rob_ents
       .e_valid       ( e_valid[i]      ),
       .robid         ( t_rob_id'(i)    ),
       .head_id,
-      .valid_nq_rn1,
+      .rob_wr_rn1,
       .rename_rn1,
       .q_alloc_s_rn0 ( rob_st_new_rn0  ),
       .e_alloc_rn0   ( e_alloc_rn0[i]  ),

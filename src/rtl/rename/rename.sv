@@ -35,7 +35,7 @@ module rename
     input  t_rat_restore_pkt rat_restore_pkt_rbx,
 
     output logic         valid_rn1,
-    output logic         valid_nq_rn1,
+    output logic         rob_wr_rn1,
     output t_uinstr      uinstr_rn1,
     output t_rename_pkt  rename_rn1
 );
@@ -51,17 +51,27 @@ localparam NUM_RN_STAGES = 1;
 logic         alloc_pdst_rn0;
 `MKPIPE(t_rob_id, robid_rnx, RN0, NUM_RN_STAGES)
 
+logic hold_rn1;
+
+t_rename_pkt  rename_nq_rn1;
+logic skid_full_rn1;
+
 //
 // Logic
 //
 
+assign hold_rn1 = valid_rn1 & ~alloc_ready_ra0;
+
 assign alloc_pdst_rn0 = valid_rn0 & ~nuke_rb1.valid & rob_ready_rn0 & uinstr_rn0.dst.optype == OP_REG;
 assign rob_alloc_rn0  = valid_rn0 & ~nuke_rb1.valid & rob_ready_rn0;
 
-`DFF(valid_nq_rn1,  valid_rn0 & ~nuke_rb1.valid,  clk)
-assign valid_rn1 = valid_nq_rn1 & ~nuke_rb1.valid;
+`DFF(rob_wr_rn1,  valid_rn0 & ~nuke_rb1.valid,  clk)
 
-`DFF(uinstr_rn1, uinstr_rn0, clk)
+logic valid_nq_rn1;
+assign valid_nq_rn1 = rob_wr_rn1 & ~nuke_rb1.valid;
+
+t_uinstr uinstr_nq_rn1;
+`DFF(uinstr_nq_rn1, uinstr_rn0, clk)
 
 // PRFs
 
@@ -86,8 +96,8 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
 
     .rdmap_nq_rd0   ( {   rdmap_nq_rd0[SRC2],         rdmap_nq_rd0[SRC1]} ) ,
     .rdmap_gpr_rd0  ( {uinstr_rn0.src2.opreg,      uinstr_rn0.src1.opreg} ) ,
-    .rdmap_psrc_rd1 ( {     rename_rn1.psrc2,           rename_rn1.psrc1} ) ,
-    .rdmap_pend_rd1 ( {rename_rn1.psrc2_pend,      rename_rn1.psrc1_pend} ) ,
+    .rdmap_psrc_rd1 ( {     rename_nq_rn1.psrc2,     rename_nq_rn1.psrc1} ) ,
+    .rdmap_pend_rd1 ( {rename_nq_rn1.psrc2_pend,rename_nq_rn1.psrc1_pend} ) ,
 
     `ifdef SIMULATION
     .simid_rn0_inst ( uinstr_rn0.SIMID ) ,
@@ -100,14 +110,41 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
 
     .alloc_pdst_rn0,
     .gpr_id_rn0     ( uinstr_rn0.dst.opreg                           ) ,
-    .pdst_rn1       ( rename_rn1.pdst                                ) ,
-    .pdst_old_rn1   ( rename_rn1.pdst_old                            )
+    .pdst_rn1       ( rename_nq_rn1.pdst                                ) ,
+    .pdst_old_rn1   ( rename_nq_rn1.pdst_old                            )
 );
 
 assign robid_rnx[RN0] = next_robid_rn0;
-assign rename_rn1.robid = robid_rnx[RN1];
+assign rename_nq_rn1.robid = robid_rnx[RN1];
 
-assign rename_ready_rn0 = rename_ready_prf_rn0 & rob_ready_rn0;
+assign rename_ready_rn0 = rename_ready_prf_rn0 & rob_ready_rn0 & ~skid_full_rn1;
+
+// Skid FIFO
+
+typedef struct packed {
+    t_uinstr uinstr;
+    t_rename_pkt rename;
+} t_rn_skid_pkt;
+
+t_rn_skid_pkt rn_skid_in_rn1;
+t_rn_skid_pkt rn_skid_out_rn1;
+
+assign rn_skid_in_rn1.uinstr = uinstr_nq_rn1;
+assign rn_skid_in_rn1.rename = rename_nq_rn1;
+assign uinstr_rn1 = rn_skid_out_rn1.uinstr;
+assign rename_rn1 = rn_skid_out_rn1.rename;
+
+gen_skid #(.DEPTH(2), .T(t_rn_skid_pkt)) skid (
+    .clk,
+    .reset     ( reset | nuke_rb1.valid ) ,
+    .full      ( skid_full_rn1    ) ,
+    .empty     (                  ) ,
+    .valid_xw0 ( valid_nq_rn1     ) ,
+    .din_xw0   ( rn_skid_in_rn1   ) ,
+    .hold_xr0  ( ~alloc_ready_ra0 ) ,
+    .valid_xr0 ( valid_rn1        ) ,
+    .dout_xr0  ( rn_skid_out_rn1  )
+);
 
 //
 // Debug
@@ -117,9 +154,9 @@ assign rename_ready_rn0 = rename_ready_prf_rn0 & rob_ready_rn0;
 always @(posedge clk) begin
     if (uinstr_rn1.valid) begin
         `UINFO(uinstr_rn1.SIMID, ("unit:RN dst_type:%s dst_reg:%s pdst:%s pdst_old:%s, src1_type:%s src1_reg:%s psrc1:%s psrc1_pend:%0d src2_type:%s src2_reg:%s psrc2:%s psrc2_pend:%d",
-            uinstr_rn1.dst.optype.name,  f_describe_gpr_addr(uinstr_rn1.dst.opreg ), f_describe_prf(rename_rn1.pdst ), f_describe_prf(rename_rn1.pdst_old),
-            uinstr_rn1.src1.optype.name, f_describe_gpr_addr(uinstr_rn1.src1.opreg), f_describe_prf(rename_rn1.psrc1), rename_rn1.psrc1_pend,
-            uinstr_rn1.src2.optype.name, f_describe_gpr_addr(uinstr_rn1.src2.opreg), f_describe_prf(rename_rn1.psrc2), rename_rn1.psrc2_pend))
+            uinstr_rn1.dst.optype.name,  f_describe_gpr_addr(uinstr_rn1.dst.opreg ), f_describe_prf(rename_nq_rn1.pdst ), f_describe_prf(rename_nq_rn1.pdst_old),
+            uinstr_rn1.src1.optype.name, f_describe_gpr_addr(uinstr_rn1.src1.opreg), f_describe_prf(rename_nq_rn1.psrc1), rename_nq_rn1.psrc1_pend,
+            uinstr_rn1.src2.optype.name, f_describe_gpr_addr(uinstr_rn1.src2.opreg), f_describe_prf(rename_nq_rn1.psrc2), rename_nq_rn1.psrc2_pend))
     end
 end
 `endif

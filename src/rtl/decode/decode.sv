@@ -221,6 +221,12 @@ end
 
 assign decode_ready_de0 = ~uopq_full;
 
+`ifdef ASSERT
+logic during_nuke_inst;
+`DFF(during_nuke_inst, ~reset & ~core.resume_fetch_rbx & (during_nuke_inst | nuke_rb1.valid), clk)
+    `VASSERT(a_push_during_nuke, uopq_push_de0, ~during_nuke_inst, "decode uopq pushed during branch correction window")
+`endif
+
 //
 // Debug
 //

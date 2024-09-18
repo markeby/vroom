@@ -18,7 +18,7 @@ module rob_entry
                                   q_alloc_s_rn0,
     input  logic                  e_alloc_rn0,
 
-    input  logic                  valid_nq_rn1,
+    input  logic                  rob_wr_rn1,
     input  t_rename_pkt           rename_rn1,
 
     input  t_rob_complete_pkt     ro_complete_rb0       [NUM_COMPLETES-1:0],
@@ -97,7 +97,7 @@ assign e_wb_valid_rb0 = e_ro_complete_rb0.valid & e_ro_complete_rb0.robid.idx ==
 `DFF(e_flush_needed, ~e_alloc_rn0 & (e_flush_needed | e_wb_valid_rb0 & e_ro_complete_rb0.mispred), clk)
 
 t_prf_id e_pdst_old;
-`DFF_EN(e_pdst_old, rename_rn1.pdst_old, clk, valid_nq_rn1 & rename_rn1.robid.idx == robid.idx)
+`DFF_EN(e_pdst_old, rename_rn1.pdst_old, clk, rob_wr_rn1 & rename_rn1.robid.idx == robid.idx)
 
 assign rob_entry.d.ready        = fsm == RBE_READY;
 assign rob_entry.d.flush_needed = e_flush_needed;

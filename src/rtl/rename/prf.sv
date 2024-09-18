@@ -146,7 +146,7 @@ logic         rdmap_pend_rd0 [NUM_MAP_READS-1:0];
 for (genvar r=0; r<NUM_MAP_READS; r++) begin : g_map_read
     assign rdmap_psrc_rd0[r].ptype = prf_type;
     assign rdmap_psrc_rd0[r].idx   = MAP[rdmap_gpr_rd0[r]];
-    assign rdmap_pend_rd0[r]       = pend_list_nxt[rdmap_psrc_rd0[r].idx];
+    assign rdmap_pend_rd0[r]       = pend_list_nxt[rdmap_psrc_rd0[r].idx] & rdmap_nq_rd0[r];
 end
 
 `DFF(rdmap_psrc_rd1, rdmap_psrc_rd0, clk);

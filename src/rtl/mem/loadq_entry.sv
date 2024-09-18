@@ -15,6 +15,8 @@ module loadq_entry
     input  logic            reset,
     input  t_ldq_id         id,
     input  t_nuke_pkt       nuke_rb1,
+    input  logic[STQ_NUM_ENTRIES-1:0]
+                            stq_e_valid,
 
     output logic            e_valid,
 
@@ -38,6 +40,8 @@ module loadq_entry
 logic e_complete_mm5;
 logic e_recycle_mm5;
 logic e_action_valid_mm5;
+
+logic[STQ_NUM_ENTRIES-1:0] e_stq_elders;
 
 //
 // FSM
@@ -68,7 +72,7 @@ end
 `DFF(fsm, fsm_nxt, clk)
 
 assign e_valid        = (fsm != LDQ_IDLE);
-assign e_pipe_req_mm0 = (fsm == LDQ_REQ_PIPE);
+assign e_pipe_req_mm0 = (fsm == LDQ_REQ_PIPE) & ~|e_stq_elders;
 
 //
 // Logic
@@ -92,6 +96,8 @@ always_comb begin
     e_pipe_req_pkt_mm0.SIMID    = e_static.SIMID;
     `endif
 end
+
+`DFF(e_stq_elders, e_alloc_mm0 ? stq_e_valid : (e_stq_elders & ~stq_e_valid), clk)
 
 //
 // Debug

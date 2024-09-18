@@ -14,6 +14,9 @@ module alloc
     input  logic         reset,
     input  t_nuke_pkt    nuke_rb1,
 
+    input  logic         ldq_full,
+    input  logic         stq_full,
+
     input  logic         valid_ra0,
     input  t_uinstr      uinstr_ra0,
     input  t_rename_pkt  rename_ra0,
@@ -25,6 +28,7 @@ module alloc
     input  t_rob_id      rob_src_reg_robid_ra0 [NUM_SOURCES-1:0],
 
     input  logic         rs_stall_rs0,
+    input  t_stq_id      stqid_alloc_rs0,
     output logic         disp_valid_rs0,
     output t_disp_pkt    disp_pkt_rs0
 );
@@ -40,17 +44,15 @@ localparam NUM_RA_STAGES = 1;
 t_disp_pkt disp_pkt_ra0;
 t_disp_pkt disp_pkt_ra1;
 
+logic    valid_ql_ra0;
 logic    ldq_alloc_ra0;
-logic    ldq_full_ra0;
 t_ldq_id ldq_id_ra0;
-
-logic    stq_alloc_ra0;
-logic    stq_full_ra0;
-t_stq_id stq_id_ra0;
 
 //
 // Logic
 //
+
+assign valid_ql_ra0 = valid_ra0 & alloc_ready_ra0;
 
 assign src_addr_ra0[SRC1] = uinstr_ra0.src1.opreg;
 assign src_addr_ra0[SRC2] = uinstr_ra0.src2.opreg;
@@ -59,25 +61,29 @@ always_comb begin
     disp_pkt_ra0.uinstr       = uinstr_ra0;
     disp_pkt_ra0.rename       = rename_ra0;
     disp_pkt_ra0.meta         = '0;
-    unique if (rv_opcode_is_ldst(uinstr_ra0.opcode)) disp_pkt_ra0.meta.mem = '{ldqid: ldq_id_ra0, stqid: stq_id_ra0};
-                                                else disp_pkt_ra0.meta     = '0;
 end
 
 `DFF(disp_pkt_ra1, disp_pkt_ra0, clk)
 
 logic valid_nq_ra1;
 logic valid_ra1;
-`DFF(valid_nq_ra1, valid_ra0, clk);
+`DFF(valid_nq_ra1, valid_ql_ra0, clk);
 assign valid_ra1 = valid_nq_ra1 & ~nuke_rb1.valid;
 
 logic stall_ra1;
 
-assign disp_pkt_rs0   = disp_pkt_ra1;
-assign disp_valid_rs0 = valid_ra1 & ~stall_ra1 & ~nuke_rb1.valid;
+always_comb begin
+    disp_valid_rs0 = valid_ra1 & ~stall_ra1 & ~nuke_rb1.valid;
+
+    disp_pkt_rs0   = disp_pkt_ra1;
+    if (rv_opcode_is_ldst(disp_pkt_ra1.uinstr.opcode)) begin
+        disp_pkt_rs0.meta.mem = '{ldqid: ldq_id_ra0, stqid: stqid_alloc_rs0};
+    end
+end
 
 // Stall
 
-assign stall_ra1 = rs_stall_rs0;
+assign stall_ra1 = rs_stall_rs0 | ldq_full | stq_full;
 
 assign alloc_ready_ra0 = ~stall_ra1;
 
@@ -86,16 +92,15 @@ assign alloc_ready_ra0 = ~stall_ra1;
 mem_id_trk mem_id_trk (
     .clk,
     .reset,
-    .stq_alloc_ra0,
-    .stq_id_ra0,
-    .stq_full_ra0,
+    .stq_alloc_ra0 ( '0 ),
+    .stq_id_ra0 (  ),
+    .stq_full_ra0 ( ),
     .ldq_alloc_ra0,
     .ldq_id_ra0,
-    .ldq_full_ra0
+    .ldq_full_ra0 ( )
 );
 
-assign ldq_alloc_ra0 = valid_ra0 & rv_opcode_is_ld(uinstr_ra0.opcode);
-assign stq_alloc_ra0 = valid_ra0 & rv_opcode_is_st(uinstr_ra0.opcode);
+assign ldq_alloc_ra0 = valid_ql_ra0 & rv_opcode_is_ld(uinstr_ra0.opcode);
 
 //
 // Debug

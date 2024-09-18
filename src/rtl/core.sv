@@ -30,7 +30,7 @@ t_instr_pkt   instr_fe1;
 t_uinstr      uinstr_de0;
 
 logic         valid_rn1;
-logic         valid_nq_rn1;
+logic         rob_wr_rn1;
 t_uinstr      uinstr_rn1;
 t_rename_pkt  rename_rn1;
 
@@ -50,6 +50,7 @@ t_rob_id next_robid_rn0;
 logic         rs_stall_rs0;
 logic         disp_valid_rs0;
 t_disp_pkt    disp_pkt_rs0;
+t_stq_id      stqid_alloc_rs0;
 
 logic        ex_iss_rs2;
 t_iss_pkt ex_iss_pkt_rs2;
@@ -80,6 +81,9 @@ t_mem_rsp_pkt  l2_ic_rsp_pkt;
 
 logic ldq_idle;
 logic stq_idle;
+
+logic ldq_full;
+logic stq_full;
 
 //
 // Blocks
@@ -139,7 +143,7 @@ rename rename (
     .rat_reclaim_pkt_rb1,
 
     .valid_rn1,
-    .valid_nq_rn1,
+    .rob_wr_rn1,
     .uinstr_rn1,
     .rename_rn1
 );
@@ -149,6 +153,8 @@ alloc alloc (
     .reset,
     .nuke_rb1,
     .alloc_ready_ra0,
+    .ldq_full,
+    .stq_full,
     .valid_ra0  ( valid_rn1  ),
     .uinstr_ra0 ( uinstr_rn1 ),
     .rename_ra0 ( rename_rn1 ),
@@ -156,6 +162,7 @@ alloc alloc (
     .src_addr_ra0,
     .rob_src_reg_pdg_ra0,
     .rob_src_reg_robid_ra0,
+    .stqid_alloc_rs0,
     .disp_valid_rs0,
     .disp_pkt_rs0
 );
@@ -211,9 +218,12 @@ mem mem (
     .oldest_robid,
     .ldq_idle,
     .stq_idle,
+    .ldq_full,
+    .stq_full,
 
     .disp_valid_rs0,
     .disp_pkt_rs0,
+    .stqid_alloc_rs0,
 
     .flq_mem_req_pkt ( dc_l2_req_pkt ) ,
     .flq_mem_rsp_pkt ( l2_dc_rsp_pkt ) ,
@@ -246,7 +256,7 @@ rob rob (
     .rob_alloc_rn0,
     .uinstr_rn0 ( uinstr_de1 ),
 
-    .valid_nq_rn1,
+    .rob_wr_rn1,
     .rename_rn1,
 
     .src_addr_ra0,

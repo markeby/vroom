@@ -89,6 +89,11 @@ end
 // Debug
 //
 
+`ifdef ASSERT
+    `VASSERT(a_illegal_psrc_pend, e_alloc_rs0 & e_alloc_static_rs0.psrc_pend, e_alloc_static_rs0.descr.optype == OP_REG, $sformatf("rs_reg_trk allocated with non-reg pending (%s)", e_alloc_static_rs0.descr.optype.name))
+`endif
+
+
 endmodule
 
 `endif // __RS_REG_TRK_SV

@@ -18,11 +18,15 @@ module mem
     output logic              ldq_idle,
     output logic              stq_idle,
 
+    output logic              ldq_full,
+    output logic              stq_full,
+
     output t_mem_req_pkt      flq_mem_req_pkt,
     input  t_mem_rsp_pkt      flq_mem_rsp_pkt,
 
     input  logic              disp_valid_rs0,
     input  t_disp_pkt         disp_pkt_rs0,
+    output t_stq_id           stqid_alloc_rs0,
 
     input  logic              iss_mm0,
     input  t_iss_pkt          iss_pkt_mm0,
@@ -74,6 +78,8 @@ logic            pipe_valid_mm5;
 t_mempipe_arb    pipe_req_pkt_mm5;
 t_mempipe_action pipe_action_mm5;
 
+logic[STQ_NUM_ENTRIES-1:0] stq_e_valid;
+
 //
 // Logic
 //
@@ -85,6 +91,9 @@ loadq loadq (
     .reset,
     .nuke_rb1,
     .idle ( ldq_idle ),
+    .full ( ldq_full ),
+
+    .stq_e_valid,
 
     .disp_valid_rs0,
     .disp_pkt_rs0,
@@ -109,9 +118,12 @@ storeq storeq (
     .nuke_rb1,
     .oldest_robid,
     .idle ( stq_idle ),
+    .full ( stq_full ),
+    .e_valid( stq_e_valid ),
 
     .disp_valid_rs0,
     .disp_pkt_rs0,
+    .stqid_alloc_rs0,
 
     .iss_mm0,
     .iss_pkt_mm0,

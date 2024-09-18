@@ -15,6 +15,10 @@ module loadq
     input  logic            reset,
     input  t_nuke_pkt       nuke_rb1,
     output logic            idle,
+    output logic            full,
+
+    input  logic[STQ_NUM_ENTRIES-1:0]
+                            stq_e_valid,
 
     input  logic            disp_valid_rs0,
     input  t_disp_pkt       disp_pkt_rs0,
@@ -103,6 +107,7 @@ for (genvar e=0; e<LDQ_NUM_ENTRIES; e++) begin : g_ldq_entries
         .e_valid            ( e_valid[e]            ) ,
         .e_alloc_mm0        ( e_alloc_mm0[e]        ) ,
         .q_alloc_static_mm0,
+        .stq_e_valid,
         .e_static           ( e_static[e]           ) ,
         .e_pipe_req_mm0     ( e_pipe_req_mm0[e]     ) ,
         .e_pipe_req_pkt_mm0 ( e_pipe_req_pkt_mm0[e] ) ,
@@ -114,6 +119,7 @@ for (genvar e=0; e<LDQ_NUM_ENTRIES; e++) begin : g_ldq_entries
 end
 
 assign idle = ~|e_valid;
+assign full =  &e_valid;
 
 //
 // Debug

@@ -69,8 +69,8 @@ always_comb begin
     state_nxt = state;
     unique case(state)
         FE_IDLE:      if (1'b1                                   ) state_nxt = FE_REQ_IC;
-        FE_REQ_IC:    if (nuke_pdg                               ) state_nxt = FE_PDG_NUKE;
-        FE_PDG_NUKE:  if (resume_fetch_rbx | ~nuke_pdg           ) state_nxt = FE_REQ_IC; // after a nuke, start fetching again
+        FE_REQ_IC:    if (nuke_pdg | nuke_rb1.valid              ) state_nxt = FE_PDG_NUKE;
+        FE_PDG_NUKE:  if (resume_fetch_rbx                       ) state_nxt = FE_REQ_IC; // after a nuke, start fetching again
         default:                                                   state_nxt = state;
     endcase
     if (reset) state_nxt = FE_IDLE;

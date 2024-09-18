@@ -53,6 +53,8 @@ src/rtl/gen/gen_fifo_cam.sv
 src/rtl/gen/gen_arbiter.sv
 src/rtl/gen/gen_arbiter_ff.sv
 src/rtl/gen/gen_wrapped_id_trk.sv
+src/rtl/gen/gen_age_matrix.sv
+src/rtl/gen/gen_skid.sv
 
 src/rtl/coredebug.sv
 src/rtl/sim/preload.sv

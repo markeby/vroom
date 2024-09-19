@@ -5,9 +5,11 @@
 `include "vroom_macros.sv"
 `include "csr.pkg"
 `include "gen_funcs.pkg"
+`include "instr.pkg"
+`include "instr_decode.pkg"
 
 module gen_csr_ro
-    import csr::*, gen_funcs::*;
+    import csr::*, gen_funcs::*, instr::*, instr_decode::*;
 #(parameter type T=t_gen_csr, t_csr_addr CSR_ADDR)
 (
     input  logic         clk,
@@ -25,7 +27,7 @@ t_rv_reg_data wr_value_ql_ex0;
 logic         valid_ql_ex0;
 t_csr_addr    csr_addr_ex0;
 
-assign csr_addr_ex0 = t_csr_addr'(uinstr_ex0.imm_11_0);
+assign csr_addr_ex0 = t_csr_addr'(uinstr_ex0.imm64[11:0]);
 assign valid_ql_ex0 = valid_ex0 & csr_addr_ex0 == CSR_ADDR;
 
 always_comb begin

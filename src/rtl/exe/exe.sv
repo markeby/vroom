@@ -40,6 +40,9 @@ t_rv_reg_data src2val_ex0;
 t_uinstr uinstr_ex0;
 t_uinstr uinstr_ql_ex0;
 
+logic         icsr_resvld_ex0;
+t_rv_reg_data icsr_result_ex0;
+
 logic         ialu_resvld_ex0;
 t_rv_reg_data ialu_result_ex0;
 
@@ -103,18 +106,32 @@ ibr ibr (
 );
 assign br_mispred_ex0 = ibr_mispred_ex0;
 
+icsr icsr (
+    .clk,
+    .reset,
+
+    .uinstr_ex0,
+    .src1val_ex0,
+    .src2val_ex0,
+
+    .resvld_ex0  ( icsr_resvld_ex0 ),
+    .result_ex0  ( icsr_result_ex0 )
+);
+
 // Combine outputs
 
 always_comb begin
     result_exx[EX0]  = '0;
-    result_exx[EX0] |= ialu_resvld_ex0 ? ialu_result_ex0 : ibr_result_ex0;
+    result_exx[EX0] |= ( ialu_resvld_ex0 ? ialu_result_ex0 : '0 )
+                     | ( ibr_resvld_ex0  ? ibr_result_ex0  : '0 )
+                     | ( icsr_resvld_ex0 ? icsr_result_ex0 : '0 );
 end
 
 `ifdef ASSERT
 logic LOL;
 always_comb LOL = uinstr_ex0.uop inside {U_INVALID, U_EBREAK, U_ECALL};
 
-`CHK_ONEHOT(exe_rslt_valid, iss_ex0, {LOL,ialu_resvld_ex0,ibr_resvld_ex0})
+`CHK_ONEHOT(exe_rslt_valid, iss_ex0, {LOL,icsr_resvld_ex0,ialu_resvld_ex0,ibr_resvld_ex0})
 `endif
 
 //

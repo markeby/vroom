@@ -10,6 +10,8 @@ package csr;
     import common::*;
     import instr::*;
 
+    localparam NUM_CSRS_DEFINED = 1;
+
 /* Number  Privilege  Name     Description */
 /* ------- ---------- -------- ------------------------------------------------------------ */
 /* 0x001   Read write fflags   Floating-Point Accrued Exceptions. */

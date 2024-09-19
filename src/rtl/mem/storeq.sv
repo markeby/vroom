@@ -149,10 +149,10 @@ assign full =  &e_valid;
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (q_alloc_rs0) begin
-        `UINFO(disp_pkt_rs0.uinstr.SIMID, ("unit:MM func:alloc stqid:%h", stqid_alloc_rs0))
+        `UINFO(disp_pkt_rs0.uinstr.SIMID, ("unit:STQ func:alloc stqid:%h", stqid_alloc_rs0))
     end
     if (iss_ql_mm0) begin
-        `UINFO(iss_pkt_mm0.uinstr.SIMID, ("unit:MM func:issue stqid:%h", iss_pkt_mm0.meta.mem.stqid))
+        `UINFO(iss_pkt_mm0.uinstr.SIMID, ("unit:STQ func:issue stqid:%h", iss_pkt_mm0.meta.mem.stqid))
     end
 end
 `endif

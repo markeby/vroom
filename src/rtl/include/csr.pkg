@@ -1,0 +1,43 @@
+`ifndef __CSR_PKG
+`define __CSR_PKG
+
+`include "verif.pkg"
+`include "common.pkg"
+`include "instr.pkg"
+
+package csr;
+    /* import verif::*; */
+    import common::*;
+    import instr::*;
+
+/* Number  Privilege  Name     Description */
+/* ------- ---------- -------- ------------------------------------------------------------ */
+/* 0x001   Read write fflags   Floating-Point Accrued Exceptions. */
+/* 0x002   Read write frm      Floating-Point Dynamic Rounding Mode. */
+/* 0x003   Read write fcsr     Floating-Point Control and Status Register (frm + fflags). */
+/* 0xC00   Read-only  cycle    Cycle counter for RDCYCLE instruction. */
+/* 0xC01   Read-only  time     Timer for RDTIME instruction. */
+/* 0xC02   Read-only  instret  Instructions-retired counter for RDINSTRET instruction. */
+
+    localparam CSR_ADDR_SZ = 12;
+    typedef enum logic[CSR_ADDR_SZ-1:0] {
+        CSRA_CYCLE   = 'hC00,
+        CSRA_TIME    = 'hC01,
+        CSRA_INSTRET = 'hC02
+    } t_csr_addr;
+
+    typedef struct packed {
+        logic[XLEN-1:0] data;
+    } t_gen_csr;
+
+
+    `ifdef SIMULATION
+    /* function string describe_csr(t_csr_pkt inst); */
+    /*     describe_csr = $sformatf("opcode:%s", inst.csr.opcode.name()); */
+    /* endfunction */
+
+    `endif
+
+endpackage
+
+`endif // __CSR_PKG

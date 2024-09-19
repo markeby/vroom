@@ -106,6 +106,11 @@ package gen_funcs;
             sext[OWIDTH-1:0] = {OWIDTH{inp[IWIDTH-1]}};
             sext[IWIDTH-1:0] = inp[IWIDTH-1:0];
         endfunction
+
+        static function logic[OWIDTH-1:0] zext (logic[IWIDTH-1:0] inp);
+            zext[OWIDTH-1:0] = '0;
+            zext[IWIDTH-1:0] = inp[IWIDTH-1:0];
+        endfunction
     endclass
 
     virtual class counter_funcs #(parameter IWIDTH=8);

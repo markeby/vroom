@@ -60,3 +60,5 @@ src/rtl/coredebug.sv
 src/rtl/sim/preload.sv
 src/rtl/sim/cache_sim.pkg
 src/rtl/sim/cdiff.sv
+
+src/rtl/gen/gen_csr_ro.sv

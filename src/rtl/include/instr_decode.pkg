@@ -35,7 +35,10 @@ package instr_decode;
         U_AUIPC,
         U_LUI,
         U_JAL,
-        U_JALR
+        U_JALR,
+        U_CSRRW,
+        U_CSRRC,
+        U_CSRRS
     } t_uop;
 
     typedef struct packed {
@@ -102,6 +105,14 @@ package instr_decode;
         t_prf_id      pdst;
         instr::t_rv_reg_data data;
     } t_prf_wr_pkt;
+
+    function logic rv_opcode_is_sys(t_rv_opcode opcode);
+        return opcode inside {RV_OP_SYSTEM};
+    endfunction
+
+    function logic rv_opcode_is_jalr(t_rv_opcode opcode);
+        return opcode inside {RV_OP_JALR};
+    endfunction
 
     function logic rv_opcode_is_alu(t_rv_opcode opcode);
         return opcode inside {RV_OP_ALU0_I, RV_OP_ALU1_I, RV_OP_ALU0_R, RV_OP_ALU0_I};
@@ -206,6 +217,12 @@ package instr_decode;
                         t_rv_sys_op_funct3 sys_op = t_rv_sys_op_funct3'(instr.d.I.funct3);
                         unique casez(sys_op)
                             RV_SYS_ECALL_EBREAK: rv_instr_to_uop = instr.d.I.imm_11_0[0] ? U_EBREAK : U_ECALL;
+                            RV_SYS_CSRRW:        rv_instr_to_uop = U_CSRRW;
+                            RV_SYS_CSRRS:        rv_instr_to_uop = U_CSRRS;
+                            RV_SYS_CSRRC:        rv_instr_to_uop = U_CSRRC;
+                            RV_SYS_CSRRWI:       rv_instr_to_uop = U_CSRRW;
+                            RV_SYS_CSRRSI:       rv_instr_to_uop = U_CSRRS;
+                            RV_SYS_CSRRCI:       rv_instr_to_uop = U_CSRRC;
                             default:             rv_instr_to_uop = U_INVALID;
                         endcase
                     end
@@ -296,6 +313,9 @@ package instr_decode;
             U_LUI:     uop_to_fu = FU_EXE;
             U_JAL:     uop_to_fu = FU_EXE;
             U_JALR:    uop_to_fu = FU_EXE;
+            U_CSRRW:   uop_to_fu = FU_EXE;
+            U_CSRRS:   uop_to_fu = FU_EXE;
+            U_CSRRC:   uop_to_fu = FU_EXE;
         endcase
     endfunction
 

@@ -48,14 +48,29 @@ Presently, renaming is *super* basic.  In **ALLOC**, we scan the ROB for the you
 
 Branches are resolved in **EXE** but not taken until **RETIRE**.  Branches are currently always predicted NT.
 
+CSRs
+----
+
+Following are the CSRs defined in the base ISA (omitting RV32i-only CSRs).
+
+Number  Privilege  Name     Description
+------- ---------- -------- ------------------------------------------------------------
+0x001   Read write fflags   Floating-Point Accrued Exceptions.
+0x002   Read write frm      Floating-Point Dynamic Rounding Mode.
+0x003   Read write fcsr     Floating-Point Control and Status Register (frm + fflags).
+0xC00   Read-only  cycle    Cycle counter for RDCYCLE instruction.
+0xC01   Read-only  time     Timer for RDTIME instruction.
+0xC02   Read-only  instret  Instructions-retired counter for RDINSTRET instruction.
+
 TODOs
 --------
 
 **Correctness**
-[ ] ldq/stq full not connected; dealloc not yet hooked up into ldq/stq id tracker in allocation unit
+[x] ldq/stq full not connected; dealloc not yet hooked up into ldq/stq id tracker in allocation unit
 [ ] no exceptions
 
 **New functionality**
+[ ] no CSRs
 [ ] ucode rom not implemented (need renamed temp regs?)
 [ ] unaligned ld/st not implemented (ucode implementation first?)
 

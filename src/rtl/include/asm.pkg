@@ -51,24 +51,26 @@ package asm;
               | (t_word'(funct7  ) << 25);
     endfunction
 
-    function t_word rvADD (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_ADD,  7'b0000000); endfunction
-    function t_word rvSUB (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_ADD,  7'b0100000); endfunction
-    function t_word rvAND (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_AND,  7'b0000000); endfunction
-    function t_word rvOR  (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_OR ,  7'b0000000); endfunction
-    function t_word rvXOR (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_XOR,  7'b0000000); endfunction
-    function t_word rvSLL (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_SHL,  7'b0000000); endfunction
-    function t_word rvSRL (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_SHR,  7'b0000000); endfunction
-    function t_word rvSRA (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_SHR,  7'b0100000); endfunction
-    function t_word rvSLT (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_SLT,  7'b0000000); endfunction
-    function t_word rvSLTU(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_SLTU, 7'b0000000); endfunction
-    function t_word rvADDW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_ADD,  7'b0000000); endfunction
-    function t_word rvSUBW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_ADD,  7'b0100000); endfunction
-    function t_word rvSLLW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_SHL,  7'b0000000); endfunction
-    function t_word rvSRLW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_SHR,  7'b0000000); endfunction
-    function t_word rvSRAW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_SHR,  7'b0100000); endfunction
-    function t_word rvSB  (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ST,     rd, rs1, rs2, MEM_SB,   7'b0100011); endfunction
-    function t_word rvSH  (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ST,     rd, rs1, rs2, MEM_SH,   7'b0100011); endfunction
-    function t_word rvSW  (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ST,     rd, rs1, rs2, MEM_SW,   7'b0100011); endfunction
+    function t_word rvADD (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_ADD,     7'b0000000); endfunction
+    function t_word rvSUB (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_ADD,     7'b0100000); endfunction
+    function t_word rvAND (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_AND,     7'b0000000); endfunction
+    function t_word rvOR  (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_OR ,     7'b0000000); endfunction
+    function t_word rvXOR (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_XOR,     7'b0000000); endfunction
+    function t_word rvSLL (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_SHL,     7'b0000000); endfunction
+    function t_word rvSRL (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_SHR,     7'b0000000); endfunction
+    function t_word rvSRA (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_SHR,     7'b0100000); endfunction
+    function t_word rvSLT (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_SLT,     7'b0000000); endfunction
+    function t_word rvSLTU(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, ALU_SLTU,    7'b0000000); endfunction
+    function t_word rvADDW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_ADD,     7'b0000000); endfunction
+    function t_word rvSUBW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_ADD,     7'b0100000); endfunction
+    function t_word rvSLLW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_SHL,     7'b0000000); endfunction
+    function t_word rvSRLW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_SHR,     7'b0000000); endfunction
+    function t_word rvSRAW(t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU1_R, rd, rs1, rs2, ALU_SHR,     7'b0100000); endfunction
+    function t_word rvSB  (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ST,     rd, rs1, rs2, MEM_SB,      7'b0100011); endfunction
+    function t_word rvSH  (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ST,     rd, rs1, rs2, MEM_SH,      7'b0100011); endfunction
+    function t_word rvSW  (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ST,     rd, rs1, rs2, MEM_SW,      7'b0100011); endfunction
+    function t_word rvMUL (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, MULDIV_MUL,  7'b0000001); endfunction
+    function t_word rvDIV (t_rv_reg_addr rd, t_rv_reg_addr rs1, t_rv_reg_addr rs2); return __rvR(RV_OP_ALU0_R, rd, rs1, rs2, MULDIV_DIV,  7'b0000001); endfunction
 
     // B-format instructions
 

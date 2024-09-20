@@ -40,6 +40,9 @@ t_prf_id      rdaddrs_rd0 [1:0];
 
 t_rv_reg_data rddatas_rd1 [1:0];
 
+logic         valid_uc0;
+t_uinstr      uinstr_uc0;
+
 logic            resume_fetch_rbx;
 t_nuke_pkt       nuke_rb1;
 t_br_mispred_pkt br_mispred_ex0;
@@ -103,6 +106,7 @@ fe fe (
     .resume_fetch_rbx
 );
 
+logic ucode_ready_uc0;
 decode decode (
     .clk,
     .reset,
@@ -110,10 +114,24 @@ decode decode (
 
     .valid_fe1,
     .decode_ready_de0,
-    .rename_ready_rn0,
+    .ucode_ready_uc0,
     .instr_fe1,
     .valid_de1,
     .uinstr_de1
+);
+
+ucode ucode (
+    .clk,
+    .reset,
+    .nuke_rb1,
+    .rename_ready_rn0,
+
+    .valid_de1,
+    .uinstr_de1,
+    .ucode_ready_uc0,
+
+    .valid_uc0,
+    .uinstr_uc0
 );
 
 logic rob_alloc_rn0;
@@ -128,8 +146,8 @@ rename rename (
     .rob_ready_rn0,
     .rob_alloc_rn0,
 
-    .valid_rn0 ( valid_de1 ) ,
-    .uinstr_rn0 ( uinstr_de1 ) ,
+    .valid_rn0 ( valid_uc0 ) ,
+    .uinstr_rn0 ( uinstr_uc0 ) ,
 
     .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1,  iprf_wr_en_mm5}  ),
     .iprf_wr_pkt_ro0  ( '{iprf_wr_pkt_ex1, iprf_wr_pkt_mm5} ),
@@ -255,7 +273,7 @@ rob rob (
     .oldest_robid,
     .rob_ready_rn0,
     .rob_alloc_rn0,
-    .uinstr_rn0 ( uinstr_de1 ),
+    .uinstr_rn0 ( uinstr_uc0 ),
 
     .rob_wr_rn1,
     .rename_rn1,

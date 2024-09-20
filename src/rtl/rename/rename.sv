@@ -51,22 +51,22 @@ localparam NUM_RN_STAGES = 1;
 logic         alloc_pdst_rn0;
 `MKPIPE(t_rob_id, robid_rnx, RN0, NUM_RN_STAGES)
 
-logic hold_rn1;
-
 t_rename_pkt  rename_nq_rn1;
 logic skid_full_rn1;
 logic skid_empty_rn1;
+
+logic valid_ql_rn0;
 
 //
 // Logic
 //
 
-assign hold_rn1 = valid_rn1 & ~alloc_ready_ra0;
+assign valid_ql_rn0 = valid_rn0 & ~nuke_rb1.valid & rename_ready_rn0;
 
-assign alloc_pdst_rn0 = valid_rn0 & ~nuke_rb1.valid & rob_ready_rn0 & uinstr_rn0.dst.optype == OP_REG;
-assign rob_alloc_rn0  = valid_rn0 & ~nuke_rb1.valid & rob_ready_rn0;
+assign alloc_pdst_rn0 = valid_ql_rn0 & uinstr_rn0.dst.optype == OP_REG;
+assign rob_alloc_rn0  = valid_ql_rn0;
 
-`DFF(rob_wr_rn1,  valid_rn0 & ~nuke_rb1.valid,  clk)
+`DFF(rob_wr_rn1,  valid_ql_rn0,  clk)
 
 logic valid_nq_rn1;
 assign valid_nq_rn1 = rob_wr_rn1 & ~nuke_rb1.valid;

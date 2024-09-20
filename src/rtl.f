@@ -63,3 +63,5 @@ src/rtl/sim/cache_sim.pkg
 src/rtl/sim/cdiff.sv
 
 src/rtl/gen/gen_csr_ro.sv
+
+src/rtl/ucode/ucode.sv

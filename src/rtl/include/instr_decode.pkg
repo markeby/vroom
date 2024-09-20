@@ -12,6 +12,23 @@ package instr_decode;
     import verif::*;
     import gen_funcs::*;
 
+
+    //
+    // Ucode stuff
+    //
+
+    localparam UCODE_ROM_BITS = 12;
+    localparam UCODE_ROM_ROWS = 1 << UCODE_ROM_BITS;
+    typedef logic[UCODE_ROM_BITS-1:0] t_rom_addr;
+
+    localparam int        SHIFT_ENTRY_POINT_BY = 8;
+    localparam t_rom_addr ROM_ENT_MUL = 0 << SHIFT_ENTRY_POINT_BY;
+    localparam t_rom_addr ROM_ENT_DIV = 1 << SHIFT_ENTRY_POINT_BY;
+
+    //
+    // Decode stuff
+    //
+
     typedef enum logic[5:0] {
         U_INVALID,
         U_ADD,
@@ -61,10 +78,6 @@ package instr_decode;
         t_optype optype;
         t_rv_reg_addr opreg;
     } t_uopnd_descr;
-
-    localparam UCODE_ROM_BITS = 12;
-    localparam UCODE_ROM_ROWS = 1 << UCODE_ROM_BITS;
-    typedef logic[UCODE_ROM_BITS-1:0] t_rom_addr;
 
     typedef struct packed {
         `SIMID_STRUCT
@@ -302,13 +315,14 @@ package instr_decode;
         endcase
     endfunction
 
-    function automatic t_uinstr f_decode_rv_instr(t_rv_instr rv_instr);
+    function automatic t_uinstr f_decode_rv_instr(t_rv_instr rv_instr, logic eom=1'b1);
         t_size tmp_osize;
         t_rv_instr_format ifmt;
 
         tmp_osize = SZ_INV;
         ifmt = get_instr_format(rv_instr.opcode);
         f_decode_rv_instr        = '0;
+        f_decode_rv_instr.eom    = eom;
         f_decode_rv_instr.opcode = rv_instr.opcode;
         f_decode_rv_instr.ifmt   = ifmt;
         f_decode_rv_instr.pc     = '0; // does NOT fill out PC!
@@ -431,6 +445,17 @@ package instr_decode;
         if (f_decode_rv_instr.src1.optype == OP_REG & f_decode_rv_instr.src1.opreg == '0) f_decode_rv_instr.src1.optype = OP_ZERO;
         if (f_decode_rv_instr.src2.optype == OP_REG & f_decode_rv_instr.src2.opreg == '0) f_decode_rv_instr.src2.optype = OP_ZERO;
         if (f_decode_rv_instr.dst .optype == OP_REG & f_decode_rv_instr.dst .opreg == '0) f_decode_rv_instr.dst .optype = OP_INVD;
+
+        unique casez (f_decode_rv_instr.uop)
+            U_MUL: begin
+                f_decode_rv_instr.uop           = U_ADD;
+                f_decode_rv_instr.dst.optype    = OP_INVD;
+                f_decode_rv_instr.trap_to_ucode = 1'b1;
+                f_decode_rv_instr.rom_addr      = ROM_ENT_MUL;
+            end
+            default: begin
+            end
+        endcase
 
         `ifdef SIMULATION
         f_decode_rv_instr.SIMID = '0; // does NOT fill out SIMID!

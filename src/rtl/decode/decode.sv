@@ -15,7 +15,7 @@ module decode
     input  logic             reset,
     input  t_nuke_pkt        nuke_rb1,
     output logic             decode_ready_de0,
-    input  logic             rename_ready_rn0,
+    input  logic             ucode_ready_uc0,
 
     input  logic             valid_fe1,
     input  t_instr_pkt       instr_fe1,
@@ -96,7 +96,7 @@ gen_fifo #(
     .dout_xr0       ( '{uinstr_fe_de1}  )
 );
 
-assign uopq_pop_de1 = uopq_valid_de1 & rename_ready_rn0;
+assign uopq_pop_de1 = uopq_valid_de1 & ucode_ready_uc0;
 assign valid_de1 = uopq_pop_de1;
 
 always_comb begin

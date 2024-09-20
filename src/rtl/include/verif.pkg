@@ -7,17 +7,18 @@ package verif;
 
     `ifdef SIMULATION
 
-        typedef enum logic[2:0] {
+        typedef enum logic[1:0] {
             FETCH,
             UOP,
-            FILL
+            FILL,
+            UCROM
         } t_simid_spawn_point;
 
         typedef logic[95:0] t_simid_record;
 
         typedef struct packed {
-            t_simid_spawn_point spawn;
             t_simid_record      record;
+            t_simid_spawn_point spawn;
         } t_simid_key;
 
         typedef struct packed {
@@ -35,7 +36,7 @@ package verif;
         endfunction
 
         `define SIMID_CREATE_RHS(SPAWN,FID,PC) \
-            '{fid:FID, pc:PC, txid:t_simid_key'(FID), pid: t_simid_key'('0), lid: t_simid_key'(FID)}
+            '{fid:FID, pc:PC, txid:'{spawn:SPAWN, record:t_simid_record'(FID)}, pid: t_simid_key'('0), lid: '{spawn:SPAWN, record:t_simid_record'(FID)}}
 
         `define SIMID_SPAWN_RHS(PARENT,SPAWN,RECORD) \
             '{fid:PARENT.fid, pc:PARENT.pc, txid: PARENT.txid, pid: PARENT.lid, lid: '{spawn:SPAWN, record:RECORD}}

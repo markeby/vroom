@@ -36,6 +36,12 @@ typedef struct packed {
 } t_cd_decode;
 
 typedef struct packed {
+    logic       valid;
+    int         clk;
+    t_uinstr    uinstr_uc0;
+} t_cd_ucode;
+
+typedef struct packed {
     logic        valid;
     int          clk;
     t_rename_pkt rename_rn1;
@@ -81,6 +87,7 @@ typedef struct packed {
     t_simid       SIMID;
     t_cd_fetch    FETCH;
     t_cd_decode   DECODE;
+    t_cd_ucode    UCODE;
     t_cd_rename   RENAME;
     t_cd_alloc    ALLOC;
     t_cd_rs       RS;
@@ -170,7 +177,7 @@ endtask
 function automatic int f_instq_find_match(t_simid THIS_SIMID);
     f_instq_find_match = -1;
     for (int i=0; i<INSTQ.size(); i++) begin
-        if (INSTQ[i].SIMID == THIS_SIMID) begin
+        if (INSTQ[i].SIMID.lid == THIS_SIMID.lid) begin
             if (f_instq_find_match != -1) begin
                 $error("Found multiple instq matches! %s", format_simid(THIS_SIMID));
             end
@@ -192,6 +199,26 @@ task cd_decode();
     INSTQ[i].DECODE.valid = 1'b1;
     INSTQ[i].DECODE.clk = top.cclk_count;
     INSTQ[i].DECODE.uinstr_de1 = top.core.uinstr_de1;
+endtask
+
+task cd_ucode();
+    int i;
+    if (top.core.ucode.ucrom_active_uc0) begin
+        t_cd_inst new_inst;
+        new_inst = '0;
+        new_inst.SIMID = top.core.uinstr_uc0.SIMID;
+        INSTQ.push_back(new_inst);
+    end
+
+    i = f_instq_find_match(top.core.uinstr_uc0.SIMID);
+    `CHK_INSTQ_MATCH(i,cd_ucode,top.core.uinstr_uc0.SIMID)
+
+    if (INSTQ[i].UCODE.valid) begin
+        $error("Trying to add a decode to a record that is already valid! %s", format_simid(top.core.uinstr_uc0.SIMID));
+    end
+    INSTQ[i].UCODE.valid = 1'b1;
+    INSTQ[i].UCODE.clk = top.cclk_count;
+    INSTQ[i].UCODE.uinstr_uc0 = top.core.uinstr_uc0;
 endtask
 
 task cd_rename();
@@ -309,7 +336,8 @@ endtask
 
 always_ff @(posedge clk) begin
     if (core.valid_fe1 & core.decode_ready_de0) cd_fetch();
-    if (core.valid_de1 & core.rename_ready_rn0) cd_decode();
+    if (core.valid_de1 & core.ucode_ready_uc0) cd_decode();
+    if (core.valid_uc0 & core.rename_ready_rn0) cd_ucode();
     if (core.valid_rn1 & core.alloc_ready_ra0) cd_rename();
 
     if (core.alloc.disp_valid_rs0) cd_alloc();

@@ -33,6 +33,25 @@ package instr;
     } t_rv_opcode;
 
     typedef enum logic[2:0] {
+        MULDIVW_MULW   = 3'b000,
+        MULDIVW_DIVW   = 3'b100,
+        MULDIVW_DIVUW  = 3'b101,
+        MULDIVW_REMW   = 3'b110,
+        MULDIVW_REMUW  = 3'b111
+    } t_rv_muldivw_op_funct3;
+
+    typedef enum logic[2:0] {
+        MULDIV_MUL    = 3'b000,
+        MULDIV_MULH   = 3'b001,
+        MULDIV_MULHSU = 3'b010,
+        MULDIV_MULHU  = 3'b011,
+        MULDIV_DIV    = 3'b100,
+        MULDIV_DIVU   = 3'b101,
+        MULDIV_REM    = 3'b110,
+        MULDIV_REMU   = 3'b111
+    } t_rv_muldiv_op_funct3;
+
+    typedef enum logic[2:0] {
         MEM_LB  = 3'b000,
         MEM_LH  = 3'b001,
         MEM_LW  = 3'b010,

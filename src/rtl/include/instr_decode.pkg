@@ -10,7 +10,7 @@ package instr_decode;
     import common::*;
     import verif::*;
 
-    typedef enum logic[4:0] {
+    typedef enum logic[5:0] {
         U_INVALID,
         U_ADD,
         U_ADDW,
@@ -38,7 +38,20 @@ package instr_decode;
         U_JALR,
         U_CSRRW,
         U_CSRRC,
-        U_CSRRS
+        U_CSRRS,
+        U_MUL,
+        U_MULH,
+        U_MULHSU,
+        U_MULHU,
+        U_MULW,
+        U_DIV,
+        U_DIVU,
+        U_DIVW,
+        U_DIVUW,
+        U_REM,
+        U_REMU,
+        U_REMW,
+        U_REMUW
     } t_uop;
 
     typedef struct packed {
@@ -154,24 +167,44 @@ package instr_decode;
         unique casez (ifmt)
             RV_FMT_R: begin
                 // opcode = RV_OP_ALU_R
-                t_rv_alu_op_funct3 alu_op = t_rv_alu_op_funct3'(instr.d.R.funct3);
+                t_rv_alu_op_funct3     alu_op     = t_rv_alu_op_funct3'(instr.d.R.funct3);
+                t_rv_muldiv_op_funct3  muldiv_op  = t_rv_muldiv_op_funct3'(instr.d.R.funct3);
+                t_rv_muldivw_op_funct3 muldivw_op = t_rv_muldivw_op_funct3'(instr.d.R.funct3);
                 unique casez(instr.opcode)
                     RV_OP_ALU0_R:
-                        unique casez(alu_op)
-                            ALU_ADD:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SUB : U_ADD;
-                            ALU_SHL:  rv_instr_to_uop = U_SLL;
-                            ALU_SLT:  rv_instr_to_uop = U_SLT;
-                            ALU_SLTU: rv_instr_to_uop = U_SLTU;
-                            ALU_XOR:  rv_instr_to_uop = U_XOR;
-                            ALU_SHR:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SRA : U_SRL;
-                            ALU_OR:   rv_instr_to_uop = U_OR;
-                            ALU_AND:  rv_instr_to_uop = U_AND;
+                        unique casez({instr.d.R.funct7,alu_op})
+                            {7'b0000000,ALU_ADD}:       rv_instr_to_uop = U_ADD;
+                            {7'b0100000,ALU_ADD}:       rv_instr_to_uop = U_SUB;
+                            {7'b0000000,ALU_SHL}:       rv_instr_to_uop = U_SLL;
+                            {7'b0000000,ALU_SLT}:       rv_instr_to_uop = U_SLT;
+                            {7'b0000000,ALU_SLTU}:      rv_instr_to_uop = U_SLTU;
+                            {7'b0000000,ALU_XOR}:       rv_instr_to_uop = U_XOR;
+                            {7'b0000000,ALU_SHR}:       rv_instr_to_uop = U_SRL;
+                            {7'b0100000,ALU_SHR}:       rv_instr_to_uop = U_SRA;
+                            {7'b0000000,ALU_OR}:        rv_instr_to_uop = U_OR;
+                            {7'b0000000,ALU_AND}:       rv_instr_to_uop = U_AND;
+                            {7'b0000001,MULDIV_MUL}:    rv_instr_to_uop = U_MUL;
+                            {7'b0000001,MULDIV_MULH}:   rv_instr_to_uop = U_MULH;
+                            {7'b0000001,MULDIV_MULHSU}: rv_instr_to_uop = U_MULHSU;
+                            {7'b0000001,MULDIV_MULHU}:  rv_instr_to_uop = U_MULHU;
+                            {7'b0000001,MULDIV_DIV}:    rv_instr_to_uop = U_DIV;
+                            {7'b0000001,MULDIV_DIVU}:   rv_instr_to_uop = U_DIVU;
+                            {7'b0000001,MULDIV_REM}:    rv_instr_to_uop = U_REM;
+                            {7'b0000001,MULDIV_REMU}:   rv_instr_to_uop = U_REMU;
+                            default:  rv_instr_to_uop = U_INVALID;
                         endcase
                     RV_OP_ALU1_R:
-                        unique casez(alu_op)
-                            ALU_ADD:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SUBW : U_ADDW;
-                            ALU_SHL:  rv_instr_to_uop = U_SLLW;
-                            ALU_SHR:  rv_instr_to_uop = instr.d.R.funct7[5] ? U_SRAW : U_SRLW;
+                        unique casez({instr.d.R.funct7,alu_op})
+                            {7'b0000000,ALU_ADD}:       rv_instr_to_uop = U_ADDW;
+                            {7'b0100000,ALU_ADD}:       rv_instr_to_uop = U_SUBW;
+                            {7'b0000000,ALU_SHL}:       rv_instr_to_uop = U_SLLW;
+                            {7'b0000000,ALU_SHR}:       rv_instr_to_uop = U_SRLW;
+                            {7'b0100000,ALU_SHR}:       rv_instr_to_uop = U_SRAW;
+                            {7'b0000001,MULDIVW_MULW}:  rv_instr_to_uop = U_MULW;
+                            {7'b0000001,MULDIVW_DIVW}:  rv_instr_to_uop = U_DIVW;
+                            {7'b0000001,MULDIVW_DIVUW}: rv_instr_to_uop = U_DIVUW;
+                            {7'b0000001,MULDIVW_REMW}:  rv_instr_to_uop = U_REMW;
+                            {7'b0000001,MULDIVW_REMUW}: rv_instr_to_uop = U_REMUW;
                             default:  rv_instr_to_uop = U_INVALID;
                         endcase
                     default:
@@ -316,6 +349,38 @@ package instr_decode;
             U_CSRRW:   uop_to_fu = FU_EXE;
             U_CSRRS:   uop_to_fu = FU_EXE;
             U_CSRRC:   uop_to_fu = FU_EXE;
+            U_MUL:     uop_to_fu = FU_EXE;
+            U_MULH:    uop_to_fu = FU_EXE;
+            U_MULHSU:  uop_to_fu = FU_EXE;
+            U_MULHU:   uop_to_fu = FU_EXE;
+            U_MULW:    uop_to_fu = FU_EXE;
+            U_DIV:     uop_to_fu = FU_EXE;
+            U_DIVU:    uop_to_fu = FU_EXE;
+            U_DIVW:    uop_to_fu = FU_EXE;
+            U_DIVUW:   uop_to_fu = FU_EXE;
+            U_REM:     uop_to_fu = FU_EXE;
+            U_REMU:    uop_to_fu = FU_EXE;
+            U_REMW:    uop_to_fu = FU_EXE;
+            U_REMUW:   uop_to_fu = FU_EXE;
+        endcase
+    endfunction
+
+    function uop_is_ucoded(t_uop uop);
+        unique casez(uop)
+            U_MUL:     uop_is_ucoded = 1'b1;
+            U_MULH:    uop_is_ucoded = 1'b1;
+            U_MULHSU:  uop_is_ucoded = 1'b1;
+            U_MULHU:   uop_is_ucoded = 1'b1;
+            U_MULW:    uop_is_ucoded = 1'b1;
+            U_DIV:     uop_is_ucoded = 1'b1;
+            U_DIVU:    uop_is_ucoded = 1'b1;
+            U_DIVW:    uop_is_ucoded = 1'b1;
+            U_DIVUW:   uop_is_ucoded = 1'b1;
+            U_REM:     uop_is_ucoded = 1'b1;
+            U_REMU:    uop_is_ucoded = 1'b1;
+            U_REMW:    uop_is_ucoded = 1'b1;
+            U_REMUW:   uop_is_ucoded = 1'b1;
+            default:   uop_is_ucoded = 1'b0;
         endcase
     endfunction
 

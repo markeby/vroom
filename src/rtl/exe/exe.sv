@@ -16,7 +16,7 @@ module exe
     input  t_nuke_pkt    nuke_rb1,
 
     input  logic         iss_ex0,
-    input  t_iss_pkt  iss_pkt_ex0,
+    input  t_iss_pkt     iss_pkt_ex0,
 
     output t_br_mispred_pkt br_mispred_ex0,
 
@@ -37,6 +37,7 @@ localparam NUM_EX_STAGES = 1;
 t_rv_reg_data src1val_ex0;
 t_rv_reg_data src2val_ex0;
 
+logic    valid_ex0;
 t_uinstr uinstr_ex0;
 t_uinstr uinstr_ql_ex0;
 
@@ -83,6 +84,7 @@ ialu ialu (
     .clk,
     .reset,
 
+    .iss_ex0,
     .uinstr_ex0,
     .src1val_ex0,
     .src2val_ex0,
@@ -110,6 +112,7 @@ icsr icsr (
     .clk,
     .reset,
 
+    .iss_ex0,
     .uinstr_ex0,
     .src1val_ex0,
     .src2val_ex0,

@@ -10,6 +10,7 @@ module ialu
     input  logic         clk,
     input  logic         reset,
 
+    input  logic         iss_ex0,
     input  t_uinstr      uinstr_ex0,
     input  t_rv_reg_data src1val_ex0,
     input  t_rv_reg_data src2val_ex0,
@@ -35,7 +36,7 @@ logic signed [XLEN-1:0] src2val_signed_ex0; always_comb src2val_signed_ex0 = src
 
 always_comb begin
     result_ex0 = '0;
-    resvld_ex0 = uinstr_ex0.valid;
+    resvld_ex0 = iss_ex0;
     unique case (uinstr_ex0.uop)
         U_ADD:     result_ex0 = src1val_ex0 + src2val_ex0;
         U_SUB:     result_ex0 = src1val_ex0 - src2val_ex0;

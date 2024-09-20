@@ -130,7 +130,7 @@ rename rename (
     .rob_ready_rn0,
     .rob_alloc_rn0,
 
-    .valid_rn0 ( uinstr_de1.valid ) ,
+    .valid_rn0 ( valid_de1 ) ,
     .uinstr_rn0 ( uinstr_de1 ) ,
 
     .iprf_wr_en_ro0   ( '{iprf_wr_en_ex1,  iprf_wr_en_mm5}  ),

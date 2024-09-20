@@ -153,7 +153,7 @@ gen_skid #(.DEPTH(2), .T(t_rn_skid_pkt)) skid (
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (uinstr_rn1.valid) begin
+    if (valid_rn1) begin
         `UINFO(uinstr_rn1.SIMID, ("unit:RN dst_type:%s dst_reg:%s pdst:%s pdst_old:%s, src1_type:%s src1_reg:%s psrc1:%s psrc1_pend:%0d src2_type:%s src2_reg:%s psrc2:%s psrc2_pend:%d",
             uinstr_rn1.dst.optype.name,  f_describe_gpr_addr(uinstr_rn1.dst.opreg ), f_describe_prf(rename_nq_rn1.pdst ), f_describe_prf(rename_nq_rn1.pdst_old),
             uinstr_rn1.src1.optype.name, f_describe_gpr_addr(uinstr_rn1.src1.opreg), f_describe_prf(rename_nq_rn1.psrc1), rename_nq_rn1.psrc1_pend,

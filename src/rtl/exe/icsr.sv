@@ -11,6 +11,7 @@ module icsr
     input  logic         clk,
     input  logic         reset,
 
+    input  logic         iss_ex0,
     input  t_uinstr      uinstr_ex0,
     input  t_rv_reg_data src1val_ex0,
     input  t_rv_reg_data src2val_ex0,
@@ -49,9 +50,6 @@ module icsr
 // CSRs
 //
 
-logic valid_ex0;
-assign valid_ex0 = uinstr_ex0.valid;
-
 t_gen_csr cntr_inst_ret;
 assign cntr_inst_ret.data = 64'hDEAFBEEFB00BCAFE;
 
@@ -61,7 +59,7 @@ gen_csr_ro #(.T(t_gen_csr), .CSR_ADDR(CSRA_INSTRET)) csr_inst_ret (
     .clk,
     .reset,
     .csr_state    ( cntr_inst_ret      ) ,
-    .valid_ex0,
+    .valid_ex0    ( iss_ex0            ) ,
     .uinstr_ex0,
     .wr_value_ex0 ( src1val_ex0        ) ,
     .rd_value_ex0 ( csr_rd_data_ex0[0] )

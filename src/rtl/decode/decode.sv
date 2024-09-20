@@ -63,7 +63,6 @@ always_comb begin
 
     uinstr_de0 = '0;
     uinstr_de0.opcode = rv_instr_fe1.opcode;
-    uinstr_de0.valid  = valid_dex[DE0];
     uinstr_de0.ifmt   = ifmt_de0;
     uinstr_de0.pc     = instr_fe1.pc;
 
@@ -206,7 +205,7 @@ t_uinstr uinstr_nq_de1;
 logic ebreak_seen;
 `DFF(ebreak_seen, ~reset & ~nuke_rb1.valid & (ebreak_seen | uopq_push_de0 & uinstr_de0.uop == U_EBREAK), clk)
 
-assign uopq_push_de0 = uinstr_de0.valid & ~ebreak_seen & ~nuke_rb1.valid & decode_ready_de0;
+assign uopq_push_de0 = valid_dex[DE0] & ~ebreak_seen & ~nuke_rb1.valid & decode_ready_de0;
 
 logic uopq_valid_de1;
 gen_fifo #(
@@ -229,7 +228,6 @@ assign valid_de1 = uopq_pop_de1;
 
 always_comb begin
     uinstr_de1 = uinstr_nq_de1;
-    uinstr_de1.valid = valid_de1;
 end
 
 assign decode_ready_de0 = ~uopq_full;
@@ -246,7 +244,7 @@ logic during_nuke_inst;
 
 `ifdef SIMULATION
 always @(posedge clk) begin
-    if (uinstr_de0.valid) begin
+    if (valid_dex[DE0]) begin
         `UINFO(uinstr_de0.SIMID, ("unit:DE func:uopq_push %s", describe_uinstr(uinstr_de0)))
     end
     if (uopq_valid_de1  & ~valid_de1) begin

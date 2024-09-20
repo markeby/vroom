@@ -73,7 +73,6 @@ package instr_decode;
         t_rv_instr_format ifmt;
         t_uop             uop;
         t_paddr           pc;
-        logic             valid;
     } t_uinstr;
 
     typedef logic[RV_REG_ADDR_BITS-1:0] t_gpr_id;
@@ -292,25 +291,6 @@ package instr_decode;
                 endcase
             end
         endcase
-    endfunction
-
-    function logic[RV_NUM_REGS-1:0] uinstr_to_rdmask(t_uinstr u);
-        if (!u.valid) begin
-            uinstr_to_rdmask = '0;
-        end else begin
-            uinstr_to_rdmask = '0;
-            if (u.src1.optype == OP_REG) uinstr_to_rdmask[u.src1.opreg] = 1'b1;
-            if (u.src2.optype == OP_REG) uinstr_to_rdmask[u.src2.opreg] = 1'b1;
-        end
-    endfunction
-
-    function logic[RV_NUM_REGS-1:0] uinstr_to_wrmask(t_uinstr u);
-        if (!u.valid) begin
-            uinstr_to_wrmask = '0;
-        end else begin
-            uinstr_to_wrmask = '0;
-            if (u.dst.optype == OP_REG) uinstr_to_wrmask[u.dst.opreg] = 1'b1;
-        end
     endfunction
 
     typedef enum logic[1:0] {

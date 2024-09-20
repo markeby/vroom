@@ -4,11 +4,13 @@
 `include "instr.pkg"
 `include "verif.pkg"
 `include "common.pkg"
+`include "gen_funcs.pkg"
 
 package instr_decode;
     import instr::*;
     import common::*;
     import verif::*;
+    import gen_funcs::*;
 
     typedef enum logic[5:0] {
         U_INVALID,
@@ -60,8 +62,14 @@ package instr_decode;
         t_rv_reg_addr opreg;
     } t_uopnd_descr;
 
+    localparam UCODE_ROM_BITS = 12;
+    localparam UCODE_ROM_ROWS = 1 << UCODE_ROM_BITS;
+    typedef logic[UCODE_ROM_BITS-1:0] t_rom_addr;
+
     typedef struct packed {
         `SIMID_STRUCT
+        logic             trap_to_ucode;
+        t_rom_addr        rom_addr;
         logic[63:0]       imm64;
         logic[6:0]        funct7;
         logic             mispred;
@@ -73,6 +81,7 @@ package instr_decode;
         t_rv_instr_format ifmt;
         t_uop             uop;
         t_paddr           pc;
+        logic             eom;
     } t_uinstr;
 
     typedef logic[RV_REG_ADDR_BITS-1:0] t_gpr_id;
@@ -291,6 +300,141 @@ package instr_decode;
                 endcase
             end
         endcase
+    endfunction
+
+    function automatic t_uinstr f_decode_rv_instr(t_rv_instr rv_instr);
+        t_size tmp_osize;
+        t_rv_instr_format ifmt;
+
+        tmp_osize = SZ_INV;
+        ifmt = get_instr_format(rv_instr.opcode);
+        f_decode_rv_instr        = '0;
+        f_decode_rv_instr.opcode = rv_instr.opcode;
+        f_decode_rv_instr.ifmt   = ifmt;
+        f_decode_rv_instr.pc     = '0; // does NOT fill out PC!
+        unique case (ifmt)
+            RV_FMT_R: begin
+                f_decode_rv_instr.funct7 = rv_instr.d.R.funct7;
+                f_decode_rv_instr.funct3 = rv_instr.d.R.funct3;
+                if (~rv_instr.opcode[3]) begin
+                    // 64b version
+                    f_decode_rv_instr.dst    = '{opreg: rv_instr.d.R.rd,  optype: OP_REG, opsize: SZ_8B};
+                    f_decode_rv_instr.src1   = '{opreg: rv_instr.d.R.rs1, optype: OP_REG, opsize: SZ_8B};
+                    f_decode_rv_instr.src2   = '{opreg: rv_instr.d.R.rs2, optype: OP_REG, opsize: SZ_8B};
+                end else begin
+                    // 32b (W-suffix) version
+                    f_decode_rv_instr.dst    = '{opreg: rv_instr.d.R.rd,  optype: OP_REG, opsize: SZ_4B};
+                    f_decode_rv_instr.src1   = '{opreg: rv_instr.d.R.rs1, optype: OP_REG, opsize: SZ_4B};
+                    f_decode_rv_instr.src2   = '{opreg: rv_instr.d.R.rs2, optype: OP_REG, opsize: SZ_4B};
+                end
+                f_decode_rv_instr.imm64  = '0;
+                f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
+            end
+            RV_FMT_I: begin
+                f_decode_rv_instr.funct7 = '0;
+                f_decode_rv_instr.funct3 = rv_instr.d.I.funct3;
+                if (rv_opcode_is_alu(rv_instr.opcode)) begin
+                    if (~rv_instr.opcode[3]) begin
+                        // 64b version
+                        f_decode_rv_instr.dst    = '{opreg: rv_instr.d.I.rd,  optype: OP_REG, opsize: SZ_8B};
+                        f_decode_rv_instr.src1   = '{opreg: rv_instr.d.I.rs1, optype: OP_REG, opsize: SZ_8B};
+                        f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_8B};
+                    end else begin
+                        // 32b (W-suffix) version
+                        f_decode_rv_instr.dst    = '{opreg: rv_instr.d.I.rd,  optype: OP_REG, opsize: SZ_4B};
+                        f_decode_rv_instr.src1   = '{opreg: rv_instr.d.I.rs1, optype: OP_REG, opsize: SZ_4B};
+                        f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_4B};
+                    end
+                end else if (rv_opcode_is_ld(rv_instr.opcode)) begin
+                    f_decode_rv_instr.dst    = '{opreg: rv_instr.d.I.rd,  optype: OP_REG, opsize: SZ_4B};
+                    f_decode_rv_instr.src1   = '{opreg: rv_instr.d.I.rs1, optype: OP_REG, opsize: SZ_4B};
+                    f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_4B};
+                end else if (rv_opcode_is_jalr(rv_instr.opcode)) begin
+                    f_decode_rv_instr.dst    = '{opreg: rv_instr.d.I.rd,  optype: OP_REG, opsize: SZ_8B};
+                    f_decode_rv_instr.src1   = '{opreg: rv_instr.d.I.rs1, optype: OP_REG, opsize: SZ_8B};
+                    f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_8B};
+                end else if (rv_opcode_is_sys(rv_instr.opcode)) begin
+                    if (~rv_instr.d.I.funct3[2]) begin
+                        // CSRRW, CSRRS, CSRRC
+                        f_decode_rv_instr.dst    = '{opreg: rv_instr.d.I.rd,  optype: OP_REG, opsize: SZ_8B};
+                        f_decode_rv_instr.src1   = '{opreg: rv_instr.d.I.rs1, optype: OP_REG, opsize: SZ_8B};
+                        f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_8B};
+                    end else begin
+                        // CSRRWI, CSRRSI, CSRRCI
+                        // these munge a 5b unsigned imm into rs1
+                        f_decode_rv_instr.dst    = '{opreg: rv_instr.d.I.rd,  optype: OP_REG, opsize: SZ_8B};
+                        f_decode_rv_instr.src1   = '{opreg: rv_instr.d.I.rs1, optype: OP_IMM, opsize: SZ_8B};
+                        f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_8B};
+                    end
+                end
+                f_decode_rv_instr.imm64  = sext_funcs#(.IWIDTH(12), .OWIDTH(64))::sext(rv_instr.d.I.imm_11_0);
+                f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
+            end
+            RV_FMT_S: begin
+                f_decode_rv_instr.funct7 = '0;
+                f_decode_rv_instr.funct3 = rv_instr.d.S.funct3;
+
+                if (rv_opcode_is_st(rv_instr.opcode)) begin
+                    unique casez (t_rv_st_op_funct3'(rv_instr.d.S.funct3))
+                        MEM_SB:  tmp_osize = SZ_1B;
+                        MEM_SH:  tmp_osize = SZ_2B;
+                        MEM_SW:  tmp_osize = SZ_4B;
+                        MEM_SD:  tmp_osize = SZ_8B;
+                        default: tmp_osize = SZ_INV;
+                    endcase
+                    f_decode_rv_instr.dst    = '{opreg: '0,                   optype: OP_MEM, opsize: tmp_osize};
+                    f_decode_rv_instr.src1   = '{opreg: rv_instr.d.S.rs1, optype: OP_REG, opsize: SZ_8B};
+                    f_decode_rv_instr.src2   = '{opreg: rv_instr.d.S.rs2, optype: OP_REG, opsize: tmp_osize};
+                end
+                f_decode_rv_instr.imm64  = sext_funcs#(.IWIDTH(12), .OWIDTH(64))::sext({rv_instr.d.S.imm_11_5, rv_instr.d.S.imm_4_0});
+                f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
+            end
+            RV_FMT_J: begin
+                f_decode_rv_instr.funct7 = '0;
+                f_decode_rv_instr.funct3 = '0;
+                f_decode_rv_instr.dst    = '{opreg: rv_instr.d.J.rd,  optype: OP_REG, opsize: SZ_4B};
+                f_decode_rv_instr.src1   = '{opreg: '0,                   optype: OP_INVD, opsize: SZ_4B};
+                f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_4B};
+                f_decode_rv_instr.imm64  = sext_funcs#(.IWIDTH(21), .OWIDTH(64))::sext({rv_instr.d.J.imm_20,
+                                                                                 rv_instr.d.J.imm_19_12,
+                                                                                 rv_instr.d.J.imm_11,
+                                                                                 rv_instr.d.J.imm_10_1,
+                                                                                 1'b0});
+                f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
+            end
+            RV_FMT_B: begin
+                f_decode_rv_instr.funct7 = '0;
+                f_decode_rv_instr.funct3 = rv_instr.d.B.funct3;
+                f_decode_rv_instr.dst    = '{opreg: '0, optype: OP_INVD, opsize: SZ_4B};
+                f_decode_rv_instr.src1   = '{opreg: rv_instr.d.B.rs1, optype: OP_REG, opsize: SZ_4B};
+                f_decode_rv_instr.src2   = '{opreg: rv_instr.d.B.rs2, optype: OP_REG, opsize: SZ_4B};
+                f_decode_rv_instr.imm64  = sext_funcs#(.IWIDTH(13), .OWIDTH(64))::sext({rv_instr.d.B.imm_12,
+                                                                                 rv_instr.d.B.imm_11,
+                                                                                 rv_instr.d.B.imm_10_5,
+                                                                                 rv_instr.d.B.imm_4_1,
+                                                                                 1'b0});
+                f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
+            end
+            RV_FMT_U: begin
+                f_decode_rv_instr.funct7 = '0;
+                f_decode_rv_instr.funct3 = '0;
+                f_decode_rv_instr.dst    = '{opreg: rv_instr.d.U.rd,  optype: OP_REG, opsize: SZ_8B};
+                f_decode_rv_instr.src1   = '{opreg: '0, optype: OP_INVD, opsize: SZ_4B};
+                f_decode_rv_instr.src2   = '{opreg: '0, optype: OP_IMM,  opsize: SZ_8B};
+                f_decode_rv_instr.imm64  = sext_funcs#(.IWIDTH(32), .OWIDTH(64))::sext({rv_instr.d.U.imm_31_12, 12'd0});
+                f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
+            end
+            default: begin
+            end
+        endcase
+
+        if (f_decode_rv_instr.src1.optype == OP_REG & f_decode_rv_instr.src1.opreg == '0) f_decode_rv_instr.src1.optype = OP_ZERO;
+        if (f_decode_rv_instr.src2.optype == OP_REG & f_decode_rv_instr.src2.opreg == '0) f_decode_rv_instr.src2.optype = OP_ZERO;
+        if (f_decode_rv_instr.dst .optype == OP_REG & f_decode_rv_instr.dst .opreg == '0) f_decode_rv_instr.dst .optype = OP_INVD;
+
+        `ifdef SIMULATION
+        f_decode_rv_instr.SIMID = '0; // does NOT fill out SIMID!
+        `endif
     endfunction
 
     typedef enum logic[1:0] {

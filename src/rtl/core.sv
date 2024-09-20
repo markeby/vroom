@@ -27,7 +27,6 @@ logic         rob_ready_rn0;
 
 logic         valid_fe1;
 t_instr_pkt   instr_fe1;
-t_uinstr      uinstr_de0;
 
 logic         valid_rn1;
 logic         rob_wr_rn1;
@@ -113,7 +112,6 @@ decode decode (
     .decode_ready_de0,
     .rename_ready_rn0,
     .instr_fe1,
-    .uinstr_de0,
     .valid_de1,
     .uinstr_de1
 );

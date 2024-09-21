@@ -9,11 +9,8 @@ package uasm;
     import common::*;
     import instr_decode::*;
 
-    function t_uinstr uADDI(t_uopnd_descr dst, t_uopnd_descr src1, logic[63:0] imm64, logic eom=1'b1);
-        return '{eom: eom, imm64: imm64, uop: U_ADD,
-                dst: dst,
-                src1: src1,
-                src2: '{opreg: '0, optype: OP_IMM, opsize: SZ_8B}, default: '0};
+    function t_uinstr uADDD_RRI(t_uopnd_descr dst, t_uopnd_descr src1, logic[63:0] imm64, logic eom=1'b1);
+        return '{uop: U_ADD, dst: dst, src1: src1, src2: '{opreg: '0, optype: OP_IMM, opsize: SZ_8B}, eom: eom, imm64: imm64, default: '0};
     endfunction
 
 

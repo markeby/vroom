@@ -134,6 +134,11 @@ end
 // ROM
 //
 
+let GPR_8B(X)   = '{opreg: X,  optype: OP_REG,       opsize: SZ_8B};
+let TRAP_SRC1() = '{opreg: '0, optype: OP_TRAP_SRC1, opsize: SZ_INV};
+let TRAP_SRC2() = '{opreg: '0, optype: OP_TRAP_SRC2, opsize: SZ_INV};
+let TRAP_DST()  = '{opreg: '0, optype: OP_TRAP_DST,  opsize: SZ_INV};
+
 always_comb begin
     int r;
 
@@ -142,12 +147,8 @@ always_comb begin
     end
 
     r = int'(ROM_ENT_MUL);
-    // ROM[r++] = '{opcode: RV_OP_ALU0_I, ifmt: RV_FMT_I, eom: 1'b0, funct7: '0, funct3: ALU_ADD, imm64: '0, uop: U_ADD,
-    //             dst: '{opreg: REG_TMP0, optype: OP_REG, opsize: SZ_8B},
-    //             src1: '{opreg: REG_X0, optype: OP_TRAP_SRC1, opsize: SZ_8B},
-    //             src2: '{opreg: '0, optype: OP_IMM, opsize: SZ_8B}, default: '0};
-    ROM[r++] = uADDI('{opreg: REG_TMP0, optype: OP_REG, opsize: SZ_8B}, '{opreg: '0, optype: OP_TRAP_SRC1, opsize: SZ_8B}, 64'h0, 1'b0);
-    ROM[r++] = uADDI('{opreg: REG_TMP1, optype: OP_REG, opsize: SZ_8B}, '{opreg: '0, optype: OP_TRAP_SRC2, opsize: SZ_8B}, 64'h0, 1'b0);
+    ROM[r++] = uADDD_RRI(GPR_8B(REG_TMP0), TRAP_SRC1, 64'h0, 1'b0);
+    ROM[r++] = uADDD_RRI(GPR_8B(REG_TMP1), TRAP_SRC2, 64'h0, 1'b0);
     ROM[r++] = f_decode_rv_instr(rvADDI(REG_X22, 0, 12'hABC), 1'b0);
     ROM[r++] = f_decode_rv_instr(rvADDI(REG_X23, 0, 12'hDEF), 1'b0);
     ROM[r++] = f_decode_rv_instr(rvADDI(REG_X24, 0, 12'h123), 1'b1);

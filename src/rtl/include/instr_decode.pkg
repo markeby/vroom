@@ -46,7 +46,12 @@ package instr_decode;
         U_SRAW,
         U_OR,
         U_AND,
-        U_BR,
+        U_BR_EQ,
+        U_BR_NE,
+        U_BR_LT,
+        U_BR_GE,
+        U_BR_LTU,
+        U_BR_GEU,
         U_LOAD,
         U_STORE,
         U_EBREAK,
@@ -84,9 +89,7 @@ package instr_decode;
         logic             trap_to_ucode;
         t_rom_addr        rom_addr;
         logic[63:0]       imm64;
-        logic[6:0]        funct7;
         logic             mispred;
-        t_rv_funct3       funct3;
         t_uopnd_descr     src2;
         t_uopnd_descr     src1;
         t_uopnd_descr     dst;
@@ -306,7 +309,17 @@ package instr_decode;
             end
             RV_FMT_B: begin
                 unique casez(instr.opcode)
-                    RV_OP_BR: rv_instr_to_uop = U_BR;
+                    RV_OP_BR: begin
+                        t_rv_br_op_funct3 br_op = t_rv_br_op_funct3'(instr.d.B.funct3);
+                        unique casez(br_op)
+                            RV_BR_BEQ:  rv_instr_to_uop = U_BR_EQ;
+                            RV_BR_BNE:  rv_instr_to_uop = U_BR_NE;
+                            RV_BR_BLT:  rv_instr_to_uop = U_BR_LT;
+                            RV_BR_BGE:  rv_instr_to_uop = U_BR_GE;
+                            RV_BR_BLTU: rv_instr_to_uop = U_BR_LTU;
+                            RV_BR_BGEU: rv_instr_to_uop = U_BR_GEU;
+                        endcase
+                    end
                     default: rv_instr_to_uop = U_INVALID;
                 endcase
             end
@@ -327,8 +340,6 @@ package instr_decode;
         f_decode_rv_instr.pc     = '0; // does NOT fill out PC!
         unique case (ifmt)
             RV_FMT_R: begin
-                f_decode_rv_instr.funct7 = rv_instr.d.R.funct7;
-                f_decode_rv_instr.funct3 = rv_instr.d.R.funct3;
                 if (~rv_instr.opcode[3]) begin
                     // 64b version
                     f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.R.rd),  optype: OP_REG, opsize: SZ_8B};
@@ -344,8 +355,6 @@ package instr_decode;
                 f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
             end
             RV_FMT_I: begin
-                f_decode_rv_instr.funct7 = '0;
-                f_decode_rv_instr.funct3 = rv_instr.d.I.funct3;
                 if (rv_opcode_is_alu(rv_instr.opcode)) begin
                     if (~rv_instr.opcode[3]) begin
                         // 64b version
@@ -384,9 +393,6 @@ package instr_decode;
                 f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
             end
             RV_FMT_S: begin
-                f_decode_rv_instr.funct7 = '0;
-                f_decode_rv_instr.funct3 = rv_instr.d.S.funct3;
-
                 if (rv_opcode_is_st(rv_instr.opcode)) begin
                     unique casez (t_rv_st_op_funct3'(rv_instr.d.S.funct3))
                         MEM_SB:  tmp_osize = SZ_1B;
@@ -403,8 +409,6 @@ package instr_decode;
                 f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
             end
             RV_FMT_J: begin
-                f_decode_rv_instr.funct7 = '0;
-                f_decode_rv_instr.funct3 = '0;
                 f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.J.rd), optype: OP_REG, opsize: SZ_4B};
                 f_decode_rv_instr.src1   = '{opreg: '0,                         optype: OP_INVD, opsize: SZ_4B};
                 f_decode_rv_instr.src2   = '{opreg: '0,                         optype: OP_IMM, opsize: SZ_4B};
@@ -416,8 +420,6 @@ package instr_decode;
                 f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
             end
             RV_FMT_B: begin
-                f_decode_rv_instr.funct7 = '0;
-                f_decode_rv_instr.funct3 = rv_instr.d.B.funct3;
                 f_decode_rv_instr.dst    = '{opreg: '0, optype: OP_INVD, opsize: SZ_4B};
                 f_decode_rv_instr.src1   = '{opreg: t_gpr_id'(rv_instr.d.B.rs1), optype: OP_REG, opsize: SZ_4B};
                 f_decode_rv_instr.src2   = '{opreg: t_gpr_id'(rv_instr.d.B.rs2), optype: OP_REG, opsize: SZ_4B};
@@ -429,8 +431,6 @@ package instr_decode;
                 f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
             end
             RV_FMT_U: begin
-                f_decode_rv_instr.funct7 = '0;
-                f_decode_rv_instr.funct3 = '0;
                 f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.U.rd),  optype: OP_REG, opsize: SZ_8B};
                 f_decode_rv_instr.src1   = '{opreg: '0, optype: OP_INVD, opsize: SZ_4B};
                 f_decode_rv_instr.src2   = '{opreg: '0, optype: OP_IMM,  opsize: SZ_8B};
@@ -485,7 +485,12 @@ package instr_decode;
             U_SRAW:    uop_to_fu = FU_EXE;
             U_OR:      uop_to_fu = FU_EXE;
             U_AND:     uop_to_fu = FU_EXE;
-            U_BR:      uop_to_fu = FU_EXE;
+            U_BR_EQ:   uop_to_fu = FU_EXE;
+            U_BR_NE:   uop_to_fu = FU_EXE;
+            U_BR_LT:   uop_to_fu = FU_EXE;
+            U_BR_GE:   uop_to_fu = FU_EXE;
+            U_BR_LTU:  uop_to_fu = FU_EXE;
+            U_BR_GEU:  uop_to_fu = FU_EXE;
             U_LOAD:    uop_to_fu = FU_MEM;
             U_STORE:   uop_to_fu = FU_MEM;
             U_EBREAK:  uop_to_fu = FU_EXE;
@@ -555,8 +560,8 @@ package instr_decode;
     function string describe_uinstr(t_uinstr uinstr);
         describe_uinstr = $sformatf("opcode:%s uop:%s ifmt:%s", uinstr.opcode.name(), uinstr.uop.name(), uinstr.ifmt.name());
         case (uinstr.ifmt)
-            RV_FMT_I: describe_uinstr = $sformatf("%s dst:%s src1:%s imm64:0x%h funct3:%-d", describe_uinstr, f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), uinstr.imm64, uinstr.funct3);
-            RV_FMT_R: describe_uinstr = $sformatf("%s dst:%s src1:%s src2:%s funct3:%-d funct7:%-d", describe_uinstr, f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), f_describe_opnd_descr(uinstr.src2), uinstr.funct3, uinstr.funct7);
+            RV_FMT_I: describe_uinstr = $sformatf("%s dst:%s src1:%s imm64:0x%h", describe_uinstr, f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), uinstr.imm64);
+            RV_FMT_R: describe_uinstr = $sformatf("%s dst:%s src1:%s src2:%s", describe_uinstr, f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), f_describe_opnd_descr(uinstr.src2));
             RV_FMT_S: describe_uinstr = $sformatf("%s dst:%s src1:%s src2:%s imm64:0x%h", describe_uinstr, f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), f_describe_opnd_descr(uinstr.src2), uinstr.imm64);
             RV_FMT_U: describe_uinstr = $sformatf("%s dst:%s imm64:0x%h", describe_uinstr, f_describe_opnd_descr(uinstr.dst), uinstr.imm64);
             RV_FMT_J: describe_uinstr = $sformatf("%s dst:%s imm64:0x%h", describe_uinstr, f_describe_opnd_descr(uinstr.dst), uinstr.imm64);

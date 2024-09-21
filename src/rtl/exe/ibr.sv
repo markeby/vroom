@@ -47,10 +47,15 @@ assign uinstr_ex0 = iss_pkt_ex0.uinstr;
 always_comb begin
     resvld_ex0 = iss_ex0;
     unique case (uinstr_ex0.uop)
-        U_BR:    resvld_ex0 &= 1'b1;
-        U_JAL:   resvld_ex0 &= 1'b1;
-        U_JALR:  resvld_ex0 &= 1'b1;
-        default: resvld_ex0 &= 1'b0;
+        U_BR_EQ:  resvld_ex0 &= 1'b1;
+        U_BR_NE:  resvld_ex0 &= 1'b1;
+        U_BR_LT:  resvld_ex0 &= 1'b1;
+        U_BR_GE:  resvld_ex0 &= 1'b1;
+        U_BR_LTU: resvld_ex0 &= 1'b1;
+        U_BR_GEU: resvld_ex0 &= 1'b1;
+        U_JAL:    resvld_ex0 &= 1'b1;
+        U_JALR:   resvld_ex0 &= 1'b1;
+        default:  resvld_ex0 &= 1'b0;
     endcase
 end
 
@@ -66,16 +71,16 @@ end
 
 always_comb begin
     tkn_ex0 = 1'b0;
-    unique casez({uinstr_ex0.uop, uinstr_ex0.funct3.br})
-        {U_BR,   RV_BR_BEQ }: tkn_ex0 = src1val_ex0 == src2val_ex0;
-        {U_BR,   RV_BR_BNE }: tkn_ex0 = src1val_ex0 != src2val_ex0;
-        {U_BR,   RV_BR_BLT }: tkn_ex0 = int'(src1val_ex0) <  int'(src2val_ex0);
-        {U_BR,   RV_BR_BGE }: tkn_ex0 = int'(src1val_ex0) >= int'(src2val_ex0);
-        {U_BR,   RV_BR_BLTU}: tkn_ex0 = src1val_ex0 <  src2val_ex0;
-        {U_BR,   RV_BR_BGEU}: tkn_ex0 = src1val_ex0 >= src2val_ex0;
-        {U_JAL,  3'b???    }: tkn_ex0 = 1'b1;
-        {U_JALR, 3'b???    }: tkn_ex0 = 1'b1;
-        default: tkn_ex0 = 1'b0;
+    unique casez(uinstr_ex0.uop)
+        U_BR_EQ:  tkn_ex0 = src1val_ex0 == src2val_ex0;
+        U_BR_NE:  tkn_ex0 = src1val_ex0 != src2val_ex0;
+        U_BR_LT:  tkn_ex0 = int'(src1val_ex0) <  int'(src2val_ex0);
+        U_BR_GE:  tkn_ex0 = int'(src1val_ex0) >= int'(src2val_ex0);
+        U_BR_LTU: tkn_ex0 = src1val_ex0 <  src2val_ex0;
+        U_BR_GEU: tkn_ex0 = src1val_ex0 >= src2val_ex0;
+        U_JAL:    tkn_ex0 = 1'b1;
+        U_JALR:   tkn_ex0 = 1'b1;
+        default:  tkn_ex0 = 1'b0;
     endcase
 end
 

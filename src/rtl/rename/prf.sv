@@ -11,7 +11,7 @@
 
 module prf
    import instr::*, instr_decode::*, common::*, rename_defs::*, gen_funcs::*, verif::*;
-#(parameter int NUM_ENTRIES=8, parameter int NUM_REG_READS=2, parameter int NUM_REG_WRITES=1, parameter int NUM_MAP_READS=2)
+#(parameter int NUM_ENTRIES=8, parameter int NUM_REG_READS=2, parameter int NUM_REG_WRITES=1, parameter int NUM_MAP_READS=2, parameter int NUM_REGS)
 (
     input  logic         clk,
     input  logic         reset,
@@ -53,7 +53,7 @@ localparam NUM_RN_STAGES = 1;
 //
 
 t_rv_reg_data          PRF        [NUM_ENTRIES-1:0];
-t_prf_addr             MAP        [RV_NUM_REGS-1:0];
+t_prf_addr             MAP        [NUM_REGS-1:0];
 logic[NUM_ENTRIES-1:0] free_list;
 logic[NUM_ENTRIES-1:0] pend_list;
 
@@ -82,7 +82,7 @@ assign free_list_nxt = (  free_list
 
 always_comb begin
     free_list_rst = '1;
-    for (int i=0; i<RV_NUM_REGS; i++) begin
+    for (int i=0; i<NUM_REGS; i++) begin
         free_list_rst[i] = 1'b0;
     end
 end
@@ -126,8 +126,8 @@ assign pend_list_nxt = ( pend_list
 // Mapping table
 //
 
-t_prf_addr map_tbl_rst [RV_NUM_REGS-1:0];
-for (genvar g=0; g<RV_NUM_REGS; g++) begin : g_gpr_loop
+t_prf_addr map_tbl_rst [NUM_REGS-1:0];
+for (genvar g=0; g<NUM_REGS; g++) begin : g_gpr_loop
     assign map_tbl_rst[g] = t_prf_addr'(g);
 end
 

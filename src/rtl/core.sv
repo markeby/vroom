@@ -70,7 +70,7 @@ t_prf_wr_pkt iprf_wr_pkt_mm5;
 t_rob_complete_pkt ex_complete_rb0;;
 t_rob_complete_pkt mm_complete_rb0;;
 
-t_rv_reg_addr     src_addr_ra0          [NUM_SOURCES-1:0];
+t_gpr_id          src_addr_ra0          [NUM_SOURCES-1:0];
 logic             rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0];
 t_rob_id          rob_src_reg_robid_ra0 [NUM_SOURCES-1:0];
 

@@ -23,6 +23,15 @@ package common;
     localparam DISP_PORT_EINT     = 0;
     localparam DISP_PORT_MEM      = 1;
 
+    localparam RV_NUM_REGS      = 32;
+    localparam RV_REG_ADDR_BITS = $clog2(RV_NUM_REGS);
+
+    localparam NUM_TEMP_REGS      = 16;
+    localparam IPRF_NUM_REGS      = RV_NUM_REGS + NUM_TEMP_REGS;
+    localparam IPRF_REG_ADDR_BITS = $clog2(IPRF_NUM_REGS);
+
+    typedef logic[IPRF_REG_ADDR_BITS-1:0] t_gpr_id;
+
     localparam FE_FB_NUM_SETS     = 4;
     localparam FE_FB_NUM_SETS_LG2 = $clog2(FE_FB_NUM_SETS);
     localparam FE_FB_SET_BITS     = FE_FB_NUM_SETS_LG2;

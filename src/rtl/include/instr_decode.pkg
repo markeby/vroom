@@ -76,7 +76,7 @@ package instr_decode;
     typedef struct packed {
         t_size   opsize;
         t_optype optype;
-        t_rv_reg_addr opreg;
+        t_gpr_id opreg;
     } t_uopnd_descr;
 
     typedef struct packed {
@@ -96,8 +96,6 @@ package instr_decode;
         t_paddr           pc;
         logic             eom;
     } t_uinstr;
-
-    typedef logic[RV_REG_ADDR_BITS-1:0] t_gpr_id;
 
     typedef struct packed {
         t_prf_id psrc1;
@@ -322,6 +320,7 @@ package instr_decode;
         tmp_osize = SZ_INV;
         ifmt = get_instr_format(rv_instr.opcode);
         f_decode_rv_instr        = '0;
+
         f_decode_rv_instr.eom    = eom;
         f_decode_rv_instr.opcode = rv_instr.opcode;
         f_decode_rv_instr.ifmt   = ifmt;
@@ -332,14 +331,14 @@ package instr_decode;
                 f_decode_rv_instr.funct3 = rv_instr.d.R.funct3;
                 if (~rv_instr.opcode[3]) begin
                     // 64b version
-                    f_decode_rv_instr.dst    = '{opreg: rv_instr.d.R.rd,  optype: OP_REG, opsize: SZ_8B};
-                    f_decode_rv_instr.src1   = '{opreg: rv_instr.d.R.rs1, optype: OP_REG, opsize: SZ_8B};
-                    f_decode_rv_instr.src2   = '{opreg: rv_instr.d.R.rs2, optype: OP_REG, opsize: SZ_8B};
+                    f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.R.rd),  optype: OP_REG, opsize: SZ_8B};
+                    f_decode_rv_instr.src1   = '{opreg: t_gpr_id'(rv_instr.d.R.rs1), optype: OP_REG, opsize: SZ_8B};
+                    f_decode_rv_instr.src2   = '{opreg: t_gpr_id'(rv_instr.d.R.rs2), optype: OP_REG, opsize: SZ_8B};
                 end else begin
                     // 32b (W-suffix) version
-                    f_decode_rv_instr.dst    = '{opreg: rv_instr.d.R.rd,  optype: OP_REG, opsize: SZ_4B};
-                    f_decode_rv_instr.src1   = '{opreg: rv_instr.d.R.rs1, optype: OP_REG, opsize: SZ_4B};
-                    f_decode_rv_instr.src2   = '{opreg: rv_instr.d.R.rs2, optype: OP_REG, opsize: SZ_4B};
+                    f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.R.rd),  optype: OP_REG, opsize: SZ_4B};
+                    f_decode_rv_instr.src1   = '{opreg: t_gpr_id'(rv_instr.d.R.rs1), optype: OP_REG, opsize: SZ_4B};
+                    f_decode_rv_instr.src2   = '{opreg: t_gpr_id'(rv_instr.d.R.rs2), optype: OP_REG, opsize: SZ_4B};
                 end
                 f_decode_rv_instr.imm64  = '0;
                 f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
@@ -350,35 +349,35 @@ package instr_decode;
                 if (rv_opcode_is_alu(rv_instr.opcode)) begin
                     if (~rv_instr.opcode[3]) begin
                         // 64b version
-                        f_decode_rv_instr.dst    = '{opreg: rv_instr.d.I.rd,  optype: OP_REG, opsize: SZ_8B};
-                        f_decode_rv_instr.src1   = '{opreg: rv_instr.d.I.rs1, optype: OP_REG, opsize: SZ_8B};
-                        f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_8B};
+                        f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.I.rd),  optype: OP_REG, opsize: SZ_8B};
+                        f_decode_rv_instr.src1   = '{opreg: t_gpr_id'(rv_instr.d.I.rs1), optype: OP_REG, opsize: SZ_8B};
+                        f_decode_rv_instr.src2   = '{opreg: '0,                          optype: OP_IMM, opsize: SZ_8B};
                     end else begin
                         // 32b (W-suffix) version
-                        f_decode_rv_instr.dst    = '{opreg: rv_instr.d.I.rd,  optype: OP_REG, opsize: SZ_4B};
-                        f_decode_rv_instr.src1   = '{opreg: rv_instr.d.I.rs1, optype: OP_REG, opsize: SZ_4B};
-                        f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_4B};
+                        f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.I.rd),  optype: OP_REG, opsize: SZ_4B};
+                        f_decode_rv_instr.src1   = '{opreg: t_gpr_id'(rv_instr.d.I.rs1), optype: OP_REG, opsize: SZ_4B};
+                        f_decode_rv_instr.src2   = '{opreg: '0,                          optype: OP_IMM, opsize: SZ_4B};
                     end
                 end else if (rv_opcode_is_ld(rv_instr.opcode)) begin
-                    f_decode_rv_instr.dst    = '{opreg: rv_instr.d.I.rd,  optype: OP_REG, opsize: SZ_4B};
-                    f_decode_rv_instr.src1   = '{opreg: rv_instr.d.I.rs1, optype: OP_REG, opsize: SZ_4B};
-                    f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_4B};
+                    f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.I.rd),  optype: OP_REG, opsize: SZ_4B};
+                    f_decode_rv_instr.src1   = '{opreg: t_gpr_id'(rv_instr.d.I.rs1), optype: OP_REG, opsize: SZ_4B};
+                    f_decode_rv_instr.src2   = '{opreg: '0,                          optype: OP_IMM, opsize: SZ_4B};
                 end else if (rv_opcode_is_jalr(rv_instr.opcode)) begin
-                    f_decode_rv_instr.dst    = '{opreg: rv_instr.d.I.rd,  optype: OP_REG, opsize: SZ_8B};
-                    f_decode_rv_instr.src1   = '{opreg: rv_instr.d.I.rs1, optype: OP_REG, opsize: SZ_8B};
-                    f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_8B};
+                    f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.I.rd),  optype: OP_REG, opsize: SZ_8B};
+                    f_decode_rv_instr.src1   = '{opreg: t_gpr_id'(rv_instr.d.I.rs1), optype: OP_REG, opsize: SZ_8B};
+                    f_decode_rv_instr.src2   = '{opreg: '0,                          optype: OP_IMM, opsize: SZ_8B};
                 end else if (rv_opcode_is_sys(rv_instr.opcode)) begin
                     if (~rv_instr.d.I.funct3[2]) begin
                         // CSRRW, CSRRS, CSRRC
-                        f_decode_rv_instr.dst    = '{opreg: rv_instr.d.I.rd,  optype: OP_REG, opsize: SZ_8B};
-                        f_decode_rv_instr.src1   = '{opreg: rv_instr.d.I.rs1, optype: OP_REG, opsize: SZ_8B};
-                        f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_8B};
+                        f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.I.rd),  optype: OP_REG, opsize: SZ_8B};
+                        f_decode_rv_instr.src1   = '{opreg: t_gpr_id'(rv_instr.d.I.rs1), optype: OP_REG, opsize: SZ_8B};
+                        f_decode_rv_instr.src2   = '{opreg: '0,                          optype: OP_IMM, opsize: SZ_8B};
                     end else begin
                         // CSRRWI, CSRRSI, CSRRCI
                         // these munge a 5b unsigned imm into rs1
-                        f_decode_rv_instr.dst    = '{opreg: rv_instr.d.I.rd,  optype: OP_REG, opsize: SZ_8B};
-                        f_decode_rv_instr.src1   = '{opreg: rv_instr.d.I.rs1, optype: OP_IMM, opsize: SZ_8B};
-                        f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_8B};
+                        f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.I.rd),  optype: OP_REG, opsize: SZ_8B};
+                        f_decode_rv_instr.src1   = '{opreg: t_gpr_id'(rv_instr.d.I.rs1), optype: OP_IMM, opsize: SZ_8B};
+                        f_decode_rv_instr.src2   = '{opreg: '0,                          optype: OP_IMM, opsize: SZ_8B};
                     end
                 end
                 f_decode_rv_instr.imm64  = sext_funcs#(.IWIDTH(12), .OWIDTH(64))::sext(rv_instr.d.I.imm_11_0);
@@ -396,9 +395,9 @@ package instr_decode;
                         MEM_SD:  tmp_osize = SZ_8B;
                         default: tmp_osize = SZ_INV;
                     endcase
-                    f_decode_rv_instr.dst    = '{opreg: '0,                   optype: OP_MEM, opsize: tmp_osize};
-                    f_decode_rv_instr.src1   = '{opreg: rv_instr.d.S.rs1, optype: OP_REG, opsize: SZ_8B};
-                    f_decode_rv_instr.src2   = '{opreg: rv_instr.d.S.rs2, optype: OP_REG, opsize: tmp_osize};
+                    f_decode_rv_instr.dst    = '{opreg: '0,                          optype: OP_MEM, opsize: tmp_osize};
+                    f_decode_rv_instr.src1   = '{opreg: t_gpr_id'(rv_instr.d.S.rs1), optype: OP_REG, opsize: SZ_8B};
+                    f_decode_rv_instr.src2   = '{opreg: t_gpr_id'(rv_instr.d.S.rs2), optype: OP_REG, opsize: tmp_osize};
                 end
                 f_decode_rv_instr.imm64  = sext_funcs#(.IWIDTH(12), .OWIDTH(64))::sext({rv_instr.d.S.imm_11_5, rv_instr.d.S.imm_4_0});
                 f_decode_rv_instr.uop    = rv_instr_to_uop(rv_instr);
@@ -406,9 +405,9 @@ package instr_decode;
             RV_FMT_J: begin
                 f_decode_rv_instr.funct7 = '0;
                 f_decode_rv_instr.funct3 = '0;
-                f_decode_rv_instr.dst    = '{opreg: rv_instr.d.J.rd,  optype: OP_REG, opsize: SZ_4B};
-                f_decode_rv_instr.src1   = '{opreg: '0,                   optype: OP_INVD, opsize: SZ_4B};
-                f_decode_rv_instr.src2   = '{opreg: '0,                   optype: OP_IMM, opsize: SZ_4B};
+                f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.J.rd), optype: OP_REG, opsize: SZ_4B};
+                f_decode_rv_instr.src1   = '{opreg: '0,                         optype: OP_INVD, opsize: SZ_4B};
+                f_decode_rv_instr.src2   = '{opreg: '0,                         optype: OP_IMM, opsize: SZ_4B};
                 f_decode_rv_instr.imm64  = sext_funcs#(.IWIDTH(21), .OWIDTH(64))::sext({rv_instr.d.J.imm_20,
                                                                                  rv_instr.d.J.imm_19_12,
                                                                                  rv_instr.d.J.imm_11,
@@ -420,8 +419,8 @@ package instr_decode;
                 f_decode_rv_instr.funct7 = '0;
                 f_decode_rv_instr.funct3 = rv_instr.d.B.funct3;
                 f_decode_rv_instr.dst    = '{opreg: '0, optype: OP_INVD, opsize: SZ_4B};
-                f_decode_rv_instr.src1   = '{opreg: rv_instr.d.B.rs1, optype: OP_REG, opsize: SZ_4B};
-                f_decode_rv_instr.src2   = '{opreg: rv_instr.d.B.rs2, optype: OP_REG, opsize: SZ_4B};
+                f_decode_rv_instr.src1   = '{opreg: t_gpr_id'(rv_instr.d.B.rs1), optype: OP_REG, opsize: SZ_4B};
+                f_decode_rv_instr.src2   = '{opreg: t_gpr_id'(rv_instr.d.B.rs2), optype: OP_REG, opsize: SZ_4B};
                 f_decode_rv_instr.imm64  = sext_funcs#(.IWIDTH(13), .OWIDTH(64))::sext({rv_instr.d.B.imm_12,
                                                                                  rv_instr.d.B.imm_11,
                                                                                  rv_instr.d.B.imm_10_5,
@@ -432,7 +431,7 @@ package instr_decode;
             RV_FMT_U: begin
                 f_decode_rv_instr.funct7 = '0;
                 f_decode_rv_instr.funct3 = '0;
-                f_decode_rv_instr.dst    = '{opreg: rv_instr.d.U.rd,  optype: OP_REG, opsize: SZ_8B};
+                f_decode_rv_instr.dst    = '{opreg: t_gpr_id'(rv_instr.d.U.rd),  optype: OP_REG, opsize: SZ_8B};
                 f_decode_rv_instr.src1   = '{opreg: '0, optype: OP_INVD, opsize: SZ_4B};
                 f_decode_rv_instr.src2   = '{opreg: '0, optype: OP_IMM,  opsize: SZ_8B};
                 f_decode_rv_instr.imm64  = sext_funcs#(.IWIDTH(32), .OWIDTH(64))::sext({rv_instr.d.U.imm_31_12, 12'd0});

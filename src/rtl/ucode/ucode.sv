@@ -121,9 +121,9 @@ always_comb begin
     end
 
     r = int'(ROM_ENT_MUL);
-    ROM[r] = f_decode_rv_instr(rvADDI(22, 0, 12'hABC), 1'b0); r++;
-    ROM[r] = f_decode_rv_instr(rvADDI(23, 0, 12'hDEF), 1'b0); r++;
-    ROM[r] = f_decode_rv_instr(rvADDI(24, 0, 12'h123));       r++;
+    ROM[r] = f_decode_rv_instr(rvADDI(REG_X22, 0, 12'hABC), 1'b0); r++;
+    ROM[r] = f_decode_rv_instr(rvADDI(REG_X23, 0, 12'hDEF), 1'b0); r++;
+    ROM[r] = f_decode_rv_instr(rvADDI(REG_X24, 0, 12'h123));       r++;
 
     r = int'(ROM_ENT_DIV);
     ROM[r] = f_decode_rv_instr(rvADDI(23, 0, 12'hDEF)); ROM[r].eom = 1'b1; r++;

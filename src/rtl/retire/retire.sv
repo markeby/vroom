@@ -17,7 +17,7 @@ module retire
     input  t_uinstr          uinstr_ra0,
     input  t_rename_pkt      rename_ra0,
 
-    input  t_rv_reg_addr     src_addr_ra0          [NUM_SOURCES-1:0],
+    input  t_gpr_id          src_addr_ra0          [NUM_SOURCES-1:0],
     output logic             rob_src_reg_pdg_ra0   [NUM_SOURCES-1:0],
     output t_rob_id          rob_src_reg_robid_ra0 [NUM_SOURCES-1:0],
 

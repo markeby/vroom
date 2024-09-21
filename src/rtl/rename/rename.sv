@@ -82,7 +82,7 @@ assign rdmap_nq_rd0[SRC2] = valid_rn0 & uinstr_rn0.src2.optype == OP_REG;
 
 logic rename_ready_prf_rn0;
 
-prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRITES(IPRF_NUM_WRITES), .NUM_MAP_READS(IPRF_NUM_MAP_READS)) iprf
+prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRITES(IPRF_NUM_WRITES), .NUM_MAP_READS(IPRF_NUM_MAP_READS), .NUM_REGS(IPRF_NUM_REGS)) iprf
 (
     .clk,
     .reset,

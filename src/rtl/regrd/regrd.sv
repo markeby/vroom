@@ -14,7 +14,7 @@ module regrd
     input  logic             br_mispred_rb1,
 
     output logic             rdens_rd0   [1:0],
-    output t_rv_reg_addr     rdaddrs_rd0 [1:0],
+    output t_gpr_id          rdaddrs_rd0 [1:0],
     input  t_rv_reg_data     rddatas_rd1 [1:0]
 );
 

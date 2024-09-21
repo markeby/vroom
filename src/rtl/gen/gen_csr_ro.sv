@@ -9,7 +9,7 @@
 `include "instr_decode.pkg"
 
 module gen_csr_ro
-    import csr::*, gen_funcs::*, instr::*, instr_decode::*;
+    import csr::*, gen_funcs::*, instr::*, instr_decode::*, common::*;
 #(parameter type T=t_gen_csr, t_csr_addr CSR_ADDR)
 (
     input  logic         clk,
@@ -32,7 +32,7 @@ assign valid_ql_ex0 = valid_ex0 & csr_addr_ex0 == CSR_ADDR;
 
 always_comb begin
     unique casez (uinstr_ex0.src1.optype)
-        OP_IMM:  wr_value_ql_ex0 = sext_funcs#(.IWIDTH($bits(t_rv_reg_addr)), .OWIDTH(XLEN))::zext(uinstr_ex0.src1.opreg);
+        OP_IMM:  wr_value_ql_ex0 = sext_funcs#(.IWIDTH($bits(t_gpr_id)), .OWIDTH(XLEN))::zext(uinstr_ex0.src1.opreg);
         default: wr_value_ql_ex0 = wr_value_ex0;
     endcase
 end

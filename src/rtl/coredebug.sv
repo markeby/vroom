@@ -98,7 +98,7 @@ typedef struct packed {
 
 t_cd_inst  INSTQ[$];
 
-function automatic string f_describe_src_dst(t_optype optype, t_rv_reg_addr opreg, t_size opsize, t_prf_id psrc, t_rv_reg_data value);
+function automatic string f_describe_src_dst(t_optype optype, t_gpr_id opreg, t_size opsize, t_prf_id psrc, t_rv_reg_data value);
     string opsize_char;
     unique casez(opsize)
         SZ_1B: opsize_char = "B";
@@ -355,16 +355,16 @@ end
 // Regdump ////////
 ///////////////////
 
-function automatic t_prf_id f_get_gpr_prfid(t_rv_reg_addr gpr);
+function automatic t_prf_id f_get_gpr_prfid(t_gpr_id gpr);
     return {core.rename.iprf.prf_type, core.rename.iprf.MAP[gpr]};
 endfunction
 
-function automatic t_rv_reg_data f_get_gpr_data(t_rv_reg_addr gpr);
+function automatic t_rv_reg_data f_get_gpr_data(t_gpr_id gpr);
     t_prf_id prfid = f_get_gpr_prfid(gpr);
     return core.rename.iprf.PRF[prfid.idx];
 endfunction
 
-function automatic string f_describe_gpr_full(t_rv_reg_addr gpr, logic hide_zeros);
+function automatic string f_describe_gpr_full(t_gpr_id gpr, logic hide_zeros);
     t_prf_id prf_id = f_get_gpr_prfid(gpr);
     t_rv_reg_data data = f_get_gpr_data(gpr);
 
@@ -376,12 +376,12 @@ endfunction
 function automatic void dump_gprs();
     `PMSG(CDBG, ("GPR State"))
     `PMSG(CDBG, ("---------"))
-    for (int g=0; g<(RV_NUM_REGS/4); g++) begin
-        `PMSG(CDBG, ("%34s  %34s  %34s  %34s",
-            f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*0), 1'b1),
-            f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*1), 1'b1),
-            f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*2), 1'b1),
-            f_describe_gpr_full(t_rv_reg_addr'(g + (RV_NUM_REGS/4)*3), 1'b1)))
+    for (int g=0; g<(IPRF_NUM_REGS/4); g++) begin
+        `PMSG(CDBG, ("%36s  %36s  %36s  %36s",
+            f_describe_gpr_full(t_gpr_id'(g + (IPRF_NUM_REGS/4)*0), 1'b1),
+            f_describe_gpr_full(t_gpr_id'(g + (IPRF_NUM_REGS/4)*1), 1'b1),
+            f_describe_gpr_full(t_gpr_id'(g + (IPRF_NUM_REGS/4)*2), 1'b1),
+            f_describe_gpr_full(t_gpr_id'(g + (IPRF_NUM_REGS/4)*3), 1'b1)))
     end
 endfunction
 

@@ -64,7 +64,7 @@ logic                      q_pipe_gnt_mm0;
 // Logic
 //
 
-assign q_alloc_rs0     = disp_valid_rs0 & rv_opcode_is_st(disp_pkt_rs0.uinstr.opcode);
+assign q_alloc_rs0     = disp_valid_rs0 & uop_is_st(disp_pkt_rs0.uinstr.uop);
 assign e_alloc_sel_rs0 = gen_funcs#(.IWIDTH(STQ_NUM_ENTRIES))::find_first0(e_valid);
 assign e_alloc_rs0     = q_alloc_rs0 ? e_alloc_sel_rs0 : '0;
 assign stqid_alloc_rs0 = gen_lg2_funcs#(.IWIDTH(STQ_NUM_ENTRIES))::oh_encode(e_alloc_sel_rs0);
@@ -114,7 +114,7 @@ gen_age_matrix #(.DEPTH(STQ_NUM_ENTRIES), .NUM_REQS(1)) age_mtx (
 //
 
 logic iss_ql_mm0;
-assign iss_ql_mm0 = iss_mm0 & rv_opcode_is_st(iss_pkt_mm0.uinstr.opcode);
+assign iss_ql_mm0 = iss_mm0 & uop_is_st(iss_pkt_mm0.uinstr.uop);
 
 for (genvar e=0; e<STQ_NUM_ENTRIES; e++) begin : g_stq_entries
     storeq_entry storeq_entry (

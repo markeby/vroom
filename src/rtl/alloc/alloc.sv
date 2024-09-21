@@ -75,7 +75,7 @@ always_comb begin
     disp_valid_rs0 = valid_ra1 & ~stall_ra1 & ~nuke_rb1.valid;
 
     disp_pkt_rs0   = disp_pkt_ra1;
-    if (rv_opcode_is_ldst(disp_pkt_ra1.uinstr.opcode)) begin
+    if (uop_is_ldst(disp_pkt_ra1.uinstr.uop)) begin
         disp_pkt_rs0.meta.mem = '{ldqid: ldqid_alloc_rs0, stqid: stqid_alloc_rs0};
     end
 end

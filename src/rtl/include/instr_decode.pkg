@@ -93,7 +93,6 @@ package instr_decode;
         t_uopnd_descr     src2;
         t_uopnd_descr     src1;
         t_uopnd_descr     dst;
-        t_rv_opcode       opcode;
         t_uop             uop;
         t_paddr           pc;
         logic             eom;
@@ -140,6 +139,10 @@ package instr_decode;
         instr::t_rv_reg_data data;
     } t_prf_wr_pkt;
 
+    ////////////////
+    // Predicates //
+    ////////////////
+
     function logic rv_opcode_is_sys(t_rv_opcode opcode);
         return opcode inside {RV_OP_SYSTEM};
     endfunction
@@ -162,6 +165,34 @@ package instr_decode;
 
     function logic rv_opcode_is_ldst(t_rv_opcode opcode);
         return rv_opcode_is_ld(opcode) | rv_opcode_is_st(opcode);
+    endfunction
+
+    ////////////////////
+    // UOP Predicates //
+    ////////////////////
+
+    function logic uop_is_sys(t_uop uop);
+        return uop inside {U_EBREAK, U_ECALL, U_CSRRW, U_CSRRS, U_CSRRC};
+    endfunction
+
+    function logic uop_is_jalr(t_uop uop);
+        return uop inside {U_JALR};
+    endfunction
+
+    function logic uop_is_alu(t_uop uop);
+        return uop inside {U_ADD, U_ADDW, U_SUB, U_SUBW, U_SLL, U_SLLW, U_SLT, U_SLTU, U_XOR, U_SRL, U_SRLW, U_SRA, U_SRAW, U_OR, U_AND};
+    endfunction
+
+    function logic uop_is_st(t_uop uop);
+        return uop inside {U_STORE};
+    endfunction
+
+    function logic uop_is_ld(t_uop uop);
+        return uop inside {U_LOAD};
+    endfunction
+
+    function logic uop_is_ldst(t_uop uop);
+        return uop_is_ld(uop) | uop_is_st(uop);
     endfunction
 
     function t_rv_instr_format get_instr_format (t_rv_opcode opcode);
@@ -334,7 +365,6 @@ package instr_decode;
         f_decode_rv_instr        = '0;
 
         f_decode_rv_instr.eom    = eom;
-        f_decode_rv_instr.opcode = rv_instr.opcode;
         f_decode_rv_instr.pc     = '0; // does NOT fill out PC!
         unique case (ifmt)
             RV_FMT_R: begin
@@ -556,7 +586,7 @@ package instr_decode;
     endfunction
 
     function string describe_uinstr(t_uinstr uinstr);
-        describe_uinstr = $sformatf("opcode:%s uop:%s dst:%s src1:%s src2:%s imm64:0x%h", uinstr.opcode.name(), uinstr.uop.name(), f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), f_describe_opnd_descr(uinstr.src2), uinstr.imm64);
+        describe_uinstr = $sformatf("uop:%s dst:%s src1:%s src2:%s imm64:0x%h", uinstr.uop.name(), f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), f_describe_opnd_descr(uinstr.src2), uinstr.imm64);
     endfunction
 
     function string describe_opnd(t_uopnd_descr opnd, logic[63:0] val64);
@@ -569,7 +599,7 @@ package instr_decode;
 
     function void print_retire_info(t_uinstr uinstr_rb0);
         `RETLOG(("-------------------------------------"))
-        `RETLOG(("PC:%08h %s -> %s", uinstr_rb0.SIMID.pc, uinstr_rb0.opcode.name(), uinstr_rb0.uop.name()))
+        `RETLOG(("PC:%08h %s", uinstr_rb0.SIMID.pc, uinstr_rb0.uop.name()))
     endfunction
     `endif
 

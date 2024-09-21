@@ -1,0 +1,22 @@
+`ifndef __UASM_PKG
+`define __UASM_PKG
+
+`include "common.pkg"
+`include "instr_decode.pkg"
+
+package uasm;
+    import instr::*;
+    import common::*;
+    import instr_decode::*;
+
+    function t_uinstr uADDI(t_uopnd_descr dst, t_uopnd_descr src1, logic[63:0] imm64, logic eom=1'b1);
+        return '{eom: eom, imm64: imm64, uop: U_ADD,
+                dst: dst,
+                src1: src1,
+                src2: '{opreg: '0, optype: OP_IMM, opsize: SZ_8B}, default: '0};
+    endfunction
+
+
+endpackage
+
+`endif // __UASM_PKG

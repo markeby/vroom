@@ -127,8 +127,8 @@ endfunction
 
 task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ("---------------------[ %4d @%-4t ]---------------------", top.cclk_count, $time()));
-    `PMSG(CDBG, (describe_uinstr(rec.DECODE.uinstr_de1)))
-    `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h RS %d -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.RENAME.rename_rn1.robid, rec.ALLOC.rs_ent_ra1, format_simid(rec.FETCH.instr_fe1.SIMID)))
+    `PMSG(CDBG, (describe_uinstr(rec.UCODE.uinstr_uc0)))
+    `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h RS %d -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.RENAME.rename_rn1.robid, rec.ALLOC.rs_ent_ra1, format_simid(rec.SIMID)))
     `PMSG(CDBG, (""))
     if (rec.RS.mm_iss_rs2) begin
         cd_print_mem_rec(rec);
@@ -138,8 +138,11 @@ task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ($sformatf(" src2 %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.src2.optype, rec.RS.iss_pkt_rs2.uinstr.src2.opreg, rec.RS.iss_pkt_rs2.uinstr.src2.opsize, rec.RENAME.rename_rn1.psrc2, rec.RS.iss_pkt_rs2.src2_val))))
     `PMSG(CDBG, ($sformatf("  dst %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.dst .optype, rec.RS.iss_pkt_rs2.uinstr.dst .opreg, rec.RS.iss_pkt_rs2.uinstr.dst .opsize, rec.RENAME.rename_rn1.pdst , rec.RESULT.iprf_wr_pkt_ro0.data))))
     `PMSG(CDBG, (""))
-    `PMSG(CDBG, ("    Fetch  -> Decode @ %-d", rec.FETCH.clk))
-    `PMSG(CDBG, ("    Decode -> Rename @ %-d", rec.DECODE.clk))
+    if (rec.FETCH.valid)
+        `PMSG(CDBG, ("    Fetch  -> Decode @ %-d", rec.FETCH.clk))
+    if (rec.DECODE.valid)
+        `PMSG(CDBG, ("    Decode -> Ucode  @ %-d", rec.DECODE.clk))
+    `PMSG(CDBG, ("    Ucode  -> Rename @ %-d", rec.UCODE.clk))
     `PMSG(CDBG, ("    Rename -> Alloc  @ %-d", rec.RENAME.clk))
     `PMSG(CDBG, ("    Alloc  -> RS.%0d   @ %-d", rec.ALLOC.port, rec.ALLOC.clk))
     `PMSG(CDBG, ("              Result @ %-d", rec.RESULT.clk))

@@ -142,15 +142,16 @@ always_ff @(posedge clk) begin
 end
 
 t_prf_id      rdmap_psrc_rd0 [NUM_MAP_READS-1:0];
-logic         rdmap_pend_rd0 [NUM_MAP_READS-1:0];
 for (genvar r=0; r<NUM_MAP_READS; r++) begin : g_map_read
     assign rdmap_psrc_rd0[r].ptype = prf_type;
     assign rdmap_psrc_rd0[r].idx   = MAP[rdmap_gpr_rd0[r]];
-    assign rdmap_pend_rd0[r]       = pend_list_nxt[rdmap_psrc_rd0[r].idx] & rdmap_nq_rd0[r];
 end
 
 `DFF(rdmap_psrc_rd1, rdmap_psrc_rd0, clk);
-`DFF(rdmap_pend_rd1, rdmap_pend_rd0, clk);
+
+for (genvar r=0; r<NUM_MAP_READS; r++) begin : g_pend_read
+    assign rdmap_pend_rd1[r]       = pend_list_nxt[rdmap_psrc_rd1[r].idx];
+end
 
 //
 // PRF data
@@ -179,6 +180,13 @@ end
 //
 
 `ifdef SIMULATION
+
+logic rdmap_nq_rd1_inst [NUM_MAP_READS-1:0];
+`DFF(rdmap_nq_rd1_inst, rdmap_nq_rd0, clk)
+
+t_gpr_id rdmap_gpr_rd1_inst [NUM_MAP_READS-1:0];
+`DFF(rdmap_gpr_rd1_inst, rdmap_gpr_rd0, clk)
+
 always @(posedge clk) begin
     if (alloc_pdst_rn0) begin
         `UINFO(simid_rn0_inst, ("unit:RN func:pdst_alloc gpr_id:%s pdst:%s pdst_old:%s", f_describe_gpr_addr(gpr_id_rn0), f_describe_prf(pdst_rn0), f_describe_prf(pdst_old_rn0)))
@@ -189,8 +197,8 @@ always @(posedge clk) begin
     end
 
     for (int r=0; r<NUM_MAP_READS; r++) begin
-        if (rdmap_nq_rd0[r]) begin
-            `UINFO(simid_rd0_inst, ("unit:RN func:rat_read gpr_id:%s psrc:%s psrc_pend:%0d", f_describe_gpr_addr(rdmap_gpr_rd0[r]), f_describe_prf(rdmap_psrc_rd0[r]), rdmap_pend_rd0[r]))
+        if (rdmap_nq_rd1_inst[r]) begin
+            `UINFO(simid_rd0_inst, ("unit:RN func:rat_read gpr_id:%s psrc:%s psrc_pend:%0d", f_describe_gpr_addr(rdmap_gpr_rd1_inst[r]), f_describe_prf(rdmap_psrc_rd1[r]), rdmap_pend_rd1[r]))
         end
     end
 

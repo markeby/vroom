@@ -4,13 +4,14 @@
 `include "instr.pkg"
 `include "instr_decode.pkg"
 `include "asm.pkg"
+`include "uasm.pkg"
 `include "vroom_macros.sv"
 `include "gen_funcs.pkg"
 `include "common.pkg"
 `include "verif.pkg"
 
 module ucode
-    import instr::*, instr_decode::*, asm::*, gen_funcs::*, common::*, verif::*;
+    import instr::*, instr_decode::*, asm::*, uasm::*, gen_funcs::*, common::*, verif::*;
 (
     input  logic             clk,
     input  logic             reset,
@@ -141,13 +142,15 @@ always_comb begin
     end
 
     r = int'(ROM_ENT_MUL);
-    ROM[r++] = '{opcode: RV_OP_ALU0_I, ifmt: RV_FMT_I, eom: 1'b0, funct7: '0, funct3: ALU_ADD, imm64: '0, uop: U_ADD,
-                dst: '{opreg: REG_TMP0, optype: OP_REG, opsize: SZ_8B},
-                src1: '{opreg: REG_X0, optype: OP_TRAP_SRC1, opsize: SZ_8B},
-                src2: '{opreg: '0, optype: OP_IMM, opsize: SZ_8B}, default: '0};
+    // ROM[r++] = '{opcode: RV_OP_ALU0_I, ifmt: RV_FMT_I, eom: 1'b0, funct7: '0, funct3: ALU_ADD, imm64: '0, uop: U_ADD,
+    //             dst: '{opreg: REG_TMP0, optype: OP_REG, opsize: SZ_8B},
+    //             src1: '{opreg: REG_X0, optype: OP_TRAP_SRC1, opsize: SZ_8B},
+    //             src2: '{opreg: '0, optype: OP_IMM, opsize: SZ_8B}, default: '0};
+    ROM[r++] = uADDI('{opreg: REG_TMP0, optype: OP_REG, opsize: SZ_8B}, '{opreg: '0, optype: OP_TRAP_SRC1, opsize: SZ_8B}, 64'h0, 1'b0);
+    ROM[r++] = uADDI('{opreg: REG_TMP1, optype: OP_REG, opsize: SZ_8B}, '{opreg: '0, optype: OP_TRAP_SRC2, opsize: SZ_8B}, 64'h0, 1'b0);
     ROM[r++] = f_decode_rv_instr(rvADDI(REG_X22, 0, 12'hABC), 1'b0);
     ROM[r++] = f_decode_rv_instr(rvADDI(REG_X23, 0, 12'hDEF), 1'b0);
-    ROM[r++] = f_decode_rv_instr(rvADDI(REG_X24, 0, 12'h123));
+    ROM[r++] = f_decode_rv_instr(rvADDI(REG_X24, 0, 12'h123), 1'b1);
 
     r = int'(ROM_ENT_DIV);
     ROM[r++] = f_decode_rv_instr(rvADDI(23, 0, 12'hDEF));

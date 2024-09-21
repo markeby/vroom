@@ -548,6 +548,7 @@ package instr_decode;
             OP_ZERO: f_describe_opnd_descr = $sformatf("zero");
             OP_INVD: f_describe_opnd_descr = $sformatf("invalid");
             OP_MEM:  f_describe_opnd_descr = $sformatf("mem.%s", opsize_char);
+            default: f_describe_opnd_descr = $sformatf("?????");
         endcase
     endfunction
 

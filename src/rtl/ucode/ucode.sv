@@ -95,13 +95,33 @@ t_uinstr trapped_uinstr;
 `SIMID_SPAWN_CNTR(SIMID_UROM, (fsm == UC_FETCH & rename_ready_rn0), clk, trapped_uinstr.SIMID, UCROM)
 `endif
 
+t_uinstr uc_uinstr_uc0;
+always_comb begin
+    uc_uinstr_uc0 = ROM[useq_pc];
+
+    // Source1
+    if (uc_uinstr_uc0.src1.optype == OP_TRAP_SRC1) uc_uinstr_uc0.src1 = trapped_uinstr.src1;
+    if (uc_uinstr_uc0.src1.optype == OP_TRAP_SRC2) uc_uinstr_uc0.src1 = trapped_uinstr.src2;
+    if (uc_uinstr_uc0.src1.optype == OP_TRAP_DST ) uc_uinstr_uc0.src1 = trapped_uinstr.dst;
+
+    // Source2
+    if (uc_uinstr_uc0.src2.optype == OP_TRAP_SRC1) uc_uinstr_uc0.src2 = trapped_uinstr.src1;
+    if (uc_uinstr_uc0.src2.optype == OP_TRAP_SRC2) uc_uinstr_uc0.src2 = trapped_uinstr.src2;
+    if (uc_uinstr_uc0.src2.optype == OP_TRAP_DST ) uc_uinstr_uc0.src2 = trapped_uinstr.dst;
+
+    // Dest
+    if (uc_uinstr_uc0.dst .optype == OP_TRAP_SRC1) uc_uinstr_uc0.dst  = trapped_uinstr.src1;
+    if (uc_uinstr_uc0.dst .optype == OP_TRAP_SRC2) uc_uinstr_uc0.dst  = trapped_uinstr.src2;
+    if (uc_uinstr_uc0.dst .optype == OP_TRAP_DST ) uc_uinstr_uc0.dst  = trapped_uinstr.dst;
+end
+
 always_comb begin
     unique casez (fsm)
         UC_IDLE: begin
             uinstr_uc0 = uinstr_de1;
         end
         UC_FETCH: begin
-            uinstr_uc0 = ROM[useq_pc];
+            uinstr_uc0 = uc_uinstr_uc0;
             `ifdef SIMULATION
             uinstr_uc0.SIMID = SIMID_UROM;
             `endif
@@ -121,12 +141,16 @@ always_comb begin
     end
 
     r = int'(ROM_ENT_MUL);
-    ROM[r] = f_decode_rv_instr(rvADDI(REG_X22, 0, 12'hABC), 1'b0); r++;
-    ROM[r] = f_decode_rv_instr(rvADDI(REG_X23, 0, 12'hDEF), 1'b0); r++;
-    ROM[r] = f_decode_rv_instr(rvADDI(REG_X24, 0, 12'h123));       r++;
+    ROM[r++] = '{opcode: RV_OP_ALU0_I, ifmt: RV_FMT_I, eom: 1'b0, funct7: '0, funct3: ALU_ADD, imm64: '0, uop: U_ADD,
+                dst: '{opreg: REG_TMP0, optype: OP_REG, opsize: SZ_8B},
+                src1: '{opreg: REG_X0, optype: OP_TRAP_SRC1, opsize: SZ_8B},
+                src2: '{opreg: '0, optype: OP_IMM, opsize: SZ_8B}, default: '0};
+    ROM[r++] = f_decode_rv_instr(rvADDI(REG_X22, 0, 12'hABC), 1'b0);
+    ROM[r++] = f_decode_rv_instr(rvADDI(REG_X23, 0, 12'hDEF), 1'b0);
+    ROM[r++] = f_decode_rv_instr(rvADDI(REG_X24, 0, 12'h123));
 
     r = int'(ROM_ENT_DIV);
-    ROM[r] = f_decode_rv_instr(rvADDI(23, 0, 12'hDEF)); ROM[r].eom = 1'b1; r++;
+    ROM[r++] = f_decode_rv_instr(rvADDI(23, 0, 12'hDEF));
 end
 
 //

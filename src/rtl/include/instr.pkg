@@ -248,7 +248,10 @@ package instr;
         OP_ZERO,
         OP_IMM,
         OP_REG,
-        OP_MEM
+        OP_MEM,
+        OP_TRAP_SRC1,
+        OP_TRAP_SRC2,
+        OP_TRAP_DST
     } t_optype;
 
     `ifdef SIMULATION

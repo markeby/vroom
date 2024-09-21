@@ -113,6 +113,7 @@ function automatic string f_describe_src_dst(t_optype optype, t_gpr_id opreg, t_
         OP_ZERO: f_describe_src_dst = $sformatf("zero    value:0x%016h",            0);
         OP_INVD: f_describe_src_dst = $sformatf("invalid",                      );
         OP_MEM:  f_describe_src_dst = $sformatf("mem (%s)", opsize_char);
+        default: f_describe_src_dst = $sformatf("?????");
     endcase
 endfunction
 

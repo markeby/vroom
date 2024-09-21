@@ -120,6 +120,7 @@ function automatic t_rv_reg_data f_opsel(t_optype optype, t_rv_reg_data imm_data
         OP_IMM:  f_opsel = imm_data;
         OP_MEM:  f_opsel = '0; // ???
         OP_REG:  f_opsel = prf_data;
+        default: f_opsel = '0; // ???
     endcase
 endfunction
 

@@ -94,7 +94,6 @@ package instr_decode;
         t_uopnd_descr     src1;
         t_uopnd_descr     dst;
         t_rv_opcode       opcode;
-        t_rv_instr_format ifmt;
         t_uop             uop;
         t_paddr           pc;
         logic             eom;
@@ -336,7 +335,6 @@ package instr_decode;
 
         f_decode_rv_instr.eom    = eom;
         f_decode_rv_instr.opcode = rv_instr.opcode;
-        f_decode_rv_instr.ifmt   = ifmt;
         f_decode_rv_instr.pc     = '0; // does NOT fill out PC!
         unique case (ifmt)
             RV_FMT_R: begin
@@ -558,15 +556,7 @@ package instr_decode;
     endfunction
 
     function string describe_uinstr(t_uinstr uinstr);
-        describe_uinstr = $sformatf("opcode:%s uop:%s ifmt:%s", uinstr.opcode.name(), uinstr.uop.name(), uinstr.ifmt.name());
-        case (uinstr.ifmt)
-            RV_FMT_I: describe_uinstr = $sformatf("%s dst:%s src1:%s imm64:0x%h", describe_uinstr, f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), uinstr.imm64);
-            RV_FMT_R: describe_uinstr = $sformatf("%s dst:%s src1:%s src2:%s", describe_uinstr, f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), f_describe_opnd_descr(uinstr.src2));
-            RV_FMT_S: describe_uinstr = $sformatf("%s dst:%s src1:%s src2:%s imm64:0x%h", describe_uinstr, f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), f_describe_opnd_descr(uinstr.src2), uinstr.imm64);
-            RV_FMT_U: describe_uinstr = $sformatf("%s dst:%s imm64:0x%h", describe_uinstr, f_describe_opnd_descr(uinstr.dst), uinstr.imm64);
-            RV_FMT_J: describe_uinstr = $sformatf("%s dst:%s imm64:0x%h", describe_uinstr, f_describe_opnd_descr(uinstr.dst), uinstr.imm64);
-            default:  describe_uinstr = describe_uinstr;
-        endcase
+        describe_uinstr = $sformatf("opcode:%s uop:%s dst:%s src1:%s src2:%s imm64:0x%h", uinstr.opcode.name(), uinstr.uop.name(), f_describe_opnd_descr(uinstr.dst), f_describe_opnd_descr(uinstr.src1), f_describe_opnd_descr(uinstr.src2), uinstr.imm64);
     endfunction
 
     function string describe_opnd(t_uopnd_descr opnd, logic[63:0] val64);

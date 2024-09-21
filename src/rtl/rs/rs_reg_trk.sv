@@ -91,6 +91,7 @@ end
 
 `ifdef ASSERT
     `VASSERT(a_illegal_psrc_pend, e_alloc_rs0 & e_alloc_static_rs0.psrc_pend, e_alloc_static_rs0.descr.optype == OP_REG, $sformatf("rs_reg_trk allocated with non-reg pending (%s)", e_alloc_static_rs0.descr.optype.name))
+    `VASSERT(a_bad_pend_psrc, fsm == SRC_PDG_RSLT, core.rename.iprf.pend_list[e_static.psrc.idx], "RS entry stuck waiting on non-pending PRF entry")
 `endif
 
 

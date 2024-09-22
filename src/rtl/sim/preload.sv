@@ -40,7 +40,7 @@ task preload_from_irom();
     //`define TEST_BR_NT
     //`define TEST_BR_T
     //`define TEST_BEEF
-    `define TEST_LOAD
+    // `define TEST_LOAD
 
     IROM[a++] = rvADDI(1,1,12'h1);
     IROM[a++] = rvADDI(8,8,12'h1);

@@ -33,7 +33,8 @@ vroom is going out-of-order!  The pipeline looks like this:
 
 * **FETCH** has a FSM to read instructions from main memory.
 * **DECODE** receives instructions from **FETCH** and decodes them into uops.
-* **ALLOC** receives decoded instructions from **DECODE**, assigns ROBIDs, and sends uops to the appropriate **RS**.
+* **UCODE** receives decoded uops from **DECODE** and generally passes them through in the same cycle.  Uops from decode with `trap_to_ucode` set will cause the microsequencer to take over until an `eom` is seen.
+* **ALLOC** receives uops from **UCODE**, assigns ROBIDs, and sends uops to the appropriate **RS**.
 
 **Out-of-Order**
 
@@ -44,9 +45,15 @@ vroom is going out-of-order!  The pipeline looks like this:
 
 * **RETIRE** receives writebacks from the OoO part of the pipe and writes them back.
 
-Presently, renaming is *super* basic.  In **ALLOC**, we scan the ROB for the youngest older instruction that is writing each of our source operands.  If any such instructions exist, the RS will wait for that ROB result to be written; otherwise, reads come out of the GPR RF when a uop is issued.  Eventually we'll do full renaming with a PRF, keeping a free list and reclaiming registers, etc...  but not today.
+Branches
+--------
 
 Branches are resolved in **EXE** but not taken until **RETIRE**.  Branches are currently always predicted NT.
+
+Micro branches (or ubranches) are normal branch uops where the uop comes from
+ucrom and does not have an "eom".  These branches are resolved just like normal
+branches, including a nuke... but the misprediction calculation is based on rom
+address, not PC, and the FE/DE stages are untouched by the correction flow.
 
 CSRs
 ----

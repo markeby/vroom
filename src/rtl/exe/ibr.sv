@@ -31,8 +31,13 @@ t_uinstr uinstr_ex0;
 
 t_paddr tkn_tgt_ex0;
 t_paddr tru_tgt_ex0;
-t_paddr pcnxt_ex0;
+
+t_paddr    pcnxt_ex0;
+t_rom_addr usnxt_ex0;
+t_paddr    pc_or_us_nxt_ex0;
+
 logic   tkn_ex0;
+logic   ucbr_ex0;
 
 //
 // Logic
@@ -43,6 +48,7 @@ logic   tkn_ex0;
 //
 
 assign uinstr_ex0 = iss_pkt_ex0.uinstr;
+assign ucbr_ex0 = uinstr_ex0.from_ucrom & ~uinstr_ex0.eom;
 
 always_comb begin
     resvld_ex0 = iss_ex0;
@@ -60,7 +66,9 @@ always_comb begin
 end
 
 assign pcnxt_ex0   = uinstr_ex0.pc + 4;
-assign result_ex0  = pcnxt_ex0;
+assign usnxt_ex0   = uinstr_ex0.rom_addr + 1;
+assign pc_or_us_nxt_ex0 = ucbr_ex0 ? t_paddr'(usnxt_ex0) : pcnxt_ex0;
+assign result_ex0  = pc_or_us_nxt_ex0;
 
 always_comb begin
     unique casez (uinstr_ex0.uop)
@@ -84,10 +92,11 @@ always_comb begin
     endcase
 end
 
-assign tru_tgt_ex0                = tkn_ex0 ? tkn_tgt_ex0 : pcnxt_ex0;
-assign br_mispred_ex0.valid       = tru_tgt_ex0 != pcnxt_ex0 & resvld_ex0;
+assign tru_tgt_ex0                = tkn_ex0 ? tkn_tgt_ex0 : pc_or_us_nxt_ex0;
+assign br_mispred_ex0.valid       = tru_tgt_ex0 != pc_or_us_nxt_ex0 & resvld_ex0;
 assign br_mispred_ex0.target_addr = tru_tgt_ex0;
 assign br_mispred_ex0.robid       = iss_pkt_ex0.robid;
+assign br_mispred_ex0.ucbr        = ucbr_ex0;
 
 ///
 // Debug
@@ -96,7 +105,11 @@ assign br_mispred_ex0.robid       = iss_pkt_ex0.robid;
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (resvld_ex0) begin
-        `UINFO(uinstr_ex0.SIMID, ("unit:EX.IBR %s mispred:%-d tkn:%-d tru_tgt:%h pcnxt:%h ", describe_uinstr(uinstr_ex0), br_mispred_ex0.valid, tkn_ex0, tru_tgt_ex0, pcnxt_ex0))
+        if (ucbr_ex0) begin
+            `UINFO(uinstr_ex0.SIMID, ("unit:EX.IBR func:ubranch mispred:%-d tkn:%-d tru_tgt:%h usnxt:%h ", br_mispred_ex0.valid, tkn_ex0, tru_tgt_ex0, usnxt_ex0))
+        end else begin
+            `UINFO(uinstr_ex0.SIMID, ("unit:EX.IBR func:branch mispred:%-d tkn:%-d tru_tgt:%h pcnxt:%h ", br_mispred_ex0.valid, tkn_ex0, tru_tgt_ex0, pcnxt_ex0))
+        end
     end
 end
 `endif

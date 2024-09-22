@@ -146,15 +146,44 @@ always_comb begin
         ROM[r] = f_decode_rv_instr(rvEBREAK());
     end
 
+    // MUL algorithm
+    // tmp0 := 0
+    // tmp1 := tmp1
+    // tmp2 := tmp2
+    // while (tmp1 > 0) begin
+    //    tmp3 = tmp1 & 1
+    //    tmp3 = tmp3 - 1 // 1->0, 0->11111
+    //    tmp3 = tmp3 ^ 111111 // 
+    //    tmp4 = tmp3 & tmp2
+    //    tmp0 += tmp2
+    //    tmp2 <<= 1
+    //    tmp1 >>= 1
+    // end
     r = int'(ROM_ENT_MUL);
-    ROM[r++] = uADDD_RRI(GPR_8B(REG_TMP0), TRAP_SRC1, 64'h0, 1'b0);
-    ROM[r++] = uADDD_RRI(GPR_8B(REG_TMP1), TRAP_SRC2, 64'h0, 1'b0);
-    ROM[r++] = f_decode_rv_instr(rvADDI(REG_X22, 0, 12'hABC), 1'b0);
-    ROM[r++] = f_decode_rv_instr(rvADDI(REG_X23, 0, 12'hDEF), 1'b0);
-    ROM[r++] = f_decode_rv_instr(rvADDI(REG_X24, 0, 12'h123), 1'b1);
+    ROM[r++] = uADDD_RRI(GPR_8B(REG_TMP0) , GPR_8B(REG_X0)  , 64'h0                , 1'b0);
+    ROM[r++] = uADDD_RRI(GPR_8B(REG_TMP1) , TRAP_SRC1       , 64'h0                , 1'b0);
+    ROM[r++] = uADDD_RRI(GPR_8B(REG_TMP2) , TRAP_SRC2       , 64'h0                , 1'b0);
+
+    ROM[r++] = uBEQ_RR  (GPR_8B(REG_TMP1) , GPR_8B(REG_X0)  , 13'h9                , 1'b0);
+
+    ROM[r++] = uANDD_RRI(GPR_8B(REG_TMP3) , GPR_8B(REG_TMP1), 64'h1                , 1'b0);
+    ROM[r++] = uSUBD_RRI(GPR_8B(REG_TMP3) , GPR_8B(REG_TMP3), 64'h1                , 1'b0);
+    ROM[r++] = uXORD_RRI(GPR_8B(REG_TMP3) , GPR_8B(REG_TMP3), 64'hFFFFFFFFFFFFFFFF , 1'b0);
+    ROM[r++] = uANDD_RRR(GPR_8B(REG_TMP4) , GPR_8B(REG_TMP3), GPR_8B(REG_TMP2)     , 1'b0);
+    ROM[r++] = uADDD_RRR(GPR_8B(REG_TMP0) , GPR_8B(REG_TMP0), GPR_8B(REG_TMP2)     , 1'b0);
+    ROM[r++] = uSLLD_RRI(GPR_8B(REG_TMP2) , GPR_8B(REG_TMP2), 64'h1                , 1'b0);
+    ROM[r++] = uSRLD_RRI(GPR_8B(REG_TMP1) , GPR_8B(REG_TMP1), 64'h1                , 1'b0);
+    ROM[r++] = uBNE_RR  (GPR_8B(REG_TMP1) , GPR_8B(REG_X0)  , -7                   , 1'b0);
+
+    ROM[r++] = uADDD_RRI(TRAP_DST         , GPR_8B(REG_TMP0), 64'h0                , 1'b1);
 
     r = int'(ROM_ENT_DIV);
     ROM[r++] = f_decode_rv_instr(rvADDI(23, 0, 12'hDEF));
+
+    for (r=0; r<UCODE_ROM_ROWS; r++) begin
+        ROM[r].rom_addr = t_rom_addr'(r);
+        ROM[r].from_ucrom = 1'b1;
+    end
 end
 
 //

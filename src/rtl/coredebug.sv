@@ -148,9 +148,9 @@ task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ("              Result @ %-d", rec.RESULT.clk))
     `PMSG(CDBG, ("              Retire @ %-d %s", rec.RETIRE.clk, rec.RETIRE.nuke_rb1.valid ? "NUKE!!!" : ""))
     `PMSG(CDBG, (""))
-    if (rec.DECODE.uinstr_de1.dst.optype == OP_REG) begin
+    if (rec.UCODE.uinstr_uc0.dst.optype == OP_REG) begin
         `PMSG(CDBG, ("Register Updates"))
-        `PMSG(CDBG, ("  GPR %3s := 0x%08h (prf %s -> %s)", $sformatf("x%0d", rec.DECODE.uinstr_de1.dst.opreg), rec.RESULT.iprf_wr_pkt_ro0.data, f_describe_prf(rec.RENAME.rename_rn1.pdst_old), f_describe_prf(rec.RENAME.rename_rn1.pdst)))
+        `PMSG(CDBG, ("  GPR %5s := 0x%08h (prf %s -> %s)", f_describe_gpr_addr(rec.UCODE.uinstr_uc0.dst.opreg), rec.RESULT.iprf_wr_pkt_ro0.data, f_describe_prf(rec.RENAME.rename_rn1.pdst_old), f_describe_prf(rec.RENAME.rename_rn1.pdst)))
         `PMSG(CDBG, (""))
         if(rec.RESULT.iprf_wr_pkt_ro0.data == 64'h666) begin
             `INFO(("Saw 666; dying!"))

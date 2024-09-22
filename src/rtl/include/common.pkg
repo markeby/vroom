@@ -73,6 +73,7 @@ package common;
 
     typedef struct packed {
         logic    valid;
+        logic    ucbr;
         t_rob_id robid;
         t_paddr  target_addr;
     } t_br_mispred_pkt;
@@ -84,6 +85,7 @@ package common;
 
     typedef struct packed {
         logic       valid;
+        logic       nuke_fe;
         t_nuke_type nuke_type;
     } t_nuke_pkt;
 

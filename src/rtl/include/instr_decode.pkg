@@ -88,6 +88,7 @@ package instr_decode;
         `SIMID_STRUCT
         logic             trap_to_ucode;
         t_rom_addr        rom_addr;
+        logic             from_ucrom;
         logic[63:0]       imm64;
         logic             mispred;
         t_uopnd_descr     src2;

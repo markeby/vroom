@@ -8,11 +8,45 @@ package uasm;
     import instr::*;
     import common::*;
     import instr_decode::*;
+    import gen_funcs::*;
 
-    function t_uinstr uADDD_RRI(t_uopnd_descr dst, t_uopnd_descr src1, logic[63:0] imm64, logic eom=1'b1);
-        return '{uop: U_ADD, dst: dst, src1: src1, src2: '{opreg: '0, optype: OP_IMM, opsize: SZ_8B}, eom: eom, imm64: imm64, default: '0};
+    `define MKUASM_D_RRI(ALU_OP_NAME) \
+        function t_uinstr u``ALU_OP_NAME``D_RRI(t_uopnd_descr dst, t_uopnd_descr src1, logic[63:0] imm64, logic eom=1'b1); \
+            return '{uop: U_``ALU_OP_NAME``, dst: dst, src1: src1, src2: '{opreg: '0, optype: OP_IMM, opsize: SZ_8B}, eom: eom, imm64: imm64, default: '0}; \
+        endfunction
+
+    `define MKUASM_D_RRR(ALU_OP_NAME) \
+        function t_uinstr u``ALU_OP_NAME``D_RRR(t_uopnd_descr dst, t_uopnd_descr src1, t_uopnd_descr src2, logic eom=1'b1); \
+            return '{uop: U_``ALU_OP_NAME``, dst: dst, src1: src1, src2: src2, eom: eom, imm64: '0, default: '0}; \
+        endfunction
+
+    `define MKUASM(ALU_OP_NAME) \
+        `MKUASM_D_RRI(ALU_OP_NAME) \
+        `MKUASM_D_RRR(ALU_OP_NAME)
+
+    `MKUASM(ADD)
+    `MKUASM(ADDW)
+    `MKUASM(SUB)
+    `MKUASM(SUBW)
+    `MKUASM(SLL)
+    `MKUASM(SLLW)
+    `MKUASM(SLT)
+    `MKUASM(SLTU)
+    `MKUASM(XOR)
+    `MKUASM(SRL)
+    `MKUASM(SRLW)
+    `MKUASM(SRA)
+    `MKUASM(SRAW)
+    `MKUASM(OR)
+    `MKUASM(AND)
+
+    function t_uinstr uBEQ_RR(t_uopnd_descr src1, t_uopnd_descr src2, logic[12:0] imm13, logic eom=1'b1);
+        return '{uop: U_BR_EQ, dst:'{optype: OP_INVD, opreg: '0, opsize: SZ_8B}, src1: src1, src2: src2, eom: eom, imm64: sext_funcs#(.IWIDTH(13), .OWIDTH(64))::sext(imm13), default: '0};
     endfunction
 
+    function t_uinstr uBNE_RR(t_uopnd_descr src1, t_uopnd_descr src2, logic[12:0] imm13, logic eom=1'b1);
+        return '{uop: U_BR_NE, dst:'{optype: OP_INVD, opreg: '0, opsize: SZ_8B}, src1: src1, src2: src2, eom: eom, imm64: sext_funcs#(.IWIDTH(13), .OWIDTH(64))::sext(imm13), default: '0};
+    endfunction
 
 endpackage
 

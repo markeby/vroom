@@ -54,6 +54,8 @@ logic    incr_pc_nnn;
 t_paddr  PC;
 t_fsm_fe state;
 t_fsm_fe state_nxt;
+logic    nuke_rb1_valid_ql;
+logic    br_mispred_ql_ex0;
 
 //
 // Logic
@@ -62,14 +64,16 @@ t_fsm_fe state_nxt;
 t_rv_instr fb_fe_rsp_fb0_instr;
 assign fb_fe_rsp_fb0_instr = fb_fe_rsp_fb0.instr;
 
+assign nuke_rb1_valid_ql = nuke_rb1.valid & nuke_rb1.nuke_fe;
+
 logic nuke_pdg;
-`DFF(nuke_pdg, ~reset & (nuke_pdg & ~nuke_rb1.valid | br_mispred_ex0.valid), clk)
+`DFF(nuke_pdg, ~reset & (nuke_pdg & ~nuke_rb1_valid_ql | br_mispred_ql_ex0), clk)
 
 always_comb begin
     state_nxt = state;
     unique case(state)
         FE_IDLE:      if (1'b1                                   ) state_nxt = FE_REQ_IC;
-        FE_REQ_IC:    if (nuke_pdg | nuke_rb1.valid              ) state_nxt = FE_PDG_NUKE;
+        FE_REQ_IC:    if (nuke_pdg | nuke_rb1_valid_ql           ) state_nxt = FE_PDG_NUKE;
         FE_PDG_NUKE:  if (resume_fetch_rbx                       ) state_nxt = FE_REQ_IC; // after a nuke, start fetching again
         default:                                                   state_nxt = state;
     endcase
@@ -79,13 +83,12 @@ end
 
 // Misprediction
 
-logic    br_mispred_ql_ex0;
 logic    br_mispred_pdg;
 t_rob_id br_mispred_robid;
 
-assign br_mispred_ql_ex0 = br_mispred_ex0.valid & (~br_mispred_pdg | f_robid_a_older_b(br_mispred_ex0.robid, br_mispred_robid, oldest_robid));
+assign br_mispred_ql_ex0 = br_mispred_ex0.valid & ~br_mispred_ex0.ucbr & (~br_mispred_pdg | f_robid_a_older_b(br_mispred_ex0.robid, br_mispred_robid, oldest_robid));
 
-`DFF(br_mispred_pdg, ~reset & ~nuke_rb1.valid & (br_mispred_pdg | br_mispred_ex0.valid), clk)
+`DFF(br_mispred_pdg, ~reset & ~nuke_rb1_valid_ql & (br_mispred_pdg | br_mispred_ql_ex0), clk)
 `DFF_EN(br_mispred_robid, br_mispred_ex0.robid, clk, br_mispred_ql_ex0)
 
 // PC

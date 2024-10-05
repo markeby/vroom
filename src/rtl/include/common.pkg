@@ -89,6 +89,7 @@ package common;
         t_rob_id   robid;
         t_paddr    restore_pc;
         t_rom_addr restore_useq;
+        logic      tkn;
     } t_br_mispred_pkt;
 
     typedef enum logic {
@@ -102,6 +103,13 @@ package common;
         logic       nuke_useq;
         t_nuke_type nuke_type;
     } t_nuke_pkt;
+
+    typedef struct packed {
+        logic   valid;
+        logic   taken;
+        t_paddr target;
+        t_paddr pc;
+    } t_bpu_train_pkt;
 
     //////////////////////////////
     // PRF Defines ///////////////

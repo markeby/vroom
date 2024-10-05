@@ -19,6 +19,7 @@ module fe
     input  t_mem_rsp_pkt  l2_ic_rsp_pkt,
 
     input  t_br_mispred_pkt br_mispred_ex0,
+    input  t_bpu_train_pkt  bpu_train_pkt_ex0,
     input  t_nuke_pkt       nuke_rb1,
     input  logic            resume_fetch_rbx,
 
@@ -53,6 +54,7 @@ fe_ctl fe_ctl (
     .oldest_robid,
 
     .br_mispred_ex0,
+    .bpu_train_pkt_ex0,
 
     .fe_fb_req_fb0,
     .fb_fe_rsp_fb0,

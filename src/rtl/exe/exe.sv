@@ -19,6 +19,7 @@ module exe
     input  t_iss_pkt     iss_pkt_ex0,
 
     output t_br_mispred_pkt br_mispred_ex0,
+    output t_bpu_train_pkt  bpu_train_pkt_ex0,
 
     output logic         iprf_wr_en_ex1,
     output t_prf_wr_pkt  iprf_wr_pkt_ex1,
@@ -104,7 +105,8 @@ ibr ibr (
 
     .resvld_ex0     ( ibr_resvld_ex0  ),
     .result_ex0     ( ibr_result_ex0  ),
-    .br_mispred_ex0 ( ibr_mispred_ex0 )
+    .br_mispred_ex0 ( ibr_mispred_ex0 ),
+    .bpu_train_pkt_ex0
 );
 assign br_mispred_ex0 = ibr_mispred_ex0;
 

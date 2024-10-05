@@ -20,6 +20,7 @@ module fe_ctl
     input  t_fb_fe_rsp fb_fe_rsp_fb0,
 
     input  t_br_mispred_pkt br_mispred_ex0,
+    input  t_bpu_train_pkt  bpu_train_pkt_ex0,
 
     output logic       valid_fe1,
     output t_instr_pkt instr_fe1,
@@ -91,6 +92,21 @@ assign br_mispred_ql_ex0 = br_mispred_ex0.valid & (~br_mispred_pdg | f_robid_a_o
 `DFF(br_mispred_pdg, ~reset & ~nuke_rb1_valid_ql & (br_mispred_pdg | br_mispred_ql_ex0), clk)
 `DFF_EN(br_mispred_robid, br_mispred_ex0.robid, clk, br_mispred_ql_ex0)
 
+// branch pred
+
+t_paddr pred_pc_nxt;
+logic   pred_tkn;
+bpu bpu (
+    .clk,
+    .reset,
+    .valid_fe1,
+    .bpu_train_pkt_ex0,
+    .instr_fe1 ( fb_fe_rsp_fb0.instr ),
+    .decode_ready_de0,
+    .pc,
+    .pred_pc_nxt,
+    .pred_tkn
+);
 // pc
 
 assign adv_pc_nnn = valid_fe1 & decode_ready_de0;
@@ -105,10 +121,11 @@ initial begin
 end
 
 assign pc_adv = pc + 4;
-always_comb pc_nxt = reset            ? pc_rst                    :
-                    br_mispred_ql_ex0 ? br_mispred_ex0.restore_pc :
-                    adv_pc_nnn        ? pc_adv                    :
-                                        pc;
+always_comb pc_nxt = reset                ? pc_rst                    :
+                    br_mispred_ql_ex0     ? br_mispred_ex0.restore_pc :
+                    adv_pc_nnn & pred_tkn ? pred_pc_nxt               :
+                    adv_pc_nnn            ? pc_adv                    :
+                                            pc;
 `DFF(pc, pc_nxt, clk)
 
 // IC req
@@ -142,10 +159,11 @@ assign fake_stall_now = stall_after_n_instr_en & (stall_after_n_instr == 0);
 `endif
 
 always_comb begin
-    valid_fe1       = state == FE_REQ_IC & fb_fe_rsp_fb0.valid & ~nuke_pdg & ~fake_stall_now;
-    instr_fe1       = t_instr_pkt'('0);
-    instr_fe1.instr = fb_fe_rsp_fb0.instr;
-    instr_fe1.pc    = fb_fe_rsp_fb0.pc;
+    valid_fe1        = state == FE_REQ_IC & fb_fe_rsp_fb0.valid & ~nuke_pdg & ~fake_stall_now;
+    instr_fe1        = t_instr_pkt'('0);
+    instr_fe1.instr  = fb_fe_rsp_fb0.instr;
+    instr_fe1.pc     = fb_fe_rsp_fb0.pc;
+    instr_fe1.pc_nxt = pc_nxt;
     `ifdef SIMULATION
     instr_fe1.SIMID = `SIMID_CREATE_RHS(FETCH,instr_cnt_inst,fb_fe_rsp_fb0.pc);
     `endif //SIMULATION

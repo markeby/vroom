@@ -17,6 +17,7 @@ src/rtl/fe/fe_buf.sv
 src/rtl/fe/fe_pf.sv
 src/rtl/fe/fetch_chk.sv
 src/rtl/fe/icache.sv
+src/rtl/fe/bpu.sv
 
 src/rtl/l2/l2.sv
 

@@ -59,10 +59,18 @@ task preload_from_irom();
     // IROM[a++] = rvADDI(8,8,12'h1);
     IROM[a++] = rvADDI(1,0,12'hbb);
     IROM[a++] = rvADDI(2,0,12'hf1);
-    IROM[a++] = rvMUL(3,1,2);
+    // IROM[a++] = rvMUL(3,1,2);
     // IROM[a++] = rvBNE(0,1,8);
     // IROM[a++] = rvADDI(0,0,12'h42);
     // IROM[a++] = rvADDI(1,1,32);
+
+    IROM[a++] = rvADDI(3,0,12'h1);
+    IROM[a++] = rvADDI(4,0,12'h8);
+
+    IROM[a++] = rvADD(3,3,3);
+    IROM[a++] = rvADDI(4,4,12'hfff);
+    IROM[a++] = rvBNE(4,0,-8);
+
 
     // IROM[a++] = rvXOR(1,1,1);
     // IROM[a++] = rvXOR(2,2,2);

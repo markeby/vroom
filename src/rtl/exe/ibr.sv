@@ -20,7 +20,8 @@ module ibr
 
     output logic         resvld_ex0,
     output t_rv_reg_data result_ex0,
-    output t_br_mispred_pkt br_mispred_ex0
+    output t_br_mispred_pkt br_mispred_ex0,
+    output t_bpu_train_pkt  bpu_train_pkt_ex0
 );
 
 //
@@ -65,7 +66,7 @@ always_comb begin
     endcase
 end
 
-assign pcnxt_ex0   = uinstr_ex0.pc + 4;
+assign pcnxt_ex0   = uinstr_ex0.pc_nxt;
 assign usnxt_ex0   = uinstr_ex0.rom_addr + 1;
 assign pc_or_us_nxt_ex0 = ucbr_ex0 ? t_paddr'(usnxt_ex0) : pcnxt_ex0;
 assign result_ex0  = pc_or_us_nxt_ex0;
@@ -93,14 +94,22 @@ always_comb begin
     endcase
 end
 
-assign tru_tgt_ex0                 = tkn_ex0 ? tkn_tgt_ex0 : pc_or_us_nxt_ex0;
+assign tru_tgt_ex0                 = tkn_ex0  ? tkn_tgt_ex0             :
+                                     ucbr_ex0 ? t_paddr'(uinstr_ex0.rom_addr) + 1 :
+                                                uinstr_ex0.pc + 4;
 assign br_mispred_ex0.valid        = tru_tgt_ex0 != pc_or_us_nxt_ex0 & resvld_ex0;
 assign br_mispred_ex0.ucbr         = ucbr_ex0;
 assign br_mispred_ex0.restore_pc   = ucbr_ex0 ? pcnxt_ex0                : tru_tgt_ex0;
 assign br_mispred_ex0.restore_useq = ucbr_ex0 ? t_rom_addr'(tru_tgt_ex0) : usnxt_ex0;
 assign br_mispred_ex0.robid        = iss_pkt_ex0.robid;
+assign br_mispred_ex0.tkn          = tkn_ex0;
 
-///
+assign bpu_train_pkt_ex0.valid     = resvld_ex0;
+assign bpu_train_pkt_ex0.taken     = tkn_ex0;
+assign bpu_train_pkt_ex0.pc        = uinstr_ex0.pc;
+assign bpu_train_pkt_ex0.target    = tru_tgt_ex0;
+
+//
 // Debug
 //
 

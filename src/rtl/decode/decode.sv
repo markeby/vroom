@@ -60,6 +60,7 @@ always_comb begin
     end else begin
         uinstr_de0 = f_decode_rv_instr(rv_instr_fe1);
         uinstr_de0.pc = instr_fe1.pc;
+        uinstr_de0.pc_nxt = instr_fe1.pc_nxt;
         `ifdef SIMULATION
         uinstr_de0.SIMID = instr_fe1.SIMID;
         `endif
@@ -103,7 +104,7 @@ always_comb begin
     uinstr_de1 = uinstr_fe_de1;
 end
 
-assign decode_ready_de0 = ~uopq_full;
+assign decode_ready_de0 = ~uopq_full & ~ebreak_seen;
 
 `ifdef ASSERT
 logic during_nuke_inst;

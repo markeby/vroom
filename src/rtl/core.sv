@@ -21,6 +21,7 @@ module core
 //
 
 t_chicken_bits chicken_bits;
+t_bpu_train_pkt bpu_train_pkt_ex0;
 
 logic         decode_ready_de0;
 logic         rename_ready_rn0;
@@ -102,6 +103,7 @@ fe fe (
     .l2_ic_rsp_pkt,
     .decode_ready_de0,
     .br_mispred_ex0,
+    .bpu_train_pkt_ex0,
     .valid_fe1,
     .instr_fe1,
     .nuke_rb1,
@@ -222,6 +224,7 @@ exe exe (
     .reset,
     .nuke_rb1,
     .br_mispred_ex0,
+    .bpu_train_pkt_ex0,
 
     .iss_ex0      ( ex_iss_rs2        ) ,
     .iss_pkt_ex0  ( ex_iss_pkt_rs2    ) ,

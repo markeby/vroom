@@ -230,6 +230,7 @@ package instr;
     typedef struct packed {
         `SIMID_STRUCT
         t_paddr    pc;
+        t_paddr    pc_nxt;
         t_rv_instr instr;
     } t_instr_pkt;
 

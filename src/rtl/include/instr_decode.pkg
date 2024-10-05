@@ -83,6 +83,7 @@ package instr_decode;
         t_uopnd_descr     dst;
         t_uop             uop;
         t_paddr           pc;
+        t_paddr           pc_nxt;
         logic             eom;
     } t_uinstr;
 
@@ -139,6 +140,10 @@ package instr_decode;
         return opcode inside {RV_OP_JALR};
     endfunction
 
+    function logic rv_opcode_is_jal(t_rv_opcode opcode);
+        return opcode inside {RV_OP_JAL};
+    endfunction
+
     function logic rv_opcode_is_alu(t_rv_opcode opcode);
         return opcode inside {RV_OP_ALU0_I, RV_OP_ALU1_I, RV_OP_ALU0_R, RV_OP_ALU0_I};
     endfunction
@@ -149,6 +154,10 @@ package instr_decode;
 
     function logic rv_opcode_is_ld(t_rv_opcode opcode);
         return opcode inside {RV_OP_LD};
+    endfunction
+
+    function logic rv_opcode_is_br(t_rv_opcode opcode);
+        return opcode inside { RV_OP_BR };
     endfunction
 
     function logic rv_opcode_is_ldst(t_rv_opcode opcode);
@@ -181,6 +190,10 @@ package instr_decode;
 
     function logic uop_is_ldst(t_uop uop);
         return uop_is_ld(uop) | uop_is_st(uop);
+    endfunction
+
+    function logic uop_is_br(t_uop uop);
+        return uop inside { U_BR_EQ, U_BR_NE, U_BR_LT, U_BR_GE, U_BR_LTU, U_BR_GEU, U_JAL, U_JALR };
     endfunction
 
     function t_rv_instr_format get_instr_format (t_rv_opcode opcode);

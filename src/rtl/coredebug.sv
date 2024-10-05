@@ -98,6 +98,16 @@ typedef struct packed {
 
 t_cd_inst  INSTQ[$];
 
+int first_retire_cycle;
+int last_retire_cycle;
+int num_instrs_retired;
+
+initial begin
+    first_retire_cycle = -1;
+    last_retire_cycle = -1;
+    num_instrs_retired = 0;
+end
+
 function automatic string f_describe_src_dst(t_optype optype, t_gpr_id opreg, t_size opsize, t_prf_id psrc, t_rv_reg_data value);
     string opsize_char;
     unique casez(opsize)
@@ -338,6 +348,12 @@ task cd_retire();
     end else begin
         INSTQ.delete(i);
     end
+
+    if (first_retire_cycle == -1) begin
+        first_retire_cycle = top.cclk_count;
+    end
+    last_retire_cycle = top.cclk_count;
+    num_instrs_retired += 1;
 endtask
 
 always_ff @(posedge clk) begin
@@ -426,6 +442,7 @@ task eot();
     `PMSG(CDBG, (""))
     dump_gprs();
     `PMSG(CDBG, (""))
+    `PMSG(CDBG, ("first_ret:%0d last_ret:%0d IPC:%0f", first_retire_cycle, last_retire_cycle, (1.0*num_instrs_retired) / (last_retire_cycle - first_retire_cycle)));
 endtask
 
 ///////////////////
@@ -439,12 +456,10 @@ task hang_detected();
     $finish();
 endtask
 
-int last_cclk_retire = 0;
 always_ff @(posedge clk) begin
-    if ((top.cclk_count - last_cclk_retire) == MAX_ROB_TIMEOUT) begin
+    if ((top.cclk_count - last_retire_cycle) == MAX_ROB_TIMEOUT) begin
         hang_detected();
     end
-    if (reset | core.rob.q_retire_rb1) last_cclk_retire <= top.cclk_count;
 end
 
 endmodule

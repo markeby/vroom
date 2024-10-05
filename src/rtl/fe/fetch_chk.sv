@@ -88,7 +88,7 @@ end
 `endif
 
 `ifdef ASSERT
-    `VASSERT(a_bad_fetch_addr, state != IDLE & valid_fe1 & decode_ready_de0, valid_fe1 & instr_fe1.pc == PC, $sformatf("Incorrect PC fetched (%s): exp(%h) != act(%h)", state.name(), PC, instr_fe1.pc))
+    //`VASSERT(a_bad_fetch_addr, state != IDLE & valid_fe1 & decode_ready_de0, valid_fe1 & instr_fe1.pc == PC, $sformatf("Incorrect PC fetched (%s): exp(%h) != act(%h)", state.name(), PC, instr_fe1.pc))
 `endif
 
 

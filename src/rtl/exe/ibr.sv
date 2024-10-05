@@ -73,7 +73,8 @@ assign result_ex0  = pc_or_us_nxt_ex0;
 always_comb begin
     unique casez (uinstr_ex0.uop)
         U_JALR:  tkn_tgt_ex0 = (src1val_ex0 + uinstr_ex0.imm64) & ~64'h1;
-        default: tkn_tgt_ex0 = uinstr_ex0.pc + uinstr_ex0.imm64;
+        default: tkn_tgt_ex0 = ucbr_ex0 ? t_paddr'(uinstr_ex0.rom_addr) + uinstr_ex0.imm64 :
+                                          uinstr_ex0.pc                 + uinstr_ex0.imm64 ;
     endcase
 end
 
@@ -92,11 +93,12 @@ always_comb begin
     endcase
 end
 
-assign tru_tgt_ex0                = tkn_ex0 ? tkn_tgt_ex0 : pc_or_us_nxt_ex0;
-assign br_mispred_ex0.valid       = tru_tgt_ex0 != pc_or_us_nxt_ex0 & resvld_ex0;
-assign br_mispred_ex0.target_addr = tru_tgt_ex0;
-assign br_mispred_ex0.robid       = iss_pkt_ex0.robid;
-assign br_mispred_ex0.ucbr        = ucbr_ex0;
+assign tru_tgt_ex0                 = tkn_ex0 ? tkn_tgt_ex0 : pc_or_us_nxt_ex0;
+assign br_mispred_ex0.valid        = tru_tgt_ex0 != pc_or_us_nxt_ex0 & resvld_ex0;
+assign br_mispred_ex0.ucbr         = ucbr_ex0;
+assign br_mispred_ex0.restore_pc   = ucbr_ex0 ? pcnxt_ex0                : tru_tgt_ex0;
+assign br_mispred_ex0.restore_useq = ucbr_ex0 ? t_rom_addr'(tru_tgt_ex0) : usnxt_ex0;
+assign br_mispred_ex0.robid        = iss_pkt_ex0.robid;
 
 ///
 // Debug

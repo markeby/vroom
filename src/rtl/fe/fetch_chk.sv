@@ -66,7 +66,7 @@ always_comb begin
     if (valid_fe1 & decode_ready_de0 & state == IDLE) begin
         PCNxt = instr_fe1.pc + t_paddr'(4);;
     end else if(br_mispred_ql_ex0) begin
-        PCNxt = br_mispred_ex0.target_addr;
+        PCNxt = br_mispred_ex0.restore_pc;
     end else if(valid_fe1 & decode_ready_de0) begin
         PCNxt = PC + t_paddr'(4);;
     end else begin

@@ -86,7 +86,7 @@ end
 logic    br_mispred_pdg;
 t_rob_id br_mispred_robid;
 
-assign br_mispred_ql_ex0 = br_mispred_ex0.valid & ~br_mispred_ex0.ucbr & (~br_mispred_pdg | f_robid_a_older_b(br_mispred_ex0.robid, br_mispred_robid, oldest_robid));
+assign br_mispred_ql_ex0 = br_mispred_ex0.valid & (~br_mispred_pdg | f_robid_a_older_b(br_mispred_ex0.robid, br_mispred_robid, oldest_robid));
 
 `DFF(br_mispred_pdg, ~reset & ~nuke_rb1_valid_ql & (br_mispred_pdg | br_mispred_ql_ex0), clk)
 `DFF_EN(br_mispred_robid, br_mispred_ex0.robid, clk, br_mispred_ql_ex0)
@@ -103,7 +103,7 @@ initial begin
     $value$plusargs("boot_vector:%h", PCRst);
 end
 always_comb PCNxt = reset          ? PCRst      :
-                    br_mispred_ql_ex0 ? br_mispred_ex0.target_addr :
+                    br_mispred_ql_ex0 ? br_mispred_ex0.restore_pc :
                     incr_pc_nnn    ? PC + 4     :
                                      PC;
 `DFF(PC, PCNxt, clk)

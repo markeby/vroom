@@ -45,6 +45,18 @@ package common;
     typedef logic[VA_SZ-1:0]    t_vaddr;
 
     //////////////////////////////
+    // UCODE Stuff ///////////////
+    //////////////////////////////
+
+    localparam UCODE_ROM_BITS = 12;
+    localparam UCODE_ROM_ROWS = 1 << UCODE_ROM_BITS;
+    typedef logic[UCODE_ROM_BITS-1:0] t_rom_addr;
+
+    localparam int        SHIFT_ENTRY_POINT_BY = 8;
+    localparam t_rom_addr ROM_ENT_MUL = 0 << SHIFT_ENTRY_POINT_BY;
+    localparam t_rom_addr ROM_ENT_DIV = 1 << SHIFT_ENTRY_POINT_BY;
+
+    //////////////////////////////
     // ROB Defines ///////////////
     //////////////////////////////
 
@@ -72,10 +84,11 @@ package common;
     //////////////////////////////
 
     typedef struct packed {
-        logic    valid;
-        logic    ucbr;
-        t_rob_id robid;
-        t_paddr  target_addr;
+        logic      valid;
+        logic      ucbr;
+        t_rob_id   robid;
+        t_paddr    restore_pc;
+        t_rom_addr restore_useq;
     } t_br_mispred_pkt;
 
     typedef enum logic {
@@ -86,6 +99,7 @@ package common;
     typedef struct packed {
         logic       valid;
         logic       nuke_fe;
+        logic       nuke_useq;
         t_nuke_type nuke_type;
     } t_nuke_pkt;
 

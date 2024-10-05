@@ -17,6 +17,10 @@ module ucode
     input  logic             reset,
     input  t_nuke_pkt        nuke_rb1,
     input  logic             rename_ready_rn0,
+    input  t_rob_id          oldest_robid,
+
+    input  logic             resume_fetch_rbx,
+    input  t_br_mispred_pkt  br_mispred_ex0,
 
     input  logic             valid_de1,
     input  t_uinstr          uinstr_de1,
@@ -30,9 +34,10 @@ module ucode
 // Types
 //
 
-typedef enum logic {
+typedef enum logic[1:0] {
     UC_IDLE,
-    UC_FETCH
+    UC_FETCH,
+    UC_PDG_RSM
 } t_uc_fsm;
 t_uc_fsm fsm, fsm_nxt;
 
@@ -44,6 +49,13 @@ t_rom_addr useq_pc;
 t_rom_addr useq_pc_nxt;
 logic      trap_now_de1;
 logic      ucrom_active_uc0;
+
+logic    br_mispred_pdg;
+logic    br_mispred_resume_to_ucrom;
+t_rob_id br_mispred_robid;
+
+logic    nuke_rb1_valid_ql;
+logic    br_mispred_ql_ex0;
 
 t_uinstr ROM [UCODE_ROM_ROWS-1:0];
 
@@ -59,14 +71,19 @@ always_comb begin
         fsm_nxt = UC_IDLE;
     end else begin
         unique casez(fsm)
-            UC_IDLE:  if (trap_now_de1                                           ) fsm_nxt = UC_FETCH;
-            UC_FETCH: if (valid_uc0 & rename_ready_rn0 & uinstr_uc0.eom          ) fsm_nxt = UC_IDLE;
+            UC_IDLE:     if (trap_now_de1                                           ) fsm_nxt = UC_FETCH;
+                    else if (br_mispred_ql_ex0                                      ) fsm_nxt = UC_PDG_RSM;
+            UC_FETCH:    if (nuke_rb1.valid & nuke_rb1.nuke_useq                    ) fsm_nxt = UC_PDG_RSM;
+                    else if (br_mispred_ql_ex0                                      ) fsm_nxt = UC_PDG_RSM;
+                    else if (valid_uc0 & rename_ready_rn0 & uinstr_uc0.eom          ) fsm_nxt = UC_IDLE;
+            UC_PDG_RSM:  if (resume_fetch_rbx &  br_mispred_resume_to_ucrom         ) fsm_nxt = UC_FETCH;
+                    else if (resume_fetch_rbx & ~br_mispred_resume_to_ucrom         ) fsm_nxt = UC_IDLE;
         endcase
     end
 end
 `DFF(fsm, fsm_nxt, clk)
 
-assign ucrom_active_uc0 = fsm == UC_FETCH;
+assign ucrom_active_uc0 = fsm != UC_IDLE;
 
 //
 // Logic
@@ -76,12 +93,15 @@ assign ucrom_active_uc0 = fsm == UC_FETCH;
 
 always_comb begin
     useq_pc_nxt = useq_pc;
-    if (fsm == UC_IDLE) begin
+    if (br_mispred_ql_ex0) begin
+        useq_pc_nxt = t_rom_addr'(br_mispred_ex0.restore_useq);
+    end else if (fsm == UC_IDLE) begin
         useq_pc_nxt = uinstr_de1.rom_addr;
     end else begin
         useq_pc_nxt += (valid_uc0 & rename_ready_rn0) ? t_rom_addr'(1) : '0;
     end
 end
+
 `DFF(useq_pc, useq_pc_nxt, clk)
 
 assign ucode_ready_uc0 = fsm == UC_IDLE & rename_ready_rn0;
@@ -99,6 +119,7 @@ t_uinstr trapped_uinstr;
 t_uinstr uc_uinstr_uc0;
 always_comb begin
     uc_uinstr_uc0 = ROM[useq_pc];
+    uc_uinstr_uc0.pc = trapped_uinstr.pc;
 
     // Source1
     if (uc_uinstr_uc0.src1.optype == OP_TRAP_SRC1) uc_uinstr_uc0.src1 = trapped_uinstr.src1;
@@ -121,7 +142,7 @@ always_comb begin
         UC_IDLE: begin
             uinstr_uc0 = uinstr_de1;
         end
-        UC_FETCH: begin
+        default: begin
             uinstr_uc0 = uc_uinstr_uc0;
             `ifdef SIMULATION
             uinstr_uc0.SIMID = SIMID_UROM;
@@ -129,6 +150,15 @@ always_comb begin
         end
     endcase
 end
+
+// Misprediction
+
+assign nuke_rb1_valid_ql = nuke_rb1.valid & nuke_rb1.nuke_useq;
+assign br_mispred_ql_ex0 = br_mispred_ex0.valid & (~br_mispred_pdg | f_robid_a_older_b(br_mispred_ex0.robid, br_mispred_robid, oldest_robid));
+
+`DFF(br_mispred_pdg, ~reset & ~nuke_rb1_valid_ql & (br_mispred_pdg | br_mispred_ql_ex0), clk)
+`DFF_EN(br_mispred_robid, br_mispred_ex0.robid, clk, br_mispred_ql_ex0)
+`DFF_EN(br_mispred_resume_to_ucrom, br_mispred_ex0.ucbr, clk, br_mispred_ql_ex0)
 
 //
 // ROM
@@ -170,7 +200,7 @@ always_comb begin
     ROM[r++] = uSUBD_RRI(GPR_8B(REG_TMP3) , GPR_8B(REG_TMP3), 64'h1                , 1'b0);
     ROM[r++] = uXORD_RRI(GPR_8B(REG_TMP3) , GPR_8B(REG_TMP3), 64'hFFFFFFFFFFFFFFFF , 1'b0);
     ROM[r++] = uANDD_RRR(GPR_8B(REG_TMP4) , GPR_8B(REG_TMP3), GPR_8B(REG_TMP2)     , 1'b0);
-    ROM[r++] = uADDD_RRR(GPR_8B(REG_TMP0) , GPR_8B(REG_TMP0), GPR_8B(REG_TMP2)     , 1'b0);
+    ROM[r++] = uADDD_RRR(GPR_8B(REG_TMP0) , GPR_8B(REG_TMP0), GPR_8B(REG_TMP4)     , 1'b0);
     ROM[r++] = uSLLD_RRI(GPR_8B(REG_TMP2) , GPR_8B(REG_TMP2), 64'h1                , 1'b0);
     ROM[r++] = uSRLD_RRI(GPR_8B(REG_TMP1) , GPR_8B(REG_TMP1), 64'h1                , 1'b0);
     ROM[r++] = uBNE_RR  (GPR_8B(REG_TMP1) , GPR_8B(REG_X0)  , -7                   , 1'b0);
@@ -199,6 +229,7 @@ always @(posedge clk) begin
         unique casez (fsm)
             UC_IDLE:  `UINFO(uinstr_uc0.SIMID, ("unit:UC func:decode_uop" ))
             UC_FETCH: `UINFO(uinstr_uc0.SIMID, ("unit:UC func:ucrom_uop" ))
+            UC_PDG_RSM: `INFO(("unit:UC func:pdg_rsm"))
         endcase
     end
 end

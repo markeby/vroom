@@ -86,7 +86,6 @@ assign stq_id_ra0 = stq_id_w_ra0.idx;
 `endif
 
 `ifdef ASSERT
-//VASSERT(a_br_mispred, uinstr_rd1.valid & ibr_resvld_ex0, ~ibr_mispred_ex0, "Branch mispredictions not yet supported.")
 `endif
 
 endmodule

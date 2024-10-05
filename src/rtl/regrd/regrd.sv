@@ -11,7 +11,6 @@ module regrd
     input  logic             reset,
     input  t_uinstr          uinstr_de1,
     input  logic             stall,
-    input  logic             br_mispred_rb1,
 
     output logic             rdens_rd0   [1:0],
     output t_gpr_id          rdaddrs_rd0 [1:0],

@@ -130,7 +130,6 @@ end
 `endif
 
 `ifdef ASSERT
-//chk_no_change #(.T(t_uinstr)) cnc ( .clk, .reset, .hold(stall & uinstr_de1.valid & ~br_mispred_rb1), .thing(uinstr_de1) );
 `endif
 
 endmodule

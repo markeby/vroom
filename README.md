@@ -55,6 +55,11 @@ ucrom and does not have an "eom".  These branches are resolved just like normal
 branches, including a nuke... but the misprediction calculation is based on rom
 address, not PC, and the FE/DE stages are untouched by the correction flow.
 
+Nukes are a mess.  Thinking that br mispred needs to communicate a PC (always)
+and a uPC (sometimes) and an indication of whether we resume from ucrom or
+fetch.  Nukes reset both front-ends.  Otherwise it is hard to disentangle what
+happens if we're mixing ucode and non-ucode instructions.
+
 CSRs
 ----
 

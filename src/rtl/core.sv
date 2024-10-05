@@ -126,6 +126,10 @@ ucode ucode (
     .nuke_rb1,
     .rename_ready_rn0,
 
+    .br_mispred_ex0,
+    .resume_fetch_rbx,
+    .oldest_robid,
+
     .valid_de1,
     .uinstr_de1,
     .ucode_ready_uc0,

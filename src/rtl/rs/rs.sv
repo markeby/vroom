@@ -188,7 +188,6 @@ end
 `endif
 
 `ifdef ASSERT
-//VASSERT(a_br_mispred, uinstr_rd1.valid & ibr_resvld_ex0, ~ibr_mispred_ex0, "Branch mispredictions not yet supported.")
 for (genvar e=0; e<NUM_RS_ENTS; e++) begin : g_per_ent_asserts
     `VASSERT(a_stqid_mat, q_alloc_rs0 & e_valid[e] & uop_is_st(disp_pkt_rs0.uinstr.uop) & uop_is_st(e_static[e].uinstr_disp.uinstr.uop), disp_pkt_rs0.meta.mem.stqid != e_static[e].uinstr_disp.meta.mem.stqid, $sformatf("New dispatch with overlapping STQID (RS %d STQID %h)", e, disp_pkt_rs0.meta.mem.stqid))
 end

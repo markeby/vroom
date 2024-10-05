@@ -110,7 +110,8 @@ assign q_flush_now_rb1 = ~rob_empty_rn0 & head_entry.d.flush_needed;
 
 assign nuke_rb1.valid     = q_flush_now_rb1;
 assign nuke_rb1.nuke_type = uinstr_rb1.mispred ? NUKE_BR_MISPRED : NUKE_EXCEPTION;
-assign nuke_rb1.nuke_fe   = ~uinstr_rb1.from_ucrom | uinstr_rb1.eom;
+assign nuke_rb1.nuke_fe   = 1'b1;
+assign nuke_rb1.nuke_useq = 1'b1;
 
 assign rat_reclaim_pkt_rb1.valid = q_retire_rb1 & uinstr_rb1.dst.optype == OP_REG;
 assign rat_reclaim_pkt_rb1.prfid = head_entry.d.pdst_old;

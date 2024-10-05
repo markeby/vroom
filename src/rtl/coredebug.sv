@@ -128,7 +128,9 @@ endfunction
 task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ("---------------------[ %4d @%-4t ]---------------------", top.cclk_count, $time()));
     `PMSG(CDBG, (describe_uinstr(rec.UCODE.uinstr_uc0)))
-    `PMSG(CDBG, ("PC 0x%04h ROBID 0x%0h RS %d -- %s", rec.FETCH.instr_fe1.SIMID.pc, rec.RENAME.rename_rn1.robid, rec.ALLOC.rs_ent_ra1, format_simid(rec.SIMID)))
+    `PMSG(CDBG, ("PC 0x%04h %sROBID 0x%0h RS %d -- %s", rec.UCODE.uinstr_uc0.SIMID.pc,
+        (rec.UCODE.uinstr_uc0.from_ucrom ? $sformatf("ROMADR 0x%03h ", rec.UCODE.uinstr_uc0.rom_addr) : ""),
+        rec.RENAME.rename_rn1.robid, rec.ALLOC.rs_ent_ra1, format_simid(rec.SIMID)))
     `PMSG(CDBG, (""))
     if (rec.RS.mm_iss_rs2) begin
         cd_print_mem_rec(rec);

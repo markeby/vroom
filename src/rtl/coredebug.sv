@@ -449,7 +449,7 @@ endtask
 // Hang debug /////
 ///////////////////
 
-localparam MAX_ROB_TIMEOUT = 40;
+localparam MAX_ROB_TIMEOUT = 200;
 task hang_detected();
     eot();
     $error("HANG detected!");

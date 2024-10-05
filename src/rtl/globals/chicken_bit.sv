@@ -11,7 +11,7 @@ module chicken_bit #(parameter string NAME="gizzard_dis", parameter int WIDTH=1)
 
 initial begin
     o = '0;
-    if ($value$plusargs($sformatf("+ckn:%s:%%d",NAME),o)) begin
+    if ($value$plusargs($sformatf("ckn:%s:%%d",NAME),o)) begin
         $display("+ckn:%s:%d seen",NAME,o);
     end
 end

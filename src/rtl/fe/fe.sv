@@ -13,6 +13,8 @@ module fe
 (
     input  logic       clk,
     input  logic       reset,
+    input  t_chicken_bits
+                       chicken_bits,
     input  t_rob_id    oldest_robid,
 
     output t_mem_req_pkt  ic_l2_req_pkt,
@@ -49,6 +51,7 @@ t_mem_rsp_pkt   ic_fb_rsp_nnn;
 fe_ctl fe_ctl (
     .clk,
     .reset,
+    .chicken_bits,
     .nuke_rb1,
     .resume_fetch_rbx,
     .oldest_robid,

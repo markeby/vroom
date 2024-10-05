@@ -99,6 +99,7 @@ fe fe (
     .clk,
     .reset,
     .oldest_robid,
+    .chicken_bits,
     .ic_l2_req_pkt,
     .l2_ic_rsp_pkt,
     .decode_ready_de0,

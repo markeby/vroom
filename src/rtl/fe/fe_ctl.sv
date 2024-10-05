@@ -12,6 +12,9 @@ module fe_ctl
 (
     input  logic       clk,
     input  logic       reset,
+    input  t_chicken_bits
+                       chicken_bits,
+
     input  t_nuke_pkt  nuke_rb1,
     input  logic       resume_fetch_rbx,
     input  t_rob_id    oldest_robid,
@@ -99,6 +102,7 @@ logic   pred_tkn;
 bpu bpu (
     .clk,
     .reset,
+    .chicken_bits,
     .valid_fe1,
     .bpu_train_pkt_ex0,
     .instr_fe1 ( fb_fe_rsp_fb0.instr ),

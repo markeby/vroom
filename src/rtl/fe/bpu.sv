@@ -13,6 +13,9 @@ module bpu
     input  logic       clk,
     input  logic       reset,
 
+    input  t_chicken_bits
+                       chicken_bits,
+
     input  t_bpu_train_pkt
                        bpu_train_pkt_ex0,
 
@@ -88,7 +91,7 @@ if (1) begin : twobitcntr
 end
 `DFF(cntr, cntr_nxt, clk)
 
-assign pred_tkn = cntr[1] & btb_hit_fe1 & is_br_fe1;
+assign pred_tkn = cntr[1] & btb_hit_fe1 & is_br_fe1 & ~chicken_bits.dis_br_pred;
 assign pred_pc_nxt = btb_tgt_fe1;
 
 //

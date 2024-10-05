@@ -214,6 +214,10 @@ package common;
         MESI_M = 3
     } t_mesi;
 
+    typedef struct packed {
+        logic dis_br_pred;
+    } t_chicken_bits;
+
 endpackage
 
 `endif // __COMMON_PKG

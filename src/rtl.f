@@ -1,5 +1,7 @@
 src/top.sv
 src/rtl/core.sv
+src/rtl/globals/chicken.sv
+src/rtl/globals/chicken_bit.sv
 
 src/rtl/decode/decode.sv
 

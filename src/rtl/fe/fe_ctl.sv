@@ -50,8 +50,8 @@ assign instr_cnt_inst_nxt = reset                          ? '0                 
 // Nets
 //
 
-logic    incr_pc_nnn;
-t_paddr  PC;
+logic    adv_pc_nnn;
+t_paddr  pc;
 t_fsm_fe state;
 t_fsm_fe state_nxt;
 logic    nuke_rb1_valid_ql;
@@ -91,29 +91,32 @@ assign br_mispred_ql_ex0 = br_mispred_ex0.valid & (~br_mispred_pdg | f_robid_a_o
 `DFF(br_mispred_pdg, ~reset & ~nuke_rb1_valid_ql & (br_mispred_pdg | br_mispred_ql_ex0), clk)
 `DFF_EN(br_mispred_robid, br_mispred_ex0.robid, clk, br_mispred_ql_ex0)
 
-// PC
+// pc
 
-assign incr_pc_nnn = valid_fe1 & decode_ready_de0;
+assign adv_pc_nnn = valid_fe1 & decode_ready_de0;
 
-t_paddr PCNxt;
-t_paddr PCRst;
+t_paddr pc_rst;  // Reset value
+t_paddr pc_adv;  // Advanced pc; i.e., next pc not counting branch corrections
+t_paddr pc_nxt;  // True next pc
 
 initial begin
-    PCRst = '0;
-    $value$plusargs("boot_vector:%h", PCRst);
+    pc_rst = '0;
+    $value$plusargs("boot_vector:%h", pc_rst);
 end
-always_comb PCNxt = reset          ? PCRst      :
+
+assign pc_adv = pc + 4;
+always_comb pc_nxt = reset            ? pc_rst                    :
                     br_mispred_ql_ex0 ? br_mispred_ex0.restore_pc :
-                    incr_pc_nnn    ? PC + 4     :
-                                     PC;
-`DFF(PC, PCNxt, clk)
+                    adv_pc_nnn        ? pc_adv                    :
+                                        pc;
+`DFF(pc, pc_nxt, clk)
 
 // IC req
 
 always_comb begin
     fe_fb_req_fb0 = '0;
     fe_fb_req_fb0.valid = state == FE_REQ_IC;
-    fe_fb_req_fb0.addr  = PC;
+    fe_fb_req_fb0.addr  = pc;
     fe_fb_req_fb0.id    = 0;
 end
 
@@ -155,7 +158,7 @@ end
 `ifdef SIMULATION
 always @(posedge clk) begin
     if (valid_fe1 & decode_ready_de0 & ~reset) begin
-        `UINFO(instr_fe1.SIMID, ("unit:FE pc:%h %s", PC, describe_instr(instr_fe1)))
+        `UINFO(instr_fe1.SIMID, ("unit:FE pc:%h %s", pc, describe_instr(instr_fe1)))
     end
 end
 `endif

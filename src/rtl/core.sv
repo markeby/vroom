@@ -20,6 +20,8 @@ module core
 // Nets
 //
 
+t_chicken_bits chicken_bits;
+
 logic         decode_ready_de0;
 logic         rename_ready_rn0;
 logic         alloc_ready_ra0;
@@ -298,6 +300,12 @@ rob rob (
 
     .nuke_rb1,
     .resume_fetch_rbx
+);
+
+chicken chicken (
+    .clk,
+    .reset,
+    .chicken_bits
 );
 
 `ifdef ASSERT

@@ -16,9 +16,6 @@ src/rtl/fe/fe_pf.sv
 src/rtl/fe/fetch_chk.sv
 src/rtl/fe/icache.sv
 
-src/rtl/globals/gprs.sv
-src/rtl/globals/scoreboard.sv
-
 src/rtl/l2/l2.sv
 
 src/rtl/mem/mem.sv

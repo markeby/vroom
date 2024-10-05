@@ -32,14 +32,15 @@ vroom is going out-of-order!  The pipeline looks like this:
 **In-Order**
 
 * **FETCH** has a FSM to read instructions from main memory.
-* **DECODE** receives instructions from **FETCH** and decodes them into uops.
-* **UCODE** receives decoded uops from **DECODE** and generally passes them through in the same cycle.  Uops from decode with `trap_to_ucode` set will cause the microsequencer to take over until an `eom` is seen.
-* **ALLOC** receives uops from **UCODE**, assigns ROBIDs, and sends uops to the appropriate **RS**.
+* **DECODE** receives instruction bytes decodes them into uops.
+* **UCODE** generally just passes uops through from **DECODE**.  Uops from decode with `trap_to_ucode` set will cause the microsequencer to take over and deliver uops from the ROM until an `eom` is seen.
+* **RENAME** renames register sources and dests, and sends the renamed uop to **ALLOC**.
+* **ALLOC** assigns ROBIDs and allocates into the appropriate **RS**.
 
 **Out-of-Order**
 
 * **EXE** executes integer uops from its **RS** when its deps are available, and writes back to the **ROB**.
-* **MEM** executes memory uops from its **RS** when its deps are available, and writes back to the **ROB**.
+* **MEM** executes memory uops from its **RS** when its deps are available, and writes back to the **ROB**.  Stores complete shortly after issue, and then commit post-retirement.
 
 **In-Order**
 

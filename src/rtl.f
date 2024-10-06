@@ -47,6 +47,7 @@ src/rtl/alloc/alloc.sv
 src/rtl/alloc/mem_id_trk.sv
 
 src/rtl/rename/rename.sv
+src/rtl/rename/pend_watcher.sv
 src/rtl/rename/prf.sv
 
 src/rtl/gen/gen_fifo.sv

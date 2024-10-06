@@ -171,8 +171,20 @@ always_ff @(posedge clk) begin
     end
 end
 
+t_rv_reg_data              rd_data_rd0        [NUM_REG_READS-1:0];
+logic [NUM_REG_WRITES-1:0] rd_data_fwd_wr_rd0 [NUM_REG_READS-1:0];
 for (genvar r=0; r<NUM_REG_READS; r++) begin : g_prf_rd
-    `DFF(rd_data_rd1[r], PRF[rd_psrc_rd0[r].idx], clk)
+    for (genvar w=0; w<NUM_REG_WRITES; w++) begin : g_wr_fwd
+        assign rd_data_fwd_wr_rd0[r][w] = wr_en_nq_ro0[w] & wr_pkt_ro0[w].pdst.ptype == prf_type & wr_pkt_ro0[w].pdst.idx == rd_psrc_rd0[r].idx;
+    end
+    always_comb begin
+        rd_data_rd0[r] = '0;
+        for (int w=0; w<NUM_REG_WRITES; w++) begin
+            rd_data_rd0[r] |= rd_data_fwd_wr_rd0[r][w] ? wr_pkt_ro0[w].data : '0;
+        end
+        rd_data_rd0[r] |= ~|rd_data_fwd_wr_rd0[r] ? PRF[rd_psrc_rd0[r].idx] : '0;
+    end
+    `DFF(rd_data_rd1[r], rd_data_rd0[r], clk)
 end
 
 //

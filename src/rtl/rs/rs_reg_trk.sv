@@ -38,8 +38,6 @@ typedef enum logic[1:0] {
 } t_fsm;
 t_fsm fsm, fsm_nxt;
 
-assign ready_rs1 = fsm == SRC_READY;
-
 //
 // Nets
 //
@@ -64,6 +62,8 @@ end
 assign wb_valid_match_any_ro0 = |wb_valid_matches_ro0;
 assign wb_valid_data_ro0 = wb_valid_datas_ro0[0]; //gen_funcs#(.IWIDTH(IPRF_NUM_WRITES),.T(t_rv_reg_data))::uaomux(wb_valid_datas_ro0, wb_valid_matches_ro0);
 
+assign ready_rs1 = fsm == SRC_READY
+                 | fsm == SRC_PDG_RSLT & wb_valid_match_any_ro0;
 //
 // FSM
 //
@@ -77,8 +77,8 @@ always_comb begin
          SRC_IDLE:     if ( e_alloc_rs0 & ~e_alloc_static_rs0.psrc_pend                           ) fsm_nxt = SRC_READY;
                   else if ( e_alloc_rs0 &  e_alloc_static_rs0.psrc_pend &  wb_valid_match_any_ro0 ) fsm_nxt = SRC_READY;
                   else if ( e_alloc_rs0 &  e_alloc_static_rs0.psrc_pend & ~wb_valid_match_any_ro0 ) fsm_nxt = SRC_PDG_RSLT;
-         SRC_PDG_RSLT: if ( wb_valid_match_any_ro0                                                ) fsm_nxt = SRC_READY;
-                  else if ( e_dealloc                                                             ) fsm_nxt = SRC_IDLE;
+         SRC_PDG_RSLT: if ( e_dealloc                                                             ) fsm_nxt = SRC_IDLE;
+                  else if ( wb_valid_match_any_ro0                                                ) fsm_nxt = SRC_READY;
          SRC_READY:    if ( e_dealloc                                                             ) fsm_nxt = SRC_IDLE;
       endcase
    end

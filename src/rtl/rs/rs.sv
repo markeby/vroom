@@ -42,6 +42,8 @@ localparam RS0 = 0;
 localparam RS1 = 1;
 localparam NUM_EX_STAGES = 1;
 
+localparam RS_STALL_THRESHOLD = NUM_RS_ENTS - 1;
+
 //
 // Nets
 //
@@ -71,7 +73,9 @@ logic[NUM_SOURCES-1:0] src_from_prf_rs1;
 // Logic
 //
 
-assign rs_stall_rs0      = 1'b0;
+// rs_stall_rs0 comes on before RS is full to ensure that we have room for
+// whatever is currently in alloc to drain into the RS.
+assign rs_stall_rs0      = $countones(e_valid) >= RS_STALL_THRESHOLD;
 assign q_alloc_rs0       = disp_valid_rs0;
 assign e_first_avail_rs0 = gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first0(e_valid);
 assign e_alloc_rs0       = q_alloc_rs0 ? e_first_avail_rs0 : '0;
@@ -191,6 +195,7 @@ end
 for (genvar e=0; e<NUM_RS_ENTS; e++) begin : g_per_ent_asserts
     `VASSERT(a_stqid_mat, q_alloc_rs0 & e_valid[e] & uop_is_st(disp_pkt_rs0.uinstr.uop) & uop_is_st(e_static[e].uinstr_disp.uinstr.uop), disp_pkt_rs0.meta.mem.stqid != e_static[e].uinstr_disp.meta.mem.stqid, $sformatf("New dispatch with overlapping STQID (RS %d STQID %h)", e, disp_pkt_rs0.meta.mem.stqid))
 end
+`VASSERT(a_illegal_alloc, q_alloc_rs0, ~&e_valid, "Allocated RS when full")
 `endif
 
 endmodule

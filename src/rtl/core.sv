@@ -194,7 +194,7 @@ alloc alloc (
     .disp_pkt_rs0
 );
 
-rs #(.NUM_RS_ENTS(8), .RS_NAME("RS0")) rs (
+rs #(.NUM_RS_ENTS(32), .RS_NAME("RS0")) rs (
     .clk,
     .reset,
     .nuke_rb1,

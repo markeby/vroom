@@ -60,7 +60,7 @@ package common;
     // ROB Defines ///////////////
     //////////////////////////////
 
-    localparam RB_NUM_ENTS = 8;
+    localparam RB_NUM_ENTS = 32;
     localparam RB_NUM_ENTS_LG2 = $clog2(RB_NUM_ENTS);
     typedef logic[RB_NUM_ENTS_LG2-1:0] t_rob_ptr;
     typedef struct packed {
@@ -119,7 +119,7 @@ package common;
     localparam IPRF_NUM_READS      = 2;
     localparam IPRF_NUM_MAP_READS  = 2;
 
-    localparam IPRF_NUM_ENTS = 64;
+    localparam IPRF_NUM_ENTS = 1<< (1 + $clog2(IPRF_NUM_REGS)); // round up to next pow2, then double
     localparam IPRF_NUM_ENTS_LG2 = $clog2(IPRF_NUM_ENTS);
 
     // MAX of IPRF, VPRF, etc...

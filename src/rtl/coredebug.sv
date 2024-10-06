@@ -21,7 +21,7 @@ module coredebug
     input  logic reset
 );
 
-localparam NUM_RS_ENTS = 8;
+localparam NUM_RS_ENTS = 32;
 
 typedef struct packed {
     logic       valid;

@@ -177,6 +177,23 @@ task cd_print_rec(t_cd_inst rec);
     end
 endtask
 
+task cd_print_rec_retlog(t_cd_inst rec);
+    string reg_upd;
+    if (rec.UCODE.uinstr_uc0.dst.optype == OP_REG) begin
+        reg_upd = $sformatf("reg_wr:1 reg:%0d reg_data:%0h", rec.UCODE.uinstr_uc0.dst.opreg, rec.RESULT.iprf_wr_pkt_ro0.data);
+    end else begin
+        reg_upd = $sformatf("reg_wr:0");
+    end
+    `PMSG(RETLOG, ("time:%0t cclk:%0d pc:%0h %s %s",
+        $time(),
+        top.cclk_count,
+        rec.UCODE.uinstr_uc0.SIMID.pc,
+        reg_upd,
+        format_simid(rec.SIMID)
+        ));
+endtask
+
+
 task cd_fetch();
     t_cd_inst new_inst;
     new_inst = '0;
@@ -343,6 +360,7 @@ task cd_retire();
     INSTQ[i].RETIRE.clk = top.cclk_count;
     INSTQ[i].RETIRE.nuke_rb1 = core.rob.nuke_rb1;
     cd_print_rec(INSTQ[i]);
+    cd_print_rec_retlog(INSTQ[i]);
     if (INSTQ[i].RETIRE.nuke_rb1.valid) begin
         INSTQ.delete();
     end else begin

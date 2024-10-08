@@ -5,11 +5,14 @@
 .globl _start
 _start:
 
-    li a0, SYS_WRITE
-    li a1, 1
-    la a2, msg
-    li a3, 6
-    jal syscall
+    li x1, 0xbb
+    li x2, 0xaa
+    li x3, 0x01
+    li x4, 0x23f
+loop_back:
+    add x3, x3, x3
+    add x4, x4, -1
+    bne x4, x0, loop_back
 
 pass:
     li t0, 1

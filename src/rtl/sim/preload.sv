@@ -65,7 +65,7 @@ task preload_from_irom();
     // IROM[a++] = rvADDI(1,1,32);
 
     IROM[a++] = rvADDI(3,0,12'h1);
-    IROM[a++] = rvADDI(4,0,12'h3f);
+    IROM[a++] = rvADDI(4,0,12'h23f);
 
     IROM[a++] = rvADD(3,3,3);
     IROM[a++] = rvADDI(4,4,12'hfff);

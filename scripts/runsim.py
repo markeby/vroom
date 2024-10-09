@@ -92,12 +92,12 @@ def main(args):
     logger.debug(f"Using vtop found in {vtop}")
 
     # Change to sim dir
-    sim_dir = os.path.join(args.regress_dir, args.tag)
-    if not os.path.isdir(sim_dir):
-        logger.debug(f"Creating directory {sim_dir}/")
-        os.makedirs(sim_dir, exist_ok=True)
-    logger.debug(f"Changing to {sim_dir}/")
-    os.chdir(sim_dir)
+    if args.sim_dir != None:
+        if not os.path.isdir(args.sim_dir):
+            logger.debug(f"Creating directory {args.sim_dir}/")
+            os.makedirs(args.sim_dir, exist_ok=True)
+        logger.debug(f"Changing to {args.sim_dir}/")
+        os.chdir(args.sim_dir)
 
     # Run the simulation
     run_sim(vtop, args.sim_args, args.run_log)
@@ -112,7 +112,7 @@ def main(args):
 if __name__=='__main__':
     argparser = argparse.ArgumentParser(description='Convert .dis file to preload file')
     argparser.add_argument('--vtop', '-v', type=str, default=None, help='Path to simulation binary (Vtop)')
-    argparser.add_argument('--regress-dir', '-d', type=pathlib.Path, default=pathlib.Path.cwd(), help='Regression directory')
+    argparser.add_argument('--sim-dir', '-d', type=pathlib.Path, default=None, help='Simulation directory')
     argparser.add_argument('--sim-args', '-s', type=str, help='Simulation arguments')
     argparser.add_argument('--run-log', type=str, default='run.log', help='Path to runlog')
     argparser.add_argument('tag', type=str, help='Test tag')

@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+
+"""This is a script.
+
+There are many like it, but this one is mine."""
+
+import argparse
+import logging
+import sys
+import re
+import pprint as pp
+import typing
+import subprocess
+import os
+import pathlib
+from abc import ABC,abstractmethod
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.INFO)
+
+def get_git_root(path):
+    try:
+        result = subprocess.run(['git', '-C', path, 'rev-parse', '--show-toplevel'], capture_output=True, text=True, check=True)
+        return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        return None
+
+def find_from_root(rel_path):
+    git_root = get_git_root('.')
+    final_path = os.path.join(git_root, rel_path)
+    if os.path.exists(final_path):
+        return final_path
+    else:
+        raise Exception(f"Could not {final_path}")
+
+def run_sim(vtop, sim_args, fn_run_log):
+    command = f"{vtop} {sim_args}"
+    with open(fn_run_log, "w") as fh:
+        logger.info("Launching sim...")
+        result = subprocess.run(command.split(), stdout=fh)
+        logger.info("Sim done.")
+        return result.returncode
+
+def split_log(fn_run_log) -> None:
+    logger.info("Splitting log file...")
+    rslt = subprocess.run([find_from_root('scripts/split_log'), "-f", fn_run_log], capture_output=True, text=True, check=True)
+
+def extract_plusarg(sim_args, arg, dflt=None) -> str:
+    spl = sim_args.split()
+    spl = [x if (":" in x) else f"{x}:1" for x in spl]
+    kvs = [x.split(":") for x in spl]
+    arg_dict = dict(kvs)
+    return arg_dict.get(arg, dflt)
+
+def check_results(sim_args: str) -> bool:
+    fn_preload = extract_plusarg(sim_args, "+preload", None)
+    if (fn_preload == None):
+        logger.info("Could not find +preload:, skipping checks")
+        subprocess.run(["touch", "UNKNOWN"])
+        return True
+    fn_check = re.sub(r'\.[^\.]*$', '.log', fn_preload)
+    if not os.path.exists(fn_check):
+        logger.info(f"Could not find checker file at {fn_check}, skipping checks")
+        subprocess.run(["touch", "UNKNOWN"])
+        return True
+    check_retlog = find_from_root('scripts/check_retlog.py')
+    with open("check.log", "w") as fh:
+        command = f"{check_retlog} run.RETLOG.log {fn_check}"
+        logger.info("Checking log...")
+        result = subprocess.run(command.split(), stdout=fh)
+        logger.info("Done checking.")
+        if result.returncode == 0:
+            logger.info("PASS")
+            subprocess.run(["touch", "PASS"])
+        else:
+            logger.info("FAIL")
+            subprocess.run(["touch", "FAIL"])
+            return False
+    return True
+
+#1516  scripts/check_retlog.py run.RETLOG.log tests/branchy/test.log
+
+def main(args):
+    """Main function"""
+    logger.info(f"Launching test {args.tag}")
+
+    vtop = None
+    if args.vtop != None:
+        vtop = args.vtop
+    else:
+        vtop = find_from_root("obj_dir/Vtop")
+    logger.info(f"Using vtop found in {vtop}")
+
+    # Change to sim dir
+    sim_dir = os.path.join(args.regress_dir, args.tag)
+    if not os.path.isdir(sim_dir):
+        logger.info(f"Creating directory {sim_dir}/")
+        os.makedirs(sim_dir, exist_ok=True)
+    logger.info(f"Changing to {sim_dir}/")
+    os.chdir(sim_dir)
+
+    # Run the simulation
+    run_sim(vtop, args.sim_args, args.run_log)
+
+    # Split the output
+    split_log(args.run_log)
+
+    # Check the test
+    check_results(args.sim_args)
+
+
+if __name__=='__main__':
+    argparser = argparse.ArgumentParser(description='Convert .dis file to preload file')
+    argparser.add_argument('--vtop', '-v', type=str, default=None, help='Path to simulation binary (Vtop)')
+    argparser.add_argument('--regress-dir', '-d', type=pathlib.Path, default=pathlib.Path.cwd(), help='Regression directory')
+    argparser.add_argument('--sim-args', '-s', type=str, help='Simulation arguments')
+    argparser.add_argument('--run-log', type=str, default='run.log', help='Path to runlog')
+    argparser.add_argument('tag', type=str, help='Test tag')
+    argparse_args = argparser.parse_args()
+    main(argparse_args)
+

@@ -24,9 +24,6 @@ run: Vtop
 	#obj_dir/Vtop +load_disasm +preload:tests/hello.preload +boot_vector:0000000080000000 ${SIM_FLAGS} | tee run.log
 	#obj_dir/Vtop +load_disasm +preload:tests/start.preload +boot_vector:0000000080000000 ${SIM_FLAGS} | tee run.log
 	#obj_dir/Vtop ${SIM_FLAGS} | tee run.log
-	@echo
-	@echo "Splitting run.log"
-	@echo
 	scripts/split_log -f run.log
 
 Vtop: verilated

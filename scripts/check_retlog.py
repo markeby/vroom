@@ -122,6 +122,9 @@ def main(args):
     ### Skip spike_recs to _start
     spike_recs = spike_recs[5:]
 
+    if (len(spike_recs) != len(retire_recs)):
+        croak(f"Wrong number of instructions retired!  expected:{len(spike_recs)} actual:{len(retire_recs)}")
+
     pairs = zip(spike_recs, retire_recs)
     for (s,r) in pairs:
         print("----")

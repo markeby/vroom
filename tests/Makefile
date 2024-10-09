@@ -30,4 +30,4 @@ run: $(LOG)
 	spike -l --log-commits --log=$@ -m0x80000000:0x100000 $< | tee output.txt
 
 clean:
-	rm -f $(ELF) $(OBJ) $(LOG) $(DIS) output.txt
+	rm -f $(ELF) $(OBJ) $(LOG) $(DIS) $(PRE) output.txt

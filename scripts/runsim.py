@@ -69,13 +69,13 @@ def check_results(sim_args: str) -> bool:
         logger.debug("Checking log...")
         result = subprocess.run(command.split(), stdout=fh)
         logger.debug("Done checking.")
-        if result.returncode == 0:
-            logger.debug("PASS")
-            subprocess.run(["touch", "PASS"])
-        else:
+        if result.returncode != 0:
             logger.debug("FAIL")
             subprocess.run(["touch", "FAIL"])
             return False
+        logger.debug("PASS")
+        subprocess.run(["touch", "PASS"])
+        return False
     return True
 
 #1516  scripts/check_retlog.py run.RETLOG.log tests/branchy/test.log

@@ -1,3 +1,5 @@
 *.dis
 *.elf
 *.pre
+output.txt
+test.log

@@ -36,13 +36,13 @@ def find_from_root(rel_path):
 def run_sim(vtop, sim_args, fn_run_log):
     command = f"{vtop} {sim_args}"
     with open(fn_run_log, "w") as fh:
-        logger.info("Launching sim...")
+        logger.debug("Launching sim...")
         result = subprocess.run(command.split(), stdout=fh)
-        logger.info("Sim done.")
+        logger.debug("Sim done.")
         return result.returncode
 
 def split_log(fn_run_log) -> None:
-    logger.info("Splitting log file...")
+    logger.debug("Splitting log file...")
     rslt = subprocess.run([find_from_root('scripts/split_log'), "-f", fn_run_log], capture_output=True, text=True, check=True)
 
 def extract_plusarg(sim_args, arg, dflt=None) -> str:
@@ -55,25 +55,25 @@ def extract_plusarg(sim_args, arg, dflt=None) -> str:
 def check_results(sim_args: str) -> bool:
     fn_preload = extract_plusarg(sim_args, "+preload", None)
     if (fn_preload == None):
-        logger.info("Could not find +preload:, skipping checks")
+        logger.warning("Could not find +preload:, skipping checks")
         subprocess.run(["touch", "UNKNOWN"])
         return True
     fn_check = re.sub(r'\.[^\.]*$', '.log', fn_preload)
     if not os.path.exists(fn_check):
-        logger.info(f"Could not find checker file at {fn_check}, skipping checks")
+        logger.warning(f"Could not find checker file at {fn_check}, skipping checks")
         subprocess.run(["touch", "UNKNOWN"])
         return True
     check_retlog = find_from_root('scripts/check_retlog.py')
     with open("check.log", "w") as fh:
         command = f"{check_retlog} run.RETLOG.log {fn_check}"
-        logger.info("Checking log...")
+        logger.debug("Checking log...")
         result = subprocess.run(command.split(), stdout=fh)
-        logger.info("Done checking.")
+        logger.debug("Done checking.")
         if result.returncode == 0:
-            logger.info("PASS")
+            logger.debug("PASS")
             subprocess.run(["touch", "PASS"])
         else:
-            logger.info("FAIL")
+            logger.debug("FAIL")
             subprocess.run(["touch", "FAIL"])
             return False
     return True
@@ -89,14 +89,14 @@ def main(args):
         vtop = args.vtop
     else:
         vtop = find_from_root("obj_dir/Vtop")
-    logger.info(f"Using vtop found in {vtop}")
+    logger.debug(f"Using vtop found in {vtop}")
 
     # Change to sim dir
     sim_dir = os.path.join(args.regress_dir, args.tag)
     if not os.path.isdir(sim_dir):
-        logger.info(f"Creating directory {sim_dir}/")
+        logger.debug(f"Creating directory {sim_dir}/")
         os.makedirs(sim_dir, exist_ok=True)
-    logger.info(f"Changing to {sim_dir}/")
+    logger.debug(f"Changing to {sim_dir}/")
     os.chdir(sim_dir)
 
     # Run the simulation

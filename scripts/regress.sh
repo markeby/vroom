@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
 
-SIM_FLAGS=""
 TWD=$(git rev-parse --show-toplevel)
-RUNSIM="${TWD}/scripts/runsim.py"
 
-${RUNSIM} branchy -d regress/ --sim-args "+load_disasm +preload:${TWD}/tests/branchy/test.pre +boot_vector:0000000080000000 ${SIM_FLAGS}"
-${RUNSIM} hello_ebreak -d regress/ --sim-args "+load_disasm +preload:${TWD}/tests/hello_ebreak.preload +boot_vector:0000000080000000 ${SIM_FLAGS}"
-# ${RUNSIM} -d regress/test3 --sim-args "+load_disasm +preload:${TWD}/tests/hello.preload +boot_vector:0000000080000000 ${SIM_FLAGS}"
-# ${RUNSIM} -d regress/test4 --sim-args "+load_disasm +preload:${TWD}/tests/start.preload +boot_vector:0000000080000000 ${SIM_FLAGS}"
+SIM_FLAGS=""
+DATE_TAG=$(date "+%y-%m-%d-%H%M%S")
+RUNSIM="${TWD}/scripts/runsim.py"
+REGRESS="regress.${DATE_TAG}/"
+
+echo "Regression directory: ${REGRESS}"
+
+${RUNSIM} branchy      -d ${REGRESS} --sim-args "+load_disasm +preload:${TWD}/tests/branchy/test.pre     +boot_vector:0000000080000000 ${SIM_FLAGS}"
+${RUNSIM} hello_ebreak -d ${REGRESS} --sim-args "+load_disasm +preload:${TWD}/tests/hello_ebreak.preload +boot_vector:0000000080000000 ${SIM_FLAGS}"
+
+NPASS=$(find ${REGRESS} -name PASS | wc -l)
+NFAIL=$(find ${REGRESS} -name FAIL | wc -l)
+NUNKN=$(find ${REGRESS} -name UNKNOWN | wc -l)
+let NTOT="${NPASS} + ${NFAIL} + ${NUNKN}"
+
+echo "${NPASS}/${NTOT} Passes"

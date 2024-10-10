@@ -73,8 +73,10 @@ class SpikeRec(AbstractInstrRec):
     def is_reg_wr(self) -> bool:
         if len(self._lines) < 2:
             return False
-        spl = self._lines[1].split()[-2:]
-        if spl[0][:1] == "x":
+        spl = self._lines[1].split()
+        if len(spl) < 7:
+            return False
+        if spl[5][:1] == "x":
             return True
         return False
 

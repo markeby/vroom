@@ -8,11 +8,16 @@ _start:
     li x1, 0xbb
     li x2, 0x555
     li x3, 0x01
-    li x4, 0xaaa
 
-    la x14, const_buffer
-    lw x5, 0(x14)
-    ld x6, 0(x14)
+    li x5, 6
+loop_back_x4:
+    li x4, 0xaaa
+    sll x4, x4, 12
+    add x4, x4, 0x2aa
+    add x5, x5, -1
+    bnez x5, loop_back_x4
+
+    mv x6, x5
     addw x7, x5, x6
 
 pass:

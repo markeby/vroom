@@ -39,6 +39,7 @@ always_comb begin
     resvld_ex0 = iss_ex0;
     unique case (uinstr_ex0.uop)
         U_ADD:     result_ex0 = src1val_ex0 + src2val_ex0;
+        U_ADDW:    result_ex0 = src1val_ex0 + src2val_ex0;
         U_SUB:     result_ex0 = src1val_ex0 - src2val_ex0;
         U_AND:     result_ex0 = src1val_ex0 & src2val_ex0;
         U_XOR:     result_ex0 = src1val_ex0 ^ src2val_ex0;

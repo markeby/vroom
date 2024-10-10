@@ -39,6 +39,11 @@ clean:
 	rm -f waves.fst
 	rm -f *.log
 
+.PHONY: gtkwave
+gtkwave:
+	gtkwave ${WAVES} ../retch/vroom.gtkw 
+
+
 #sim: $(SRC_FILES) $(LIB_FILES)
 #	$(IVERILOG) -I $(INC_DIR) -y $(LIB_DIR) -f src/rtl.f -o $@
 #

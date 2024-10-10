@@ -31,6 +31,39 @@ loop_back_x4:
     xor x7, x4, x5
     xor x8, x5, x6
 
+    sll x7, x4, x5
+    sll x8, x5, x6
+    sllw x9, x4, x5
+    sllw x10, x5, x6
+
+    srl x7, x4, x5
+    srl x8, x5, x6
+    srlw x9, x4, x5
+    srlw x10, x5, x6
+
+    sra x7, x4, x5
+    sra x8, x5, x6
+    sraw x9, x4, x5
+    sraw x10, x5, x6
+
+    slli x9, x5, 0x1
+    slli x9, x5, 0x2
+    slli x9, x5, 0x4
+    slli x9, x5, 0x8
+    slli x9, x5, 0x10
+
+    srli x9, x5, 0x1
+    srli x9, x5, 0x2
+    srli x9, x5, 0x4
+    srli x9, x5, 0x8
+    srli x9, x5, 0x10
+
+    srai x9, x5, 0x1
+    srai x9, x5, 0x2
+    srai x9, x5, 0x4
+    srai x9, x5, 0x8
+    srai x9, x5, 0x10
+
 pass:
     li t0, 1
     sd t0, tohost, t1

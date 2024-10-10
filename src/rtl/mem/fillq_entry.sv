@@ -107,6 +107,7 @@ always_comb begin
     e_pipe_req_pkt_mm0.robid    = '0;
     e_pipe_req_pkt_mm0.pdst     = '0;
     e_pipe_req_pkt_mm0.yost     = '0;
+    e_pipe_req_pkt_mm0.nukeable = 1'b0;
     `ifdef SIMULATION
     e_pipe_req_pkt_mm0.SIMID    = e_static.SIMID;
     `endif

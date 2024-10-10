@@ -49,6 +49,7 @@ package mem_defs;
         t_rob_id       robid;
         t_prf_id       pdst;
         t_mem_phase    phase;
+        logic          nukeable;
     } t_mempipe_arb;
 
     typedef struct packed {

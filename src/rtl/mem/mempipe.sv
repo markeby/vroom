@@ -90,9 +90,10 @@ MM5 - Result valid
 
 t_mempipe_arb req_pkt_mm0;
 logic valid_mm0;
+logic[NUM_MM_STAGES:MM1] valid_mmx;
+logic[NUM_MM_STAGES:MM0] valid_ql_mmx;
 
 `MKPIPE_INIT(t_mempipe_arb,           req_pkt_mmx, req_pkt_mm0,             MM0, NUM_MM_STAGES)
-`MKPIPE_INIT(logic,                   valid_mmx,   valid_mm0,               MM0, NUM_MM_STAGES)
 `MKPIPE     (logic,                   is_ld_mmx,                            MM0, NUM_MM_STAGES)
 `MKPIPE     (logic,                   is_fl_mmx,                            MM0, NUM_MM_STAGES)
 `MKPIPE     (logic,                   is_st_mmx,                            MM0, NUM_MM_STAGES)
@@ -110,6 +111,8 @@ logic valid_mm0;
 //
 // Logic
 //
+
+`DFF(valid_mmx[MM9:MM1], valid_ql_mmx[MM8:MM0], clk)
 
     //
     // MM0
@@ -131,6 +134,7 @@ assign is_ld_mmx[MM0] = req_pkt_mm0.arb_type == MEM_LOAD;
 assign is_st_mmx[MM0] = req_pkt_mm0.arb_type == MEM_STORE;
 assign is_fl_mmx[MM0] = req_pkt_mm0.arb_type == MEM_FILL;
 assign cacheable_mmx[MM0] = valid_mm0;
+assign valid_ql_mmx[MM0] = valid_mm0 & ~(req_pkt_mm0.nukeable & nuke_rb1.valid);
 
     //
     // MM1
@@ -154,6 +158,8 @@ assign data_rd_en_mm1    = valid_mmx[MM1] & cacheable_mmx[MM1] & ( is_ld_mmx[MM1
 
 assign req_pkt_mm1 = req_pkt_mmx[MM1];
 
+assign valid_ql_mmx[MM1] = valid_mmx[MM1] & ~(req_pkt_mmx[MM1].nukeable & nuke_rb1.valid);
+
     //
     // MM2
     // - Calculate hit/miss
@@ -170,6 +176,8 @@ for (genvar w=0; w<L1_NUM_WAYS; w++) begin : g_hit_vec
 end
 assign hit_mmx[MM2] = |hit_vec_mmx[MM2];
 assign hit_way_mmx[MM2] = gen_lg2_funcs#(.IWIDTH(L1_NUM_WAYS))::oh_encode(hit_vec_mmx[MM2]);
+
+assign valid_ql_mmx[MM2] = valid_mmx[MM2] & ~(req_pkt_mmx[MM2].nukeable & nuke_rb1.valid);
 
     //
     // MM3
@@ -194,6 +202,8 @@ assign state_wr_en_mm3    = valid_mmx[MM3] & cacheable_mmx[MM3]
 assign state_wr_state_mm3 = is_fl_mmx[MM3] ? MESI_E : MESI_M;
 assign state_wr_way_mm3   = is_fl_mmx[MM3] ? req_pkt_mmx[MM3].arb_way : hit_way_mmx[MM3];
 
+assign valid_ql_mmx[MM3] = valid_mmx[MM3] & ~(req_pkt_mmx[MM3].nukeable & nuke_rb1.valid);
+
     //
     // MM4
     // - Data rotate
@@ -208,6 +218,8 @@ always_comb begin
         o += 1'b1;
     end
 end
+
+assign valid_ql_mmx[MM4] = valid_mmx[MM4] & ~(req_pkt_mmx[MM4].nukeable & nuke_rb1.valid);
 
     //
     // MM5
@@ -264,6 +276,16 @@ always_comb begin
     `ifdef SIMULATION
     iprf_wr_pkt_mm5.SIMID = req_pkt_mmx[MM5].SIMID;
     `endif
+end
+
+assign valid_ql_mmx[MM5] = valid_mmx[MM5] & ~(req_pkt_mmx[MM5].nukeable & nuke_rb1.valid);
+
+//
+// Etc
+//
+
+for (genvar mmx=MM6; mmx<=NUM_MM_STAGES; mmx++) begin : g_valid_pipe
+    assign valid_ql_mmx[mmx] = valid_mmx[mmx] & ~(req_pkt_mmx[mmx].nukeable & nuke_rb1.valid);
 end
 
 //

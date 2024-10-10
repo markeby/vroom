@@ -77,6 +77,10 @@ always_comb begin
                      else if ( e_recycle_mm5    ) fsm_nxt = LDQ_WAIT;
             LDQ_WAIT:     if ( 1'b1             ) fsm_nxt = LDQ_REQ_PIPE;
         endcase
+
+        if (nuke_rb1.valid & (fsm inside {LDQ_IDLE,LDQ_PDG_ISS,LDQ_REQ_PIPE,LDQ_PDG_PIPE,LDQ_WAIT})) begin
+            fsm_nxt = LDQ_IDLE;
+        end
     end
 end
 `DFF(fsm, fsm_nxt, clk)
@@ -113,6 +117,7 @@ always_comb begin
     e_pipe_req_pkt_mm0.robid    = e_static.robid;
     e_pipe_req_pkt_mm0.pdst     = e_pdst;
     e_pipe_req_pkt_mm0.yost     = '0;
+    e_pipe_req_pkt_mm0.nukeable = 1'b1;
     `ifdef SIMULATION
     e_pipe_req_pkt_mm0.SIMID    = e_static.SIMID;
     `endif

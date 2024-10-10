@@ -88,6 +88,10 @@ always_comb begin
                            else if ( e_recycle_mm5    ) fsm_nxt = STQ_WAIT_FINAL;
             STQ_WAIT_FINAL:     if ( 1'b1             ) fsm_nxt = STQ_REQ_PIPE_FINAL;
         endcase
+
+        if (nuke_rb1.valid & (fsm inside {STQ_IDLE,STQ_PDG_ISS,STQ_REQ_PIPE,STQ_PDG_PIPE,STQ_WAIT,STQ_PEND_RET})) begin
+            fsm_nxt = STQ_IDLE;
+        end
     end
 end
 `DFF(fsm, fsm_nxt, clk)
@@ -174,6 +178,7 @@ always_comb begin
     e_pipe_req_pkt_mm0.phase.st = (fsm == STQ_REQ_PIPE_FINAL) ? MEM_ST_FINAL : MEM_ST_INITIAL;
     e_pipe_req_pkt_mm0.arb_data = e_st_data_repl;
     e_pipe_req_pkt_mm0.byte_en  = e_byte_en_full[63:0];
+    e_pipe_req_pkt_mm0.nukeable = 1'b1;
 end
 
 //

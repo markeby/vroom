@@ -21,12 +21,15 @@ loop_back_x4:
 
     mv x6, x5
     add x7, x4, x5
-    add x7, x5, x6
-    addw x7, x4, x5
-    addw x7, x5, x6
-    add x7, x4, x5
-    add x7, x5, x6
     add x8, x5, x6
+    addw x9, x4, x5
+    addw x10, x5, x6
+    sub x7, x4, x5
+    sub x8, x5, x6
+    subw x9, x4, x5
+    subw x10, x5, x6
+    xor x7, x4, x5
+    xor x8, x5, x6
 
 pass:
     li t0, 1

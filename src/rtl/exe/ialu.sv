@@ -43,12 +43,16 @@ always_comb begin
         U_ADD:     result_nq_ex0 = src1val_ex0 + src2val_ex0;
         U_ADDW:    result_nq_ex0 = src1val_ex0 + src2val_ex0;
         U_SUB:     result_nq_ex0 = src1val_ex0 - src2val_ex0;
+        U_SUBW:    result_nq_ex0 = src1val_ex0 - src2val_ex0;
         U_AND:     result_nq_ex0 = src1val_ex0 & src2val_ex0;
         U_XOR:     result_nq_ex0 = src1val_ex0 ^ src2val_ex0;
         U_OR:      result_nq_ex0 = src1val_ex0 | src2val_ex0;
         U_SLL:     result_nq_ex0 = src1val_ex0 << src2val_ex0[4:0];
+        U_SLLW:    result_nq_ex0 = src1val_ex0 << src2val_ex0[4:0];
         U_SRL:     result_nq_ex0 = src1val_ex0 >> src2val_ex0[4:0];
+        U_SRLW:    result_nq_ex0 = src1val_ex0 >> src2val_ex0[4:0];
         U_SRA:     result_nq_ex0 = src1val_signed_ex0 >>> src2val_ex0[4:0];
+        U_SRAW:    result_nq_ex0 = src1val_signed_ex0 >>> src2val_ex0[4:0];
         U_SLT:     result_nq_ex0 = src1val_signed_ex0 < src2val_signed_ex0 ? t_rv_reg_data'(1) : t_rv_reg_data'(0);
         U_SLTU:    result_nq_ex0 = src1val_ex0 < src2val_ex0 ? t_rv_reg_data'(1) : t_rv_reg_data'(0);
         U_LUI:     result_nq_ex0 = src2val_ex0;

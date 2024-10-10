@@ -5,7 +5,7 @@
 `include "vroom_macros.sv"
 
 module ialu
-    import instr::*, instr_decode::*;
+    import instr::*, instr_decode::*, gen_funcs::*;
 (
     input  logic         clk,
     input  logic         reset,
@@ -23,6 +23,8 @@ module ialu
 // Nets
 //
 
+t_rv_reg_data result_nq_ex0;
+
 //
 // Logic
 //
@@ -35,26 +37,36 @@ logic signed [XLEN-1:0] src1val_signed_ex0; always_comb src1val_signed_ex0 = src
 logic signed [XLEN-1:0] src2val_signed_ex0; always_comb src2val_signed_ex0 = src2val_ex0;
 
 always_comb begin
-    result_ex0 = '0;
+    result_nq_ex0 = '0;
     resvld_ex0 = iss_ex0;
     unique case (uinstr_ex0.uop)
-        U_ADD:     result_ex0 = src1val_ex0 + src2val_ex0;
-        U_ADDW:    result_ex0 = src1val_ex0 + src2val_ex0;
-        U_SUB:     result_ex0 = src1val_ex0 - src2val_ex0;
-        U_AND:     result_ex0 = src1val_ex0 & src2val_ex0;
-        U_XOR:     result_ex0 = src1val_ex0 ^ src2val_ex0;
-        U_OR:      result_ex0 = src1val_ex0 | src2val_ex0;
-        U_SLL:     result_ex0 = src1val_ex0 << src2val_ex0[4:0];
-        U_SRL:     result_ex0 = src1val_ex0 >> src2val_ex0[4:0];
-        U_SRA:     result_ex0 = src1val_signed_ex0 >>> src2val_ex0[4:0];
-        U_SLT:     result_ex0 = src1val_signed_ex0 < src2val_signed_ex0 ? t_rv_reg_data'(1) : t_rv_reg_data'(0);
-        U_SLTU:    result_ex0 = src1val_ex0 < src2val_ex0 ? t_rv_reg_data'(1) : t_rv_reg_data'(0);
-        U_LUI:     result_ex0 = src2val_ex0;
-        U_AUIPC:   result_ex0 = src2val_ex0 + uinstr_ex0.pc;
+        U_ADD:     result_nq_ex0 = src1val_ex0 + src2val_ex0;
+        U_ADDW:    result_nq_ex0 = src1val_ex0 + src2val_ex0;
+        U_SUB:     result_nq_ex0 = src1val_ex0 - src2val_ex0;
+        U_AND:     result_nq_ex0 = src1val_ex0 & src2val_ex0;
+        U_XOR:     result_nq_ex0 = src1val_ex0 ^ src2val_ex0;
+        U_OR:      result_nq_ex0 = src1val_ex0 | src2val_ex0;
+        U_SLL:     result_nq_ex0 = src1val_ex0 << src2val_ex0[4:0];
+        U_SRL:     result_nq_ex0 = src1val_ex0 >> src2val_ex0[4:0];
+        U_SRA:     result_nq_ex0 = src1val_signed_ex0 >>> src2val_ex0[4:0];
+        U_SLT:     result_nq_ex0 = src1val_signed_ex0 < src2val_signed_ex0 ? t_rv_reg_data'(1) : t_rv_reg_data'(0);
+        U_SLTU:    result_nq_ex0 = src1val_ex0 < src2val_ex0 ? t_rv_reg_data'(1) : t_rv_reg_data'(0);
+        U_LUI:     result_nq_ex0 = src2val_ex0;
+        U_AUIPC:   result_nq_ex0 = src2val_ex0 + uinstr_ex0.pc;
         default: begin
             resvld_ex0 = 1'b0;
-            result_ex0 = '0;
+            result_nq_ex0 = '0;
         end
+    endcase
+end
+
+always_comb begin
+    unique casez (uinstr_ex0.dst.opsize)
+        SZ_1B:   result_ex0 = sext_funcs#(.IWIDTH( 8), .OWIDTH(XLEN))::sext(result_nq_ex0[ 7:0]);
+        SZ_2B:   result_ex0 = sext_funcs#(.IWIDTH(16), .OWIDTH(XLEN))::sext(result_nq_ex0[15:0]);
+        SZ_4B:   result_ex0 = sext_funcs#(.IWIDTH(32), .OWIDTH(XLEN))::sext(result_nq_ex0[31:0]);
+        SZ_8B:   result_ex0 = sext_funcs#(.IWIDTH(64), .OWIDTH(XLEN))::sext(result_nq_ex0[63:0]);
+        default: result_ex0 = result_nq_ex0;
     endcase
 end
 

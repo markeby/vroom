@@ -16,7 +16,11 @@ run_test(){
     local cmd="${RUNSIM} ${test_name} --sim-args '+load_disasm +preload:${TWD}/tests/${test_name}/test.pre     +boot_vector:0000000080000000 ${SIM_FLAGS}'"
 
     mkdir -p "${rundir}"
-    echo "$cmd" > "${rundir}/runit.sh"
+    echo "rm -f PASS FAIL UNKNOWN" > "${rundir}/runit.sh"
+    echo "$cmd" >> "${rundir}/runit.sh"
+    echo "if [[ -e FAIL ]]; then echo 'FAIL'; fi" >> "${rundir}/runit.sh"
+    echo "if [[ -e PASS ]]; then echo 'PASS'; fi" >> "${rundir}/runit.sh"
+    echo "if [[ ! ( -e PASS || -e FAIL ) ]]; then echo 'UNKNOWN'; fi" >> "${rundir}/runit.sh"
     chmod +x "${rundir}/runit.sh"
     pushd "${rundir}" >& /dev/null
     ./runit.sh

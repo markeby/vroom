@@ -20,6 +20,8 @@ loop_back_x4:
     sll x5, x4, 1
 
     mv x6, x5
+    add x7, x4, x5
+    add x7, x5, x6
     addw x7, x4, x5
     addw x7, x5, x6
     add x7, x4, x5

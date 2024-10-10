@@ -10,15 +10,21 @@ _start:
     li x3, 0x01
 
     li x5, 6
-loop_back_x4:
     li x4, 0xaaa
-    sll x4, x4, 12
+loop_back_x4:
+    sll x4, x4, 10
     add x4, x4, 0x2aa
     add x5, x5, -1
     bnez x5, loop_back_x4
 
+    sll x5, x4, 1
+
     mv x6, x5
+    addw x7, x4, x5
     addw x7, x5, x6
+    add x7, x4, x5
+    add x7, x5, x6
+    add x8, x5, x6
 
 pass:
     li t0, 1

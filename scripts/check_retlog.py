@@ -53,21 +53,52 @@ class RetlogRec(AbstractInstrRec):
     def __init__(self, line: str):
         super().__init__(lines=[line], label=None)
         (time,cclk,_,*spl) = line.split()
-        #pp.pprint(spl)
-        self.kvs = dict([kv.split(":") for kv in spl])
+        self.lines = [line]
+        self._is_reg_wr = False
+        self._reg_wrs = {}
+        self._process_line(line)
+        self._complete = False
+        self._process_line(line)
+
+    def _process_line(self, line: str) -> None:
+        self.lines.append(line)
+        (time,cclk,_,*spl) = line.split()
+
+        kvs = dict([kv.split(":") for kv in spl])
+        is_reg_wr = kvs.get("reg_wr","0") == "1"
+        self._is_reg_wr |= is_reg_wr
+        if is_reg_wr:
+            self._reg_wrs[int(kvs.get("reg"))] = int(kvs.get("reg_data"),16)
+        if (pc := kvs.get("pc",None)) != None:
+            self._pc = int(pc,16)
+
+        if kvs.get("eom","1") == "1":
+            self._complete = True
+
+    def add_line(self, line: str) -> None:
+        self.lines.append(line)
+        self._process_line(line)
+
+    def is_complete(self) -> bool:
+        return self._complete
 
     def is_reg_wr(self) -> bool:
-        is_reg_wr = self.kvs.get("reg_wr","0")
-        return int(is_reg_wr) > 0
+        return self._is_reg_wr
+
+    def get_reg_wr_index(self) -> str:
+        gprs = [k for k in self._reg_wrs.keys() if k<32]
+        if len(gprs) != 1:
+            raise("Expecting only one gpr!")
+        return gprs[0]
 
     def get_reg_wr_name(self) -> str:
-        return "x" + self.kvs.get("reg")
+        return "x" + str(self.get_reg_wr_index())
 
     def get_reg_wr_data(self) -> int:
-        return int(self.kvs.get("reg_data"),16)
+        return self._reg_wrs[self.get_reg_wr_index()]
 
     def pc(self) -> int:
-        return int(self.kvs.get("pc"),16)
+        return self._pc
 
 class SpikeRec(AbstractInstrRec):
     def is_reg_wr(self) -> bool:
@@ -109,7 +140,12 @@ def read_retire_log(retlog):
     recs = []
     label = None
     for line in retlog:
-        recs.append(RetlogRec(line=line))
+        if len(recs) > 0 and not recs[-1].is_complete():
+            recs[-1].add_line(line)
+            print(f"APPEND: {line.strip()}")
+        else:
+            recs.append(RetlogRec(line=line))
+            print(f"NEW:    {line.strip()}")
     return recs
 
 def croak(msg: str) -> None:
@@ -123,9 +159,6 @@ def main(args):
 
     ### Skip spike_recs to _start
     spike_recs = spike_recs[5:]
-
-    if (len(spike_recs) != len(retire_recs)):
-        croak(f"Wrong number of instructions retired!  expected:{len(spike_recs)} actual:{len(retire_recs)}")
 
     pairs = zip(spike_recs, retire_recs)
     for (s,r) in pairs:
@@ -145,6 +178,9 @@ def main(args):
                 croak(f"Reg destination mismatch!  expected:{s.get_reg_wr_name()} actual:{r.get_reg_wr_name()}")
             if (s.get_reg_wr_data() != r.get_reg_wr_data()):
                 croak(f"Reg data mismatch!  expected:{hex(s.get_reg_wr_data())} actual:{hex(r.get_reg_wr_data())}")
+
+    if (len(spike_recs) != len(retire_recs)):
+        croak(f"Wrong number of instructions retired!  expected:{len(spike_recs)} actual:{len(retire_recs)}")
 
     # lines = []
     # for line in args.fn_dis:

@@ -64,6 +64,10 @@ loop_back_x4:
     srai x9, x5, 0x8
     srai x9, x5, 0x10
 
+    li x1, 0x5
+    li x2, 0xa
+    mul x10, x1, x2
+
 pass:
     li t0, 1
     sd t0, tohost, t1

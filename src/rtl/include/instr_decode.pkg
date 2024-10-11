@@ -480,6 +480,7 @@ package instr_decode;
                 //f_decode_rv_instr.dst.optype    = OP_INVD;
                 f_decode_rv_instr.trap_to_ucode = 1'b1;
                 f_decode_rv_instr.rom_addr      = ROM_ENT_MUL;
+                f_decode_rv_instr.eom           = 1'b0;
             end
             default: begin
             end

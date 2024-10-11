@@ -184,10 +184,11 @@ task cd_print_rec_retlog(t_cd_inst rec);
     end else begin
         reg_upd = $sformatf("reg_wr:0");
     end
-    `PMSG(RETLOG, ("time:%0t cclk:%0d pc:%0h %s %s",
+    `PMSG(RETLOG, ("time:%0t cclk:%0d pc:%0h eom:%0d %s %s",
         $time(),
         top.cclk_count,
         rec.UCODE.uinstr_uc0.SIMID.pc,
+        rec.UCODE.uinstr_uc0.eom,
         reg_upd,
         format_simid(rec.SIMID)
         ));

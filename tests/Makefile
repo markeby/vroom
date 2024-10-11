@@ -17,7 +17,7 @@ run: $(LOG)
 	$(DIS2PRE) $< $@
 
 %.o: %.s
-	riscv64-unknown-elf-gcc -c -march=rv64i -mabi=lp64 -ggdb -o $@ $<
+	riscv64-unknown-elf-gcc -c -march=rv64im -mabi=lp64 -ggdb -o $@ $<
 	#riscv64-unknown-elf-gcc -c -march=rv64imafdc -mabi=lp64 -ggdb -o $@ $<
 
 %.elf: %.o %.ld

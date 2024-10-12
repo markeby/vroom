@@ -73,8 +73,7 @@ always_comb begin
         unique casez(fsm)
             UC_IDLE:     if (trap_now_de1                                           ) fsm_nxt = UC_FETCH;
                     else if (br_mispred_ql_ex0                                      ) fsm_nxt = UC_PDG_RSM;
-            UC_FETCH:    if (nuke_rb1.valid & nuke_rb1.nuke_useq                    ) fsm_nxt = UC_PDG_RSM;
-                    else if (br_mispred_ql_ex0                                      ) fsm_nxt = UC_PDG_RSM;
+            UC_FETCH:    if (br_mispred_ql_ex0                                      ) fsm_nxt = UC_PDG_RSM;
                     else if (valid_uc0 & rename_ready_rn0 & uinstr_uc0.eom          ) fsm_nxt = UC_IDLE;
             UC_PDG_RSM:  if (resume_fetch_rbx &  br_mispred_resume_to_ucrom         ) fsm_nxt = UC_FETCH;
                     else if (resume_fetch_rbx & ~br_mispred_resume_to_ucrom         ) fsm_nxt = UC_IDLE;

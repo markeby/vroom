@@ -75,6 +75,28 @@ Number  Privilege  Name     Description
 0xC01   Read-only  time     Timer for RDTIME instruction.
 0xC02   Read-only  instret  Instructions-retired counter for RDINSTRET instruction.
 
+UCODE/FE interactions
+----------------------
+
+When ucode sees a `trap_to_ucode` instruction, its state machine becomes active
+and it begins asserting `uc_trapped_uc0` to the fetch and decode units.  This
+causes the fetch unit to reset its PC to `uc_resume_pc_uc0` and suppress its
+valid bit until `uc_trapped_uc0` deasserts, at which point it will begin
+fetching again.  It also causes the decode unit to flush itself.
+
+Branch correction
+----------------------
+
+When a branch is mispredicted and needs to be corrected, we have to know several things:
+
+1. what is the PC of the next instruction?
+2. are we resuming from ucode rom?  (i.e. was the mispredicted branch a ucbr?)
+3. if the branch was a ucbr, what is the USPC of next ROM instruction?
+
+When any branch is mispredicted -- regardless of type -- both FE and US go into a PDG_RESUME state.  The misprediction packet indicates both next PC and next USPC, as well as an indication of whether the new target is from the PC or the USPC.  USPC is only valid if the `resume_from_ucode` bit is set.
+
+When the ROB finishes its RAT unwind, it sends a resume_fetch packet to both FE and US.
+
 TODOs
 --------
 

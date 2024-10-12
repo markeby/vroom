@@ -119,6 +119,7 @@ t_uinstr uc_uinstr_uc0;
 always_comb begin
     uc_uinstr_uc0 = ROM[useq_pc];
     uc_uinstr_uc0.pc = trapped_uinstr.pc;
+    uc_uinstr_uc0.pc_nxt = trapped_uinstr.pc + 4;
 
     // Source1
     if (uc_uinstr_uc0.src1.optype == OP_TRAP_SRC1) uc_uinstr_uc0.src1 = trapped_uinstr.src1;

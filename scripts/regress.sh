@@ -13,7 +13,7 @@ echo "Regression directory: ${REGRESS}"
 run_test(){
     local test_name="$1"
     local rundir="${REGRESS}/${test_name}"
-    local cmd="${RUNSIM} ${test_name} --sim-args '+load_disasm +preload:${TWD}/tests/${test_name}/test.pre     +boot_vector:0000000080000000 ${SIM_FLAGS}'"
+    local cmd="${RUNSIM} ${test_name} --sim-args '+load_disasm +preload:./test/test.pre     +boot_vector:0000000080000000 ${SIM_FLAGS}'"
 
     mkdir -p "${rundir}"
     echo "rm -f PASS FAIL UNKNOWN" > "${rundir}/runit.sh"
@@ -23,6 +23,7 @@ run_test(){
     echo "if [[ ! ( -e PASS || -e FAIL ) ]]; then echo 'UNKNOWN'; fi" >> "${rundir}/runit.sh"
     chmod +x "${rundir}/runit.sh"
     pushd "${rundir}" >& /dev/null
+    ln -s ${TWD}/tests/${test_name}/ "test"
     ./runit.sh
     popd >& /dev/null
 }

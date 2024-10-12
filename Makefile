@@ -38,6 +38,8 @@ clean:
 	rm -rf obj_dir/
 	rm -f waves.fst
 	rm -f *.log
+	rm -f regress.latest
+	rm -rf regress.*
 
 .PHONY: gtkwave
 gtkwave:

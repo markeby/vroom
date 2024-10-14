@@ -9,6 +9,12 @@ _start:
     li x2, 0x555
     li x3, 0x01
 
+    la x19, const_buffer
+    ld x20, 0(x19)
+    add x20, x20, 0x555
+    sd x20, 8(x19)
+    ld x21, 8(x19)
+
     li x5, 6
     li x4, 0xaaa
 loop_back_x4:

@@ -24,7 +24,7 @@ run: $(LOG)
 	riscv64-unknown-elf-gcc -nostdlib -T $*.ld -o $@ $<
 
 %.dis: %.elf
-	riscv64-unknown-elf-objdump -d $< > $@
+	riscv64-unknown-elf-objdump -D $< > $@
 
 %.log: %.elf
 	spike -l --log-commits --log=$@ -m0x80000000:0x100000 $< | tee output.txt

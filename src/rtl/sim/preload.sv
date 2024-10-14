@@ -200,14 +200,15 @@ task preload_from_irom();
     end
 endtask
 
-localparam MAX_PRELOAD_WORDS = 128;
+localparam MAX_PRELOAD_WORDS = 1024;
+localparam MAX_PRELOAD_BYTES = MAX_PRELOAD_WORDS*4;
 
 task read_disasm();
     string fn;
-    t_word preload_read_buffer [MAX_PRELOAD_WORDS*2-1:0];
+    t_word preload_read_buffer [MAX_PRELOAD_BYTES*2-1:0];
 
-    for (int i=0; i<MAX_PRELOAD_WORDS*2; i+=2) begin
-        preload_read_buffer[i] = t_word'(1); // addresses must be even, so this is our "stop preloading" sentinal
+    for (int i=0; i<MAX_PRELOAD_BYTES*2; i+=2) begin
+        preload_read_buffer[i] = '1; // preloading bytes, so this is our 'stop preloading' marker
     end
 
     if (!$value$plusargs("preload:%s", fn)) begin
@@ -216,11 +217,11 @@ task read_disasm();
     $readmemh(fn, preload_read_buffer);
 
     begin : preload_loop
-        for (int i=0; i<MAX_PRELOAD_WORDS*2; i+=2) begin
-            if(preload_read_buffer[i][0]) begin
+        for (int i=0; i<MAX_PRELOAD_BYTES*2; i+=2) begin
+            if(preload_read_buffer[i+1] == '1) begin
                 disable preload_loop;
             end
-            cache_sim::f_wr_l2data_word(preload_read_buffer[i+1], preload_read_buffer[i]);
+            cache_sim::f_wr_l2data_byte(t_byte'(preload_read_buffer[i+1][7:0]), preload_read_buffer[i]);
         end
     end
 

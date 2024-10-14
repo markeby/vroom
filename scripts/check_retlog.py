@@ -142,10 +142,10 @@ def read_retire_log(retlog):
     for line in retlog:
         if len(recs) > 0 and not recs[-1].is_complete():
             recs[-1].add_line(line)
-            print(f"APPEND: {line.strip()}")
+            #print(f"APPEND: {line.strip()}")
         else:
             recs.append(RetlogRec(line=line))
-            print(f"NEW:    {line.strip()}")
+            #print(f"NEW:    {line.strip()}")
     return recs
 
 def croak(msg: str) -> None:

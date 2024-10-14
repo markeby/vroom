@@ -160,6 +160,9 @@ end
 
 `DFF_EN(stall_after_n_instr, (stall_after_n_instr - 1), clk, (valid_fe1 & (stall_after_n_instr > 0)))
 assign fake_stall_now = stall_after_n_instr_en & (stall_after_n_instr == 0);
+
+logic[$bits(t_rv_instr)-1:0] instr_flat_inst;
+assign instr_flat_inst={>>{instr_fe1.instr}};
 `endif
 
 always_comb begin

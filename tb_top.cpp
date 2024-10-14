@@ -10,7 +10,7 @@
 #include "Vtop.h"
 #include "Vtop___024root.h"
 
-#define MAX_SIM_TIME 50000
+#define MAX_SIM_TIME 100000
 vluint64_t sim_time=0;
 
 double sc_time_stamp() {

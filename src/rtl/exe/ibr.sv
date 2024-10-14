@@ -69,7 +69,7 @@ end
 assign pcnxt_ex0   = uinstr_ex0.pc_nxt;
 assign usnxt_ex0   = uinstr_ex0.rom_addr + 1;
 assign pc_or_us_nxt_ex0 = ucbr_ex0 ? t_paddr'(usnxt_ex0) : pcnxt_ex0;
-assign result_ex0  = pc_or_us_nxt_ex0;
+assign result_ex0  = uinstr_ex0.pc + 4;
 
 always_comb begin
     unique casez (uinstr_ex0.uop)

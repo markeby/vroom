@@ -75,6 +75,9 @@ end
 `endif
 
 `ifdef ASSERT
+    for (genvar p=0; p<NUM_PORTS; p++) begin : g_chk_align
+        `VASSERT(a_unaligned_l2_req, all_req_pkts[p].valid, ~|all_req_pkts[p].addr[5:0], "Unaligned request packet to L2")
+    end
 // `VASSERT(a_alloc_when_valid, e_alloc_mm0, ~e_valid, "Allocated loadq entry while valid")
 `endif
 

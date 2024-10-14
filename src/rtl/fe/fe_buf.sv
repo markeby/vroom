@@ -186,6 +186,7 @@ always_comb begin
     fb_ic_req_nnn = '0;
     fb_ic_req_nnn.valid = |e_ic_req_rq_nnn;
     fb_ic_req_nnn.addr  = e_static_nnn[c_ic_req_sl_nnn].req.addr;
+    fb_ic_req_nnn.addr[5:0] = '0;
     fb_ic_req_nnn.id    = t_mem_id'(c_ic_req_sl_nnn);
 end
 

@@ -26,30 +26,35 @@ localparam NUM_RS_ENTS = 32;
 typedef struct packed {
     logic       valid;
     int         clk;
+    time        tick;
     t_instr_pkt instr_fe1;
 } t_cd_fetch;
 
 typedef struct packed {
     logic       valid;
     int         clk;
+    time        tick;
     t_uinstr    uinstr_de1;
 } t_cd_decode;
 
 typedef struct packed {
     logic       valid;
     int         clk;
+    time        tick;
     t_uinstr    uinstr_uc0;
 } t_cd_ucode;
 
 typedef struct packed {
     logic        valid;
     int          clk;
+    time        tick;
     t_rename_pkt rename_rn1;
 } t_cd_rename;
 
 typedef struct packed {
     logic         valid;
     int           clk;
+    time        tick;
     int           port;
     t_disp_pkt    disp_pkt_ra1;
     logic[$clog2(NUM_RS_ENTS)-1:0] rs_ent_ra1;
@@ -58,6 +63,7 @@ typedef struct packed {
 typedef struct packed {
     logic        valid;
     int          clk;
+    time        tick;
     t_iss_pkt    iss_pkt_rs2;
     logic        mm_iss_rs2;
 } t_cd_rs;
@@ -65,18 +71,21 @@ typedef struct packed {
 typedef struct packed {
     logic        valid;
     int          clk;
+    time        tick;
     t_prf_wr_pkt iprf_wr_pkt_ro0;
 } t_cd_result;
 
 typedef struct packed {
     logic       valid;
     int         clk;
+    time        tick;
     t_nuke_pkt  nuke_rb1;
 } t_cd_retire;
 
 typedef struct packed {
     logic        valid;
     int          clk;
+    time        tick;
     logic        ldq_alloc_rs0;
     logic        stq_alloc_rs0;
     t_ldq_static ldq_alloc_static_rs0;
@@ -151,14 +160,14 @@ task cd_print_rec(t_cd_inst rec);
     `PMSG(CDBG, ($sformatf("  dst %s", f_describe_src_dst(rec.RS.iss_pkt_rs2.uinstr.dst .optype, rec.RS.iss_pkt_rs2.uinstr.dst .opreg, rec.RS.iss_pkt_rs2.uinstr.dst .opsize, rec.RENAME.rename_rn1.pdst , rec.RESULT.iprf_wr_pkt_ro0.data))))
     `PMSG(CDBG, (""))
     if (rec.FETCH.valid)
-        `PMSG(CDBG, ("    Fetch  -> Decode @ %-d", rec.FETCH.clk))
+        `PMSG(CDBG, ("    Fetch  -> Decode @[%-d] %-d", rec.FETCH.tick, rec.FETCH.clk))
     if (rec.DECODE.valid)
-        `PMSG(CDBG, ("    Decode -> Ucode  @ %-d", rec.DECODE.clk))
-    `PMSG(CDBG, ("    Ucode  -> Rename @ %-d", rec.UCODE.clk))
-    `PMSG(CDBG, ("    Rename -> Alloc  @ %-d", rec.RENAME.clk))
-    `PMSG(CDBG, ("    Alloc  -> RS.%0d   @ %-d", rec.ALLOC.port, rec.ALLOC.clk))
-    `PMSG(CDBG, ("              Result @ %-d", rec.RESULT.clk))
-    `PMSG(CDBG, ("              Retire @ %-d %s", rec.RETIRE.clk, rec.RETIRE.nuke_rb1.valid ? "NUKE!!!" : ""))
+        `PMSG(CDBG, ("    Decode -> Ucode  @[%-d] %-d", rec.DECODE.tick, rec.DECODE.clk))
+    `PMSG(CDBG, ("    Ucode  -> Rename @[%-d] %-d", rec.UCODE.tick, rec.UCODE.clk))
+    `PMSG(CDBG, ("    Rename -> Alloc  @[%-d] %-d", rec.RENAME.tick, rec.RENAME.clk))
+    `PMSG(CDBG, ("    Alloc  -> RS.%0d   @[%-d] %-d", rec.ALLOC.port, rec.ALLOC.tick, rec.ALLOC.clk))
+    `PMSG(CDBG, ("              Result @[%-d] %-d", rec.RESULT.tick, rec.RESULT.clk))
+    `PMSG(CDBG, ("              Retire @[%-d] %-d  %s", rec.RETIRE.tick, rec.RETIRE.clk, rec.RETIRE.nuke_rb1.valid ? "NUKE!!!" : ""))
     `PMSG(CDBG, (""))
     if (rec.UCODE.uinstr_uc0.dst.optype == OP_REG) begin
         `PMSG(CDBG, ("Register Updates"))
@@ -203,6 +212,7 @@ task cd_fetch();
 
     new_inst.FETCH.valid     = 1'b1;
     new_inst.FETCH.clk       = top.cclk_count;
+    new_inst.FETCH.tick      = $time();
     new_inst.FETCH.instr_fe1 = top.core.instr_fe1;
 
     INSTQ.push_back(new_inst);
@@ -232,6 +242,7 @@ task cd_decode();
     end
     INSTQ[i].DECODE.valid = 1'b1;
     INSTQ[i].DECODE.clk = top.cclk_count;
+    INSTQ[i].DECODE.tick= $time();
     INSTQ[i].DECODE.uinstr_de1 = top.core.uinstr_de1;
 endtask
 
@@ -252,6 +263,7 @@ task cd_ucode();
     end
     INSTQ[i].UCODE.valid = 1'b1;
     INSTQ[i].UCODE.clk = top.cclk_count;
+    INSTQ[i].UCODE.tick= $time();
     INSTQ[i].UCODE.uinstr_uc0 = top.core.uinstr_uc0;
 endtask
 
@@ -264,6 +276,7 @@ task cd_rename();
     end
     INSTQ[i].RENAME.valid = 1'b1;
     INSTQ[i].RENAME.clk = top.cclk_count;
+    INSTQ[i].RENAME.tick= $time();
     INSTQ[i].RENAME.rename_rn1 = top.core.rename_rn1;
 endtask
 
@@ -276,6 +289,7 @@ task cd_alloc();
     end
     INSTQ[i].ALLOC.valid = 1'b1;
     INSTQ[i].ALLOC.clk = top.cclk_count;
+    INSTQ[i].ALLOC.tick= $time();
     INSTQ[i].ALLOC.disp_pkt_ra1 = top.core.alloc.disp_pkt_rs0;
     INSTQ[i].ALLOC.rs_ent_ra1   = top.core.rs.q_alloc_id_rs0;
 endtask
@@ -289,6 +303,7 @@ task cd_rs();
     end
     INSTQ[i].RS.valid = 1'b1;
     INSTQ[i].RS.clk = top.cclk_count;
+    INSTQ[i].RS.tick= $time();
     INSTQ[i].RS.iss_pkt_rs2 = top.core.rs.iss_pkt_rs2;
     INSTQ[i].RS.mm_iss_rs2 = top.core.rs.mm_iss_rs2;
 endtask
@@ -326,6 +341,7 @@ task cd_result_mm();
     end
     INSTQ[i].RESULT.valid = 1'b1;
     INSTQ[i].RESULT.clk = top.cclk_count;
+    INSTQ[i].RESULT.tick= $time();
     INSTQ[i].RESULT.iprf_wr_pkt_ro0 = top.core.iprf_wr_pkt_mm5;
 endtask
 
@@ -338,6 +354,7 @@ task cd_result_eint();
     end
     INSTQ[i].RESULT.valid = 1'b1;
     INSTQ[i].RESULT.clk = top.cclk_count;
+    INSTQ[i].RESULT.tick= $time();
     INSTQ[i].RESULT.iprf_wr_pkt_ro0 = top.core.iprf_wr_pkt_ex1;
 endtask
 
@@ -359,6 +376,7 @@ task cd_retire();
     end
     INSTQ[i].RETIRE.valid = 1'b1;
     INSTQ[i].RETIRE.clk = top.cclk_count;
+    INSTQ[i].RETIRE.tick= $time();
     INSTQ[i].RETIRE.nuke_rb1 = core.rob.nuke_rb1;
     cd_print_rec(INSTQ[i]);
     cd_print_rec_retlog(INSTQ[i]);

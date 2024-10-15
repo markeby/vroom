@@ -51,7 +51,7 @@ logic    valid_ql_ra0;
 // Logic
 //
 
-assign valid_ql_ra0 = valid_ra0 & alloc_ready_ra0;
+assign valid_ql_ra0 = valid_ra0;
 
 assign src_addr_ra0[SRC1] = uinstr_ra0.src1.opreg;
 assign src_addr_ra0[SRC2] = uinstr_ra0.src2.opreg;

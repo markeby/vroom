@@ -41,7 +41,7 @@ package common;
     localparam FE_FB_NUM_ENTS     = 4;
     localparam FE_FB_NUM_ENTS_LG2 = $clog2(FE_FB_NUM_ENTS);
 
-    localparam RAT_ISSUE_PIPE_LATENCY = 1;
+    localparam RAT_ISSUE_PIPE_LATENCY = 2;
 
     typedef logic[PA_SZ-1:0]    t_paddr;
     typedef logic[VA_SZ-1:0]    t_vaddr;

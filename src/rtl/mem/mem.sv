@@ -18,8 +18,8 @@ module mem
     output logic              ldq_idle,
     output logic              stq_idle,
 
-    output logic              ldq_full,
-    output logic              stq_full,
+    output logic              ldq_stall_rs0,
+    output logic              stq_stall_rs0,
 
     output t_mem_req_pkt      flq_mem_req_pkt,
     input  t_mem_rsp_pkt      flq_mem_rsp_pkt,
@@ -92,7 +92,8 @@ loadq loadq (
     .reset,
     .nuke_rb1,
     .idle ( ldq_idle ),
-    .full ( ldq_full ),
+    .full ( ),
+    .stall_rs0 ( ldq_stall_rs0 ),
 
     .stq_e_valid,
 
@@ -120,7 +121,8 @@ storeq storeq (
     .nuke_rb1,
     .oldest_robid,
     .idle ( stq_idle ),
-    .full ( stq_full ),
+    .full ( ),
+    .stall_rs0 ( stq_stall_rs0 ),
     .e_valid( stq_e_valid ),
 
     .disp_valid_rs0,

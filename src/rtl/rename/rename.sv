@@ -115,6 +115,11 @@ prf #(.NUM_ENTRIES(IPRF_NUM_ENTS), .NUM_REG_READS(IPRF_NUM_READS), .NUM_REG_WRIT
     .pdst_old_rn1   ( rename_nq_rn1.pdst_old                            )
 );
 
+`ifdef ASSERT
+    `VASSERT(a_src1_bad_pend, valid_nq_rn1 & uinstr_nq_rn1.src1.optype != OP_REG, ~rename_nq_rn1.psrc1_pend, $sformatf("Non-reg pending out of RAT (src1) %s", format_simid(uinstr_nq_rn1.SIMID)))
+    `VASSERT(a_src2_bad_pend, valid_nq_rn1 & uinstr_nq_rn1.src2.optype != OP_REG, ~rename_nq_rn1.psrc2_pend, $sformatf("Non-reg pending out of RAT (src2) %s", format_simid(uinstr_nq_rn1.SIMID)))
+`endif
+
 assign robid_rnx[RN0] = next_robid_rn0;
 assign rename_nq_rn1.robid = robid_rnx[RN1];
 

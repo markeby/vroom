@@ -17,6 +17,7 @@ module loadq
     input  t_nuke_pkt       nuke_rb1,
     output logic            idle,
     output logic            full,
+    output logic            stall_rs0,
 
     input  logic[STQ_NUM_ENTRIES-1:0]
                             stq_e_valid,
@@ -125,6 +126,7 @@ end
 
 assign idle = ~|e_valid;
 assign full =  &e_valid;
+assign stall_rs0 = $countones(e_valid) >= (LDQ_NUM_ENTRIES - RAT_ISSUE_PIPE_LATENCY);
 
 //
 // Debug

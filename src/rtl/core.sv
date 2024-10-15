@@ -88,8 +88,8 @@ t_mem_rsp_pkt  l2_ic_rsp_pkt;
 logic ldq_idle;
 logic stq_idle;
 
-logic ldq_full;
-logic stq_full;
+logic ldq_stall_rs0;
+logic stq_stall_rs0;
 
 //
 // Blocks
@@ -179,8 +179,8 @@ alloc alloc (
     .reset,
     .nuke_rb1,
     .alloc_ready_ra0,
-    .ldq_full,
-    .stq_full,
+    .ldq_stall_rs0,
+    .stq_stall_rs0,
     .valid_ra0  ( valid_rn1  ),
     .uinstr_ra0 ( uinstr_rn1 ),
     .rename_ra0 ( rename_rn1 ),
@@ -246,8 +246,8 @@ mem mem (
     .oldest_robid,
     .ldq_idle,
     .stq_idle,
-    .ldq_full,
-    .stq_full,
+    .ldq_stall_rs0,
+    .stq_stall_rs0,
 
     .disp_valid_rs0,
     .disp_pkt_rs0,

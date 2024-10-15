@@ -149,8 +149,11 @@ end
 
 `DFF(rdmap_psrc_rd1, rdmap_psrc_rd0, clk);
 
+logic rdmap_nq_rd1[NUM_MAP_READS-1:0];
+`DFF(rdmap_nq_rd1, rdmap_nq_rd0, clk)
+
 for (genvar r=0; r<NUM_MAP_READS; r++) begin : g_pend_read
-    assign rdmap_pend_rd1[r]       = pend_list_nxt[rdmap_psrc_rd1[r].idx];
+    assign rdmap_pend_rd1[r]       = pend_list_nxt[rdmap_psrc_rd1[r].idx] & rdmap_nq_rd1[r];
 end
 
 //
@@ -193,9 +196,6 @@ end
 
 `ifdef SIMULATION
 
-logic rdmap_nq_rd1_inst [NUM_MAP_READS-1:0];
-`DFF(rdmap_nq_rd1_inst, rdmap_nq_rd0, clk)
-
 t_gpr_id rdmap_gpr_rd1_inst [NUM_MAP_READS-1:0];
 `DFF(rdmap_gpr_rd1_inst, rdmap_gpr_rd0, clk)
 
@@ -209,7 +209,7 @@ always @(posedge clk) begin
     end
 
     for (int r=0; r<NUM_MAP_READS; r++) begin
-        if (rdmap_nq_rd1_inst[r]) begin
+        if (rdmap_nq_rd1[r]) begin
             `UINFO(simid_rd0_inst, ("unit:RN func:rat_read gpr_id:%s psrc:%s psrc_pend:%0d", f_describe_gpr_addr(rdmap_gpr_rd1_inst[r]), f_describe_prf(rdmap_psrc_rd1[r]), rdmap_pend_rd1[r]))
         end
     end

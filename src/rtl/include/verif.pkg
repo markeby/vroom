@@ -19,6 +19,11 @@ package verif;
         typedef struct packed {
             t_simid_record      record;
             t_simid_spawn_point spawn;
+        } t_simid_key_struct;
+
+        typedef union packed {
+            t_simid_key_struct                   s;
+            logic[$bits(t_simid_key_struct)-1:0] flat;
         } t_simid_key;
 
         typedef struct packed {
@@ -35,11 +40,16 @@ package verif;
             return $sformatf("txid:%05h pid:%05h lid:%05h", simid.txid, simid.pid, simid.lid);
         endfunction
 
+        function t_simid_key make_simid_key(t_simid_record rec, t_simid_spawn_point spawn);
+            make_simid_key.s.record = rec;
+            make_simid_key.s.spawn  = spawn;
+        endfunction
+
         `define SIMID_CREATE_RHS(SPAWN,FID,PC) \
-            '{fid:FID, pc:PC, txid:'{spawn:SPAWN, record:t_simid_record'(FID)}, pid: t_simid_key'('0), lid: '{spawn:SPAWN, record:t_simid_record'(FID)}}
+            '{fid:FID, pc:PC, txid:make_simid_key(t_simid_record'(FID), SPAWN), pid: t_simid_key'('0), lid: make_simid_key(t_simid_record'(FID), SPAWN)}
 
         `define SIMID_SPAWN_RHS(PARENT,SPAWN,RECORD) \
-            '{fid:PARENT.fid, pc:PARENT.pc, txid: PARENT.txid, pid: PARENT.lid, lid: '{spawn:SPAWN, record:RECORD}}
+            '{fid:PARENT.fid, pc:PARENT.pc, txid: PARENT.txid, pid: PARENT.lid, lid: make_simid_key(RECORD, SPAWN)}
 
         `define SIMID_SPAWN_CNTR(NAME,SPAWN_NOW,CLK,PARENT,SPAWN) \
             t_simid_record __simid_cntr_``NAME``; \

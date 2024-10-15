@@ -14,8 +14,8 @@ module alloc
     input  logic         reset,
     input  t_nuke_pkt    nuke_rb1,
 
-    input  logic         ldq_full,
-    input  logic         stq_full,
+    input  logic         ldq_stall_rs0,
+    input  logic         stq_stall_rs0,
 
     input  logic         valid_ra0,
     input  t_uinstr      uinstr_ra0,
@@ -72,7 +72,7 @@ assign valid_ra1 = valid_nq_ra1 & ~nuke_rb1.valid;
 logic stall_ra1;
 
 always_comb begin
-    disp_valid_rs0 = valid_ra1 & ~stall_ra1 & ~nuke_rb1.valid;
+    disp_valid_rs0 = valid_ra1 & ~nuke_rb1.valid;
 
     disp_pkt_rs0   = disp_pkt_ra1;
     if (uop_is_ldst(disp_pkt_ra1.uinstr.uop)) begin
@@ -82,7 +82,7 @@ end
 
 // Stall
 
-assign stall_ra1 = rs_stall_rs0 | ldq_full | stq_full;
+assign stall_ra1 = rs_stall_rs0 | ldq_stall_rs0 | stq_stall_rs0;
 
 assign alloc_ready_ra0 = ~stall_ra1;
 
@@ -93,8 +93,8 @@ assign alloc_ready_ra0 = ~stall_ra1;
 `ifdef SIMULATION
     always @(posedge clk) begin
         if (disp_valid_rs0) begin
-            `UINFO(disp_pkt_rs0.uinstr.SIMID, ("unit:RA robid:0x%0x pdst:0x%0x psrc1:0x%0x psrc2:0x%0x %s", 
-                disp_pkt_rs0.rename.robid, disp_pkt_rs0.rename.pdst, disp_pkt_rs0.rename.psrc1, disp_pkt_rs0.rename.psrc2, 
+            `UINFO(disp_pkt_rs0.uinstr.SIMID, ("unit:RA robid:0x%0x pdst:0x%0x psrc1:0x%0x psrc1_pend:%0d psrc2:0x%0x psrc2_pend:%0d %s",
+                disp_pkt_rs0.rename.robid, disp_pkt_rs0.rename.pdst, disp_pkt_rs0.rename.psrc1, disp_pkt_rs0.rename.psrc1_pend, disp_pkt_rs0.rename.psrc2, disp_pkt_rs0.rename.psrc2_pend,
                 describe_uinstr(disp_pkt_rs0.uinstr)))
         end
     end

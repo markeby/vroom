@@ -18,6 +18,7 @@ module storeq
     input  t_rob_id         oldest_robid,
     output logic            idle,
     output logic            full,
+    output logic            stall_rs0,
 
     output logic[STQ_NUM_ENTRIES-1:0]
                             e_valid,
@@ -141,6 +142,7 @@ end
 
 assign idle = ~|e_valid;
 assign full =  &e_valid;
+assign stall_rs0 =  $countones(e_valid) >= (STQ_NUM_ENTRIES - RAT_ISSUE_PIPE_LATENCY);
 
 //
 // Debug

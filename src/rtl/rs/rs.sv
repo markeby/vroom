@@ -42,7 +42,7 @@ localparam RS0 = 0;
 localparam RS1 = 1;
 localparam NUM_EX_STAGES = 1;
 
-localparam RS_STALL_THRESHOLD = NUM_RS_ENTS - 1;
+localparam RS_STALL_THRESHOLD = NUM_RS_ENTS - RAT_ISSUE_PIPE_LATENCY;
 
 //
 // Nets

@@ -12,8 +12,9 @@ echo "Regression directory: ${REGRESS}"
 
 run_test(){
     local test_name="$1"
+    local extra_args="$2"
     local rundir="${REGRESS}/${test_name}"
-    local cmd="${RUNSIM} ${test_name} --sim-args '+load_disasm +preload:./test/test.pre     +boot_vector:0000000080000000 ${SIM_FLAGS}'"
+    local cmd="${RUNSIM} ${test_name} --sim-args '+load_disasm +preload:./test/test.pre     +boot_vector:0000000080000000 ${SIM_FLAGS} ${extra_args}'"
 
     mkdir -p "${rundir}"
     echo "rm -f PASS FAIL UNKNOWN" > "${rundir}/runit.sh"
@@ -33,7 +34,7 @@ run_test(){
 run_test branchy
 run_test math
 run_test fib
-run_test ldst
+run_test ldst "+min_ipc:0.3"
 
 NPASS=$(find ${REGRESS} -name PASS | wc -l)
 NFAIL=$(find ${REGRESS} -name FAIL | wc -l)

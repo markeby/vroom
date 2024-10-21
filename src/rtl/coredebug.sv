@@ -473,13 +473,22 @@ task cd_print_all_unretired();
 endtask
 
 task eot();
+    real ipc;
+    real min_ipc;
     `PMSG(CDBG, ("Starting EOT dumps"))
     `PMSG(CDBG, (""))
     cd_print_all_unretired();
     `PMSG(CDBG, (""))
     dump_gprs();
     `PMSG(CDBG, (""))
-    `PMSG(CDBG, ("first_ret:%0d last_ret:%0d IPC:%0f", first_retire_cycle, last_retire_cycle, (1.0*num_instrs_retired) / (last_retire_cycle - first_retire_cycle)));
+    ipc = (1.0*num_instrs_retired) / (last_retire_cycle - first_retire_cycle);
+    `PMSG(CDBG, ("first_ret:%0d last_ret:%0d IPC:%0f", first_retire_cycle, last_retire_cycle, ipc));
+
+    if ($value$plusargs("min_ipc:%f", min_ipc)) begin
+        if (min_ipc > ipc) begin
+            $error("real IPC %0f < min IPC %0f", ipc, min_ipc);
+        end
+    end
 endtask
 
 ///////////////////

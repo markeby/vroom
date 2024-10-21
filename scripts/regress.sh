@@ -33,6 +33,7 @@ run_test(){
 run_test branchy
 run_test math
 run_test fib
+run_test ldst
 
 NPASS=$(find ${REGRESS} -name PASS | wc -l)
 NFAIL=$(find ${REGRESS} -name FAIL | wc -l)

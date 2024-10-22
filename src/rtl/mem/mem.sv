@@ -81,6 +81,9 @@ t_mempipe_action pipe_action_mm5;
 
 logic[STQ_NUM_ENTRIES-1:0] stq_e_valid;
 
+t_mempipe_stuff  mempipe_stuff_mm2;
+logic[STQ_NUM_ENTRIES-1:0] stq_e_addr_match_mm2;
+
 //
 // Logic
 //
@@ -135,6 +138,9 @@ storeq storeq (
     .pipe_req_mm0     ( st_req_mm0     ) ,
     .pipe_req_pkt_mm0 ( st_req_pkt_mm0 ) ,
     .pipe_gnt_mm0     ( st_gnt_mm0     ) ,
+
+    .mempipe_stuff_mm2,
+    .e_addr_match_mm2 ( stq_e_addr_match_mm2 ) ,
 
     .pipe_valid_mm5,
     .pipe_req_pkt_mm5,
@@ -230,6 +236,9 @@ mempipe mempipe (
     .tag_wr_tag_mm1,
     .tag_wr_way_mm1,
     .tag_rd_ways_mm2,
+
+    .mempipe_stuff_mm2,
+    .stq_e_addr_match_mm2,
 
     .state_rd_en_mm1,
     .state_rd_ways_mm2,

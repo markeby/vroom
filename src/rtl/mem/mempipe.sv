@@ -9,7 +9,7 @@
 `include "gen_funcs.pkg"
 
 module mempipe
-    import instr::*, instr_decode::*, common::*, rob_defs::*, gen_funcs::*, mem_defs::*, mem_common::*;
+    import instr::*, instr_decode::*, common::*, rob_defs::*, gen_funcs::*, mem_defs::*, mem_common::*, verif::*;
 (
     input  logic            clk,
     input  logic            reset,
@@ -50,6 +50,10 @@ module mempipe
     output t_cl             data_wr_data_mm3,
     output t_cl_be          data_wr_be_mm3,
     output t_l1_way         data_wr_way_mm3,
+
+    output t_mempipe_stuff  mempipe_stuff_mm2,
+    input  logic[STQ_NUM_ENTRIES-1:0]
+                            stq_e_addr_match_mm2,
 
     // FLQ CAM
     output t_mempipe_arb    req_pkt_mm1,
@@ -107,6 +111,7 @@ logic[NUM_MM_STAGES:MM0] valid_ql_mmx;
 `MKPIPE_INIT(logic,                   flq_alloc_mmx,    flq_alloc_mm6,      MM6, NUM_MM_STAGES)
 `MKPIPE     (t_cl,                    rd_cl_data_mmx,                       MM3, NUM_MM_STAGES)
 `MKPIPE     (t_rv_reg_data,           rd_cl_data_rot_mmx,                   MM4, NUM_MM_STAGES)
+`MKPIPE     (logic,                   older_stq_mat_mmx,                    MM2, NUM_MM_STAGES)
 
 //
 // Logic
@@ -179,6 +184,14 @@ assign hit_way_mmx[MM2] = gen_lg2_funcs#(.IWIDTH(L1_NUM_WAYS))::oh_encode(hit_ve
 
 assign valid_ql_mmx[MM2] = valid_mmx[MM2] & ~(req_pkt_mmx[MM2].nukeable & nuke_rb1.valid);
 
+always_comb begin
+    mempipe_stuff_mm2.valid    = valid_mmx[MM2];
+    mempipe_stuff_mm2.arb_type = req_pkt_mmx[MM2].arb_type;
+    mempipe_stuff_mm2.paddr    = paddr_mmx[MM2];
+end
+
+assign older_stq_mat_mmx[MM2] = |(req_pkt_mmx[MM2].older_stq_ents & stq_e_addr_match_mm2);
+
     //
     // MM3
     // - Data mux
@@ -243,20 +256,48 @@ assign flq_alloc_mm5 = valid_mm5
                         );
 
 always_comb begin
-    action_mm5.complete = 1'b0;
+    action_mm5.complete      = 1'b0;
+    action_mm5.recycle       = 1'b0;
+    action_mm5.recycle_cause = '0;
+
     unique casez ({valid_mmx[MM5], req_pkt_mmx[MM5].arb_type})
-        {1'b1, MEM_LOAD }: action_mm5.complete = hit_mmx[MM5];
+        //
+        // Loads
+        //
+        {1'b1, MEM_LOAD }: begin
+            action_mm5.recycle_cause.mat_stq = older_stq_mat_mmx[MM5];
+            action_mm5.recycle_cause.miss    = ~hit_mmx[MM5];
+            action_mm5.recycle               = |action_mm5.recycle_cause;
+            action_mm5.complete              = ~action_mm5.recycle;
+        end
 
-        {1'b1, MEM_FILL }: action_mm5.complete = 1'b1;
+        //
+        // Fills
+        //
+        {1'b1, MEM_FILL }: begin
+            action_mm5.recycle_cause = '0;
+            action_mm5.recycle  = |action_mm5.recycle_cause;
+            action_mm5.complete = ~action_mm5.recycle;
+        end
 
-        {1'b1, MEM_STORE}: unique casez(req_pkt_mmx[MM5].phase.st)
-            MEM_ST_INITIAL: action_mm5.complete = 1'b1;
-            MEM_ST_FINAL:   action_mm5.complete = hit_mmx[MM5];
-        endcase
+        //
+        // Stores
+        //
+        {1'b1, MEM_STORE}: begin
+            unique casez(req_pkt_mmx[MM5].phase.st)
+                MEM_ST_INITIAL: action_mm5.complete = 1'b1;
+                MEM_ST_FINAL: begin
+                    action_mm5.recycle_cause.miss = ~hit_mmx[MM5];
+                    action_mm5.recycle            = |action_mm5.recycle_cause;
+                    action_mm5.complete           = ~action_mm5.recycle;
+                end
+            endcase
+        end
 
-        default:           action_mm5.complete = 1'b0;
+        default: begin
+            if (valid_mmx[MM5]) $error("Unexpected transaction");
+        end
     endcase
-    action_mm5.recycle  = valid_mmx[MM5] & ~action_mm5.complete;
 end
 
 always_comb begin
@@ -293,11 +334,12 @@ end
 //
 
 `ifdef SIMULATION
-// always @(posedge clk) begin
-//     if (iss_mm0) begin
-//         `INFO(("unit:MM %s", describe_uinstr(iss_pkt_mm0.uinstr)))
-//     end
-// end
+always @(posedge clk) begin
+    if (valid_ql_mmx[MM5]) begin
+        `UINFO(req_pkt_mmx[MM5].SIMID , ("unit:MEMPIPE func:action arb_type:%s id:%0d complete:%0d recycle:%0d miss:%0d mat_stq:%0d",
+            req_pkt_mmx[MM5].arb_type.name, req_pkt_mmx[MM5].id, action_mm5.complete, action_mm5.recycle, action_mm5.recycle_cause.miss, action_mm5.recycle_cause.mat_stq))
+    end
+end
 `endif
 
     /*

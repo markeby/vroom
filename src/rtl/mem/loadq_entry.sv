@@ -86,7 +86,7 @@ end
 `DFF(fsm, fsm_nxt, clk)
 
 assign e_valid        = (fsm != LDQ_IDLE);
-assign e_pipe_req_mm0 = (fsm == LDQ_REQ_PIPE) & ~|e_stq_elders;
+assign e_pipe_req_mm0 = (fsm == LDQ_REQ_PIPE); // & ~|e_stq_elders;
 
 //
 // Logic
@@ -118,6 +118,7 @@ always_comb begin
     e_pipe_req_pkt_mm0.pdst     = e_pdst;
     e_pipe_req_pkt_mm0.yost     = '0;
     e_pipe_req_pkt_mm0.nukeable = 1'b1;
+    e_pipe_req_pkt_mm0.older_stq_ents = e_stq_elders;
     `ifdef SIMULATION
     e_pipe_req_pkt_mm0.SIMID    = e_static.SIMID;
     `endif

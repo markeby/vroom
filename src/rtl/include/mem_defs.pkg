@@ -50,7 +50,14 @@ package mem_defs;
         t_prf_id       pdst;
         t_mem_phase    phase;
         logic          nukeable;
+        logic[STQ_NUM_ENTRIES-1:0] older_stq_ents;
     } t_mempipe_arb;
+
+    typedef struct packed {
+        logic    valid;
+        t_mem_arb_type arb_type;
+        t_paddr  paddr;
+    } t_mempipe_stuff;
 
     typedef struct packed {
         `SIMID_STRUCT
@@ -73,8 +80,14 @@ package mem_defs;
     } t_flq_static;
 
     typedef struct packed {
-        logic complete;
-        logic recycle;
+        logic mat_stq;
+        logic miss;
+    } t_recycle_cause;
+
+    typedef struct packed {
+        logic           complete;
+        logic           recycle;
+        t_recycle_cause recycle_cause;
     } t_mempipe_action;
 
 endpackage

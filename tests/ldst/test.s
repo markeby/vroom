@@ -7,10 +7,17 @@ _start:
     la sp, stack
     la x1, data_buffer
     ld t0, 0(x1)
+
+    ; li t1, 10
+; loop_back:
+    ; add t1, t1, -1
+    ; bnez t1, loop_back
+
     add t1, t0, 0x333
     add t2, t0, 0x3ff
     add t3, t0, 0x001
     add t4, t0, 0x555
+
     sd t1,  8(x1)
     ld t2, 24(x1)
     sd t1, 24(x1)

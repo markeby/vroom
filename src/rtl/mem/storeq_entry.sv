@@ -33,6 +33,9 @@ module storeq_entry
     output t_mempipe_arb    e_pipe_req_pkt_mm0,
     input  logic            e_pipe_gnt_mm0,
 
+    input  t_mempipe_stuff  mempipe_stuff_mm2,
+    output logic            e_addr_match_mm2,
+
     input  logic            pipe_valid_mm5,
     input  t_mempipe_arb    pipe_req_pkt_mm5,
     input  t_mempipe_action pipe_action_mm5
@@ -180,6 +183,18 @@ always_comb begin
     e_pipe_req_pkt_mm0.byte_en  = e_byte_en_full[63:0];
     e_pipe_req_pkt_mm0.nukeable = 1'b1;
 end
+
+// Pipe compares
+
+logic pa_valid;
+t_paddr e_paddr;
+assign pa_valid = e_valid & e_iss_seen;    // FIXME
+assign e_paddr  = e_vaddr; // FIXME
+
+assign e_addr_match_mm2 = e_valid
+                        & ( mempipe_stuff_mm2.paddr[PA_SZ-1:6] == e_paddr[PA_SZ-1:6]
+                          | ~pa_valid
+                          );
 
 //
 // Debug

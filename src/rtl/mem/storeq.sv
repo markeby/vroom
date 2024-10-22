@@ -34,6 +34,10 @@ module storeq
     output t_mempipe_arb    pipe_req_pkt_mm0,
     input  logic            pipe_gnt_mm0,
 
+    input  t_mempipe_stuff  mempipe_stuff_mm2,
+    output logic[STQ_NUM_ENTRIES-1:0]
+                            e_addr_match_mm2,
+
     input  logic            pipe_valid_mm5,
     input  t_mempipe_arb    pipe_req_pkt_mm5,
     input  t_mempipe_action pipe_action_mm5
@@ -134,6 +138,8 @@ for (genvar e=0; e<STQ_NUM_ENTRIES; e++) begin : g_stq_entries
         .e_pipe_req_mm0     ( e_pipe_req_mm0[e]     ) ,
         .e_pipe_req_pkt_mm0 ( e_pipe_req_pkt_mm0[e] ) ,
         .e_pipe_gnt_mm0     ( e_pipe_gnt_mm0[e]     ) ,
+        .mempipe_stuff_mm2,
+        .e_addr_match_mm2   ( e_addr_match_mm2[e]   ) ,
         .pipe_valid_mm5,
         .pipe_req_pkt_mm5,
         .pipe_action_mm5

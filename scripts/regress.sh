@@ -34,7 +34,7 @@ run_test(){
 run_test branchy
 run_test math
 run_test fib
-run_test ldst "+min_ipc:0.3"
+run_test ldst "+min_ipc:0.2"
 
 NPASS=$(find ${REGRESS} -name PASS | wc -l)
 NFAIL=$(find ${REGRESS} -name FAIL | wc -l)

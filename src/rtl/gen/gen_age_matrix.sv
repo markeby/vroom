@@ -37,8 +37,11 @@ for (genvar this_ent=0; this_ent<DEPTH; this_ent++) begin : g_this_ent
     for (genvar that_ent=0; that_ent<DEPTH; that_ent++) begin : g_that_ent
         // when an entry is allocated, all other entries are its elders
         // afterwards, when another entry is allocated, "that" entry is no longer "this" entry's elder
-        assign e_elders_nxt[this_ent][that_ent] = ~reset & (e_elders[this_ent][that_ent] & ~e_alloc[that_ent] | e_alloc[this_ent])
-                                                & (this_ent != that_ent);
+        assign e_elders_nxt[this_ent][that_ent] = ~reset
+                                                & ~(this_ent == that_ent)
+                                                & ( e_alloc[this_ent]                                 // set when allocated
+                                                  | e_elders[this_ent][that_ent] & ~e_alloc[that_ent] // clear when other is allocated
+                                                  );
     end
     `DFF(e_elders[this_ent], e_elders_nxt[this_ent], clk)
 end
@@ -47,7 +50,7 @@ end
 
 for (genvar r=0; r<NUM_REQS; r++) begin : g_reqs
     for (genvar e=0; e<DEPTH; e++) begin : g_entries
-        assign e_sels[r][e] = e_reqs[r][e] & ~|(e_reqs[r] & e_elders[r]);
+        assign e_sels[r][e] = e_reqs[r][e] & ~|(e_reqs[r] & e_elders[e]);
     end
 end
 

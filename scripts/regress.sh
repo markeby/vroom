@@ -35,7 +35,8 @@ run_test branchy
 run_test math
 run_test fib
 run_test ldst "+min_ipc:0.2"
-run_test loads "+min_ipc:0.2"
+run_test loads "+min_ipc:0.9"
+run_test stores "+min_ipc:0.4"
 
 NPASS=$(find ${REGRESS} -name PASS | wc -l)
 NFAIL=$(find ${REGRESS} -name FAIL | wc -l)

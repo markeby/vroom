@@ -84,9 +84,18 @@ assign q_alloc_id_rs0    = gen_lg2_funcs#(.IWIDTH(NUM_RS_ENTS))::oh_encode(e_fir
 // Issue arbitration
 
 assign q_req_issue_rs1 = |e_req_issue_rs1;
-assign e_sel_issue_rs1 = gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first1(e_req_issue_rs1);
+// assign e_sel_issue_rs1 = gen_funcs#(.IWIDTH(NUM_RS_ENTS))::find_first1(e_req_issue_rs1);
 assign q_gnt_issue_rs1 = q_req_issue_rs1 & ~nuke_rb1.valid;
 assign e_gnt_issue_rs1 = q_gnt_issue_rs1 ? e_sel_issue_rs1 : '0;
+
+gen_age_matrix #(.DEPTH(NUM_RS_ENTS), .NUM_REQS(1)) mtx (
+    .clk,
+    .reset,
+    .e_alloc  ( e_alloc_rs0     ) ,
+    .e_elders (                 ) ,
+    .e_reqs   ( '{e_req_issue_rs1} ) ,
+    .e_sels   ( '{e_sel_issue_rs1} )
+);
 
 assign q_sel_static_rs1 = mux_funcs#(.IWIDTH(NUM_RS_ENTS),.T(t_rs_entry_static))::uaomux(e_static, e_sel_issue_rs1);
 assign q_sel_rename_rs1 = q_sel_static_rs1.uinstr_disp.rename;

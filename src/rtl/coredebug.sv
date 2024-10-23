@@ -299,7 +299,7 @@ task cd_rs();
     `CHK_INSTQ_MATCH(i,cd_rs,top.core.rs.iss_pkt_rs2.uinstr.SIMID)
 
     if (INSTQ[i].RS.valid) begin
-        $error("Trying to add an rs to a record that is already valid!");
+        $error("Trying to add a decode to a record that is already valid! %s", format_simid(top.core.rs.iss_pkt_rs2.uinstr.SIMID));
     end
     INSTQ[i].RS.valid = 1'b1;
     INSTQ[i].RS.clk = top.cclk_count;

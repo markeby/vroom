@@ -6,10 +6,23 @@ vroom is a simple RISC-V core written in SystemVerilog, compiled with Verilator.
 - **src/** contains the RTL
 - **rc/** contains TCL scripts for gtkwave
 
+Platform and Verilator versions verified:
+- WSL Ubuntu 24.04.2 LTS 
+- Verilator  v5.034
+- riscv64-unknown-elf-gcc 13.2.0
+- Spike RISC-V ISA Simulator 1.1.1-dev
+
 To build the model:
 
 ```
 make Vtop
+```
+
+To build the test:
+
+```
+cd tests/branchy
+make all
 ```
 
 To run the model:

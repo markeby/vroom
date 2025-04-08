@@ -1,5 +1,6 @@
 obj_dir
 *.fst
+new_waivers.txt
 *.swp
 *.*-e
 run.*log

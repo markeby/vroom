@@ -9,7 +9,7 @@ LIB_FILES := $(wildcard $(LIB_DIR)/*.sv)
 SRC_FILES := $(shell cat $(RTL_F))
 
 IVERILOG  := iverilog -g2012
-VERILATOR := verilator -Wall -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-UNUSEDPARAM --assert --timing
+VERILATOR := verilator -Wall -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-UNUSEDPARAM -Wno-VARHIDDEN --assert --timing
 VL_TRACE_FLAGS := --trace-fst --trace-structs --trace-params
 
 VL_DEFINES := +define+SIMULATION=1 +define+ASSERT=1 #+define+DEBUGON=1
